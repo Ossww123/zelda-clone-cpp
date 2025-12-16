@@ -29,10 +29,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     Game game;
     game.Init ( g_hWnd);
 
-    MSG msg;
+    MSG msg = {};
 
     // 메인 루프
-    while (::GetMessage(&msg, nullptr, 0, 0))
+    while (msg.message != WM_QUIT)
     {
         if ( ::PeekMessage ( &msg , NULL , 0 , 0 , PM_REMOVE ) )
         {

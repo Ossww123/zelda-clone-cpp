@@ -21,4 +21,5 @@ void Game::Update ( )
 
 void Game::Render ( )
 {
+	::Rectangle ( _hdc , 200 , 200 , 400 , 400 );
 }
