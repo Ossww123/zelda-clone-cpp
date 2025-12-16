@@ -18,19 +18,34 @@
     <Filter Include="Source Files\01. Manager">
       <UniqueIdentifier>{1e35bc06-8d0b-4569-a803-3e975d16a050}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\99.Headers\Default">
+      <UniqueIdentifier>{224d2747-d62f-4b51-9af1-91f13a3eeab9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Resource.h">
+    <ClInclude Include="pokemon-clone.h">
+      <Filter>Source Files\00. MainGame</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
       <Filter>Source Files\99.Headers</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
+    <ClInclude Include="Defines.h">
+      <Filter>Source Files\99.Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Enums.h">
+      <Filter>Source Files\99.Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
       <Filter>Source Files\99.Headers</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
-      <Filter>Source Files\99.Headers</Filter>
+      <Filter>Source Files\99.Headers\Default</Filter>
     </ClInclude>
-    <ClInclude Include="pokemon-clone.h">
-      <Filter>Source Files\00. MainGame</Filter>
+    <ClInclude Include="Resource.h">
+      <Filter>Source Files\99.Headers\Default</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source Files\99.Headers\Default</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +64,9 @@
   <ItemGroup>
     <ClCompile Include="pokemon-clone.cpp">
       <Filter>Source Files\00. MainGame</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files\99.Headers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
