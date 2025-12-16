@@ -47,6 +47,9 @@
     <ClInclude Include="targetver.h">
       <Filter>Source Files\99.Headers\Default</Filter>
     </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Source Files\00. MainGame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pokemon-clone.rc">
@@ -67,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files\99.Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\00. MainGame</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

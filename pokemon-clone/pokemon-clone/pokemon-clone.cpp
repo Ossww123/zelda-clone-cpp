@@ -1,10 +1,12 @@
 ﻿#include "pch.h"
 #include "framework.h"
 #include "pokemon-clone.h"
+#include "Game.h"
 
 #define MAX_LOADSTRING 100
 
 HINSTANCE hInst;
+HWND g_hWnd;
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -24,6 +26,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
+    Game game;
+    game.Init ( g_hWnd);
+
     MSG msg;
 
     // 메인 루프
@@ -36,7 +41,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         else
         {
-
+            game.Update ( );
+            game.Render ( );
         }
     }
 
@@ -73,6 +79,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    HWND hWnd = CreateWindowW( L"PokemonClone" , L"Client" , WS_OVERLAPPEDWINDOW ,
       CW_USEDEFAULT, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, nullptr, nullptr, hInstance, nullptr);
+
+   g_hWnd = hWnd;
 
    if (!hWnd)
    {
