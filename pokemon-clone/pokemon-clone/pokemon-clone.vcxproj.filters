@@ -50,6 +50,12 @@
     <ClInclude Include="Game.h">
       <Filter>Source Files\00. MainGame</Filter>
     </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pokemon-clone.rc">
@@ -73,6 +79,12 @@
     </ClCompile>
     <ClCompile Include="Game.cpp">
       <Filter>Source Files\00. MainGame</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
