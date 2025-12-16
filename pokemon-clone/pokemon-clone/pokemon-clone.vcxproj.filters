@@ -5,33 +5,33 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\00. MainGame">
+      <UniqueIdentifier>{01692c3a-2961-4bf6-bffe-c66b4f22ae15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\99.Headers">
+      <UniqueIdentifier>{38468a69-e15c-43db-865f-e08b693716d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\01. Manager">
+      <UniqueIdentifier>{1e35bc06-8d0b-4569-a803-3e975d16a050}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Resource.h">
+      <Filter>Source Files\99.Headers</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files\99.Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="framework.h">
+      <Filter>Source Files\99.Headers</Filter>
     </ClInclude>
     <ClInclude Include="pokemon-clone.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files\00. MainGame</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="pokemon-clone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pokemon-clone.rc">
@@ -45,5 +45,10 @@
     <Image Include="pokemon-clone.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pokemon-clone.cpp">
+      <Filter>Source Files\00. MainGame</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
