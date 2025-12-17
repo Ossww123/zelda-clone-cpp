@@ -10,6 +10,7 @@ Game::Game ( )
 
 Game::~Game ( )
 {
+	_CrtDumpMemoryLeaks ( );
 }
 
 void Game::Init ( HWND hwnd )
