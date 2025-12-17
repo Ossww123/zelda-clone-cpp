@@ -98,6 +98,9 @@
     <ClInclude Include="ObjectManager.h">
       <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
+    <ClInclude Include="EditScene.h">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pokemon-clone.rc">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="ObjectManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="EditScene.cpp">
+      <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
