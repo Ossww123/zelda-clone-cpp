@@ -56,6 +56,9 @@
     <ClInclude Include="TimeManager.h">
       <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Source Files\99.Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pokemon-clone.rc">
@@ -85,6 +88,9 @@
     </ClCompile>
     <ClCompile Include="TimeManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Source Files\99.Headers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
