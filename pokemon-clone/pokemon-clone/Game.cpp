@@ -32,7 +32,7 @@ void Game::Init ( HWND hwnd )
 	GET_SINGLE ( InputManager )->Init ( hwnd );
 	GET_SINGLE ( SceneManager )->Init ( );
 
-	GET_SINGLE ( SceneManager )->ChangeScene ( SceneType::GameScene );
+	GET_SINGLE ( SceneManager )->ChangeScene ( SceneType::EditScene );
 }
 
 void Game::Update ( )
