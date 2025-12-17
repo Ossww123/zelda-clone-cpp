@@ -33,6 +33,12 @@
     <Filter Include="Source Files\03. Objects\Game">
       <UniqueIdentifier>{19a4081f-367b-4676-b775-72ddb2ae8cf5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\04. Resources">
+      <UniqueIdentifier>{ceba26be-2047-421b-afaa-e519d7542763}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\04. Resources\Game">
+      <UniqueIdentifier>{b30bdc93-97a7-4551-9add-66961ecd568c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pokemon-clone.h">
@@ -101,6 +107,15 @@
     <ClInclude Include="EditScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
+    <ClInclude Include="ResourceBase.h">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="LineMesh.h">
+      <Filter>Source Files\04. Resources\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pokemon-clone.rc">
@@ -163,6 +178,15 @@
     </ClCompile>
     <ClCompile Include="EditScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceBase.cpp">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="LineMesh.cpp">
+      <Filter>Source Files\04. Resources\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
