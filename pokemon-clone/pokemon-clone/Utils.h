@@ -5,6 +5,7 @@ using namespace std;
 
 class Utils
 {
+public:
 	static void DrawString ( HDC hdc , Pos pos , const wstring& str );
 
 	static void DrawRect ( HDC hdc , Pos pos , int32 w , int32 h );
