@@ -21,6 +21,15 @@
     <Filter Include="Source Files\99.Headers\Default">
       <UniqueIdentifier>{224d2747-d62f-4b51-9af1-91f13a3eeab9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\02. Scene">
+      <UniqueIdentifier>{9d20ee0e-5eb0-445b-9f51-4d6f6cd2c8f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects">
+      <UniqueIdentifier>{bcf63013-7734-4c7c-8832-25c395564f1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\02. Scene\Game">
+      <UniqueIdentifier>{da17cbef-3927-4e76-8199-5acd16e5961e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pokemon-clone.h">
@@ -59,6 +68,18 @@
     <ClInclude Include="Utils.h">
       <Filter>Source Files\99.Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Source Files\02. Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="DevScene.h">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pokemon-clone.rc">
@@ -91,6 +112,18 @@
     </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files\99.Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\02. Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="DevScene.cpp">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
