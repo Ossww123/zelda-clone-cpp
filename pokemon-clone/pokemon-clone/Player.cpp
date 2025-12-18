@@ -53,11 +53,22 @@ void Player::Update ( )
 		_pos.y += _stat.speed * deltaTime;
 	}
 
+	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::Q ) )
+	{
+		_barrelAngle += 10 * deltaTime;
+	}
+
+	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::E ) )
+	{
+		_barrelAngle -= 10 * deltaTime;
+	}
+
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::SpaceBar ) )
 	{
 		// TODO : 미사일 발사
 		Missile* missile = GET_SINGLE ( ObjectManager )->CreateObject<Missile> ( );
-		missile->SetPos ( _pos );
+		missile->SetPos ( GetFirePos());
+		missile->SetAngle ( _barrelAngle );
 		GET_SINGLE ( ObjectManager )->Add ( missile );
 	}
 }
@@ -67,4 +78,22 @@ void Player::Render ( HDC hdc )
 	const LineMesh* mesh = GET_SINGLE ( ResourceManager )->GetLineMesh ( L"Player" );
 	if ( mesh )
 		mesh->Render ( hdc, _pos );
+
+	HPEN pen = ::CreatePen ( PS_SOLID , 1 , RGB ( 255 , 0 , 0 ) );
+	HPEN oldPen = (HPEN)::SelectObject ( hdc , pen );
+
+	Utils::DrawLine ( hdc , _pos , GetFirePos());
+
+	::SelectObject ( hdc , oldPen );
+	::DeleteObject ( pen );
+}
+
+Pos Player::GetFirePos ( )
+{
+	Pos firePos = _pos;
+
+	firePos.x += _barrelLength * ::cos ( _barrelAngle );
+	firePos.y -= _barrelLength * ::sin ( _barrelAngle );
+
+	return firePos;
 }
