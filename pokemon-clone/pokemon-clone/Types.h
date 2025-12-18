@@ -17,6 +17,12 @@ struct Stat
 	float speed = 0;
 };
 
+struct Vector
+{
+	float x = 0;
+	float y = 0;
+};
+
 struct Pos
 {
 	float x = 0;
