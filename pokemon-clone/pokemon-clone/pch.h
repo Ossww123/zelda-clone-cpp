@@ -1,10 +1,5 @@
 ﻿#pragma once
 
-#include "Types.h"
-#include "Defines.h"
-#include "Enums.h"
-#include "Utils.h"
-
 /* STL */
 #include <Windows.h>
 #include <vector>
@@ -15,6 +10,11 @@
 #include <algorithm>
 
 using namespace std;
+
+#include "Types.h"
+#include "Defines.h"
+#include "Enums.h"
+#include "Utils.h"
 
 #include <format>
 

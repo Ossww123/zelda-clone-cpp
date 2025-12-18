@@ -14,5 +14,8 @@ public:
 
 protected:
 	float _angle = 0.f;
+
+	float _sumTime = 0.f;
+	Object* _target = nullptr;
 };
 
