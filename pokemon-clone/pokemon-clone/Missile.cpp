@@ -24,8 +24,33 @@ void Missile::Update ( )
 {
 	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
 
-	_pos.x += _stat.speed * deltaTime * cos ( _angle );
-	_pos.y -= _stat.speed * deltaTime * sin ( _angle );
+	if ( _target == nullptr )
+	{
+		_pos.x += _stat.speed * deltaTime * cos ( _angle );
+		_pos.y -= _stat.speed * deltaTime * sin ( _angle );
+
+		_sumTime += deltaTime;
+		if ( _sumTime >= 0.2f )
+		{
+			const vector<Object*>& objects = GET_SINGLE ( ObjectManager )->GetObjects ( );
+			for ( Object* object : objects )
+			{
+				if ( object->GetObjectType ( ) == ObjectType::Monster )
+				{
+					_target = object;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		Vector dir = _target->GetPos ( ) - GetPos ( );
+		dir.Normalize ( );
+
+		Vector moveDir = dir * _stat.speed * deltaTime;
+		_pos += moveDir;
+	}
 
 	// 충돌
 	const vector<Object*> objects = GET_SINGLE ( ObjectManager )->GetObjects ( );
@@ -37,12 +62,11 @@ void Missile::Update ( )
 		if ( object->GetObjectType ( ) != ObjectType::Monster )
 			continue;
 
-		Pos p1 = GetPos ( );
-		Pos p2 = object->GetPos ( );
+		Vector p1 = GetPos ( );
+		Vector p2 = object->GetPos ( );
 
-		const float dx = p1.x - p2.x;
-		const float dy = p1.y - p2.y;
-		float dist = sqrt ( dx * dx + dy * dy );
+		Vector dir = p2 - p1;
+		float dist = dir.Length ( );
 
 		if ( dist < 25 )
 		{
