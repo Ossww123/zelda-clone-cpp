@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "framework.h"
-#include "pokemon-clone.h"
+#include "zelda-clone.h"
 #include "Game.h"
 
 #define MAX_LOADSTRING 100
@@ -67,11 +67,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_POKEMONCLONE));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ZELDACLONE));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = nullptr;
-    wcex.lpszClassName  = L"PokemonClone";
+    wcex.lpszClassName  = L"ZeldaClone";
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
@@ -84,7 +84,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    RECT windowRect = { 0, 0, 800, 600 };
    ::AdjustWindowRect ( &windowRect, WS_OVERLAPPEDWINDOW, false);
 
-   HWND hWnd = CreateWindowW( L"PokemonClone" , L"Client" , WS_OVERLAPPEDWINDOW ,
+   HWND hWnd = CreateWindowW( L"ZeldaClone" , L"Client" , WS_OVERLAPPEDWINDOW ,
       CW_USEDEFAULT, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, nullptr, nullptr, hInstance, nullptr);
 
    g_hWnd = hWnd;

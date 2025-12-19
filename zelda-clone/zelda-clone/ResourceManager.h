@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 class ResourceBase;
-class LineMesh;
 
 class ResourceManager
 {
@@ -10,12 +9,13 @@ public:
 	~ResourceManager ( );
 
 public:
-	void Init ( );
+	void Init (HWND hwnd, fs::path resourcePath );
 	void Clear ( );
 
-	const LineMesh* GetLineMesh ( wstring key );
+	const fs::path& GetResourcePath ( ) { return _resourcePath; }
 
 private:
-	unordered_map<wstring , LineMesh*> _lineMeshes;
+	HWND _hwnd;
+	fs::path _resourcePath;
 };
 

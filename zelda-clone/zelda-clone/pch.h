@@ -15,8 +15,12 @@ using namespace std;
 #include "Defines.h"
 #include "Enums.h"
 #include "Utils.h"
+#include "Values.h"
 
+// C++20
 #include <format>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #define _CRTDEBG_MAP_ALLOC
 #include <cstdlib>

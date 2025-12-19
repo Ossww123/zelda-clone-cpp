@@ -41,7 +41,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pokemon-clone.h">
+    <ClInclude Include="zelda-clone.h">
       <Filter>Source Files\00. MainGame</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
@@ -86,23 +86,8 @@
     <ClInclude Include="DevScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
-    <ClInclude Include="GameScene.h">
-      <Filter>Source Files\02. Scene\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Source Files\03. Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Source Files\03. Objects\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Missile.h">
-      <Filter>Source Files\03. Objects\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Monster.h">
-      <Filter>Source Files\03. Objects\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectManager.h">
-      <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
     <ClInclude Include="EditScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
@@ -110,15 +95,18 @@
     <ClInclude Include="ResourceBase.h">
       <Filter>Source Files\04. Resources</Filter>
     </ClInclude>
-    <ClInclude Include="LineMesh.h">
-      <Filter>Source Files\04. Resources\Game</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceManager.h">
       <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
+    <ClInclude Include="Values.h">
+      <Filter>Source Files\99.Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Source Files\04. Resources\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="pokemon-clone.rc">
+    <ResourceCompile Include="zelda-clone.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -126,12 +114,12 @@
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="pokemon-clone.ico">
+    <Image Include="zelda-clone.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pokemon-clone.cpp">
+    <ClCompile Include="zelda-clone.cpp">
       <Filter>Source Files\00. MainGame</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
@@ -158,23 +146,8 @@
     <ClCompile Include="DevScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
-    <ClCompile Include="GameScene.cpp">
-      <Filter>Source Files\02. Scene\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp">
       <Filter>Source Files\03. Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="Missile.cpp">
-      <Filter>Source Files\03. Objects\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Monster.cpp">
-      <Filter>Source Files\03. Objects\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files\03. Objects\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectManager.cpp">
-      <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
     <ClCompile Include="EditScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
@@ -182,11 +155,11 @@
     <ClCompile Include="ResourceBase.cpp">
       <Filter>Source Files\04. Resources</Filter>
     </ClCompile>
-    <ClCompile Include="LineMesh.cpp">
-      <Filter>Source Files\04. Resources\Game</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\04. Resources\Game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

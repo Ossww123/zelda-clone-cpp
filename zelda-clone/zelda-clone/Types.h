@@ -101,3 +101,4 @@ struct Vector
 };
 
 using Pos = Vector;
+using Vec2 = Vector;
