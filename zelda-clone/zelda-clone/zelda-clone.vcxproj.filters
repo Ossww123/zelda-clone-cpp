@@ -104,6 +104,9 @@
     <ClInclude Include="Texture.h">
       <Filter>Source Files\04. Resources\Game</Filter>
     </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="zelda-clone.rc">
@@ -160,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files\04. Resources\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Source Files\04. Resources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
