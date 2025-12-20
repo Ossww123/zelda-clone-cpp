@@ -1,12 +1,21 @@
 ﻿#pragma once
+
+class Actor;
+
 class Component
 {
 public:
-	virtual void Start ( ) {}
-	virtual void Update ( ) {}
+	Component ( );
+	virtual ~Component ( );
+
+	virtual void BeginPlay ( ) {}
+	virtual void TickComponent ( ) {}
 	virtual void Render ( HDC hdc ) {}
 
-	// owner
-	// GameObject* _owner;
+	void SetOwner ( Actor* owner ) { _owner = owner; }
+	Actor* GetOwner ( ) { return _owner; }
+
+protected:
+	Actor* _owner;
 };
 

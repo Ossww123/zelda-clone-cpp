@@ -131,6 +131,9 @@
     <ClInclude Include="FlipbookActor.h">
       <Filter>Source Files\03. Objects\Unreal</Filter>
     </ClInclude>
+    <ClInclude Include="CameraComponent.h">
+      <Filter>Source Files\05. Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="zelda-clone.rc">
@@ -208,6 +211,9 @@
     </ClCompile>
     <ClCompile Include="FlipbookActor.cpp">
       <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraComponent.cpp">
+      <Filter>Source Files\05. Component</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
