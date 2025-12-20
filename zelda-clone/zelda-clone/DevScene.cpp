@@ -7,12 +7,14 @@
 #include "Actor.h"
 #include "SpriteActor.h"
 #include "Flipbook.h"
-
+#include "SphereCollider.h"
 #include "Player.h"
 
 #include "InputManager.h"
 #include "TimeManager.h"
 #include "ResourceManager.h"
+#include "CollisionManager.h"
+
 
 DevScene::DevScene ( )
 {
@@ -27,10 +29,10 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage01" , L"Sprite\\Map\\Stage01.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Sword" , L"Sprite\\Item\\Sword.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Potion" , L"Sprite\\UI\\Mp.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerUp" , L"Sprite\\Player\\PlayerUp.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerDown" , L"Sprite\\Player\\PlayerDown.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerLeft" , L"Sprite\\Player\\PlayerLeft.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerRight" , L"Sprite\\Player\\PlayerRight.bmp" );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerUp" , L"Sprite\\Player\\PlayerUp.bmp" , RGB(128, 128, 128));
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerDown" , L"Sprite\\Player\\PlayerDown.bmp" , RGB ( 128 , 128 , 128 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerLeft" , L"Sprite\\Player\\PlayerLeft.bmp" , RGB ( 128 , 128 , 128 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerRight" , L"Sprite\\Player\\PlayerRight.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Start" , L"Sprite\\UI\\Start.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Edit" , L"Sprite\\UI\\Edit.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Exit" , L"Sprite\\UI\\Exit.bmp" );
@@ -75,8 +77,29 @@ void DevScene::Init ( )
 
 		AddActor ( background );
 	}
+
 	{
 		Player* player = new Player ( );
+
+		{
+			SphereCollider* collider = new SphereCollider ( );
+			collider->SetRadius ( 100.f );
+			player->AddComponent ( collider );
+			GET_SINGLE ( CollisionManager )->AddCollider ( collider );
+		}
+		AddActor ( player );
+	}
+
+	{
+		Actor* player = new Actor ( );
+
+		{
+			SphereCollider* collider = new SphereCollider ( );
+			collider->SetRadius ( 50.f );
+			player->AddComponent ( collider );
+			GET_SINGLE ( CollisionManager )->AddCollider ( collider );
+			player->SetPos ( { 400, 200 });
+		}
 		AddActor ( player );
 	}
 
@@ -89,6 +112,8 @@ void DevScene::Init ( )
 void DevScene::Update ( )
 {
 	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
+
+	GET_SINGLE ( CollisionManager )->Update ( );
 
 	for ( const vector<Actor*>& actors : _actors )
 		for ( Actor* actor : actors )

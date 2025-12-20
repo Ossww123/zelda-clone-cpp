@@ -45,6 +45,12 @@
     <Filter Include="Source Files\05. Component">
       <UniqueIdentifier>{ccd1c976-3ff8-4d86-aa4c-5e3ecf610748}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\05. Component\Camera">
+      <UniqueIdentifier>{44a27be8-b0ce-4775-8ce1-ad3bae166776}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\05. Component\Collision">
+      <UniqueIdentifier>{eabcecc3-3048-41be-93c5-073347fadcf3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zelda-clone.h">
@@ -132,7 +138,19 @@
       <Filter>Source Files\03. Objects\Unreal</Filter>
     </ClInclude>
     <ClInclude Include="CameraComponent.h">
-      <Filter>Source Files\05. Component</Filter>
+      <Filter>Source Files\05. Component\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider.h">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereCollider.h">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxCollider.h">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +231,19 @@
       <Filter>Source Files\03. Objects\Unreal</Filter>
     </ClCompile>
     <ClCompile Include="CameraComponent.cpp">
-      <Filter>Source Files\05. Component</Filter>
+      <Filter>Source Files\05. Component\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider.cpp">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxCollider.cpp">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollider.cpp">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
