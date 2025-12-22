@@ -9,6 +9,9 @@
 #include "Flipbook.h"
 #include "SphereCollider.h"
 #include "Player.h"
+#include "UI.h"
+#include "Button.h"
+#include "TestPanel.h"
 
 #include "InputManager.h"
 #include "TimeManager.h"
@@ -103,10 +106,18 @@ void DevScene::Init ( )
 		AddActor ( player );
 	}
 
+	{
+		TestPanel* ui = new TestPanel ( );
+		_uis.push_back ( ui );
+	}
+
 	//
 	for ( const vector<Actor*>& actors : _actors )
 		for ( Actor* actor : actors )
 			actor->BeginPlay ( );
+
+	for ( UI* ui : _uis )
+		ui->BeginPlay ( );
 }
 
 void DevScene::Update ( )
@@ -118,6 +129,9 @@ void DevScene::Update ( )
 	for ( const vector<Actor*>& actors : _actors )
 		for ( Actor* actor : actors )
 			actor->Tick ( );
+
+	for ( UI* ui : _uis )
+		ui->Tick ( );
 }
 
 void DevScene::Render ( HDC hdc )
@@ -125,6 +139,9 @@ void DevScene::Render ( HDC hdc )
 	for (const vector<Actor*>& actors: _actors )
 		for ( Actor* actor : actors )
 			actor->Render ( hdc );
+
+	for ( UI* ui : _uis )
+		ui->Render ( hdc );
 }
 
 void DevScene::AddActor ( Actor* actor )

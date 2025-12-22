@@ -51,6 +51,12 @@
     <Filter Include="Source Files\05. Component\Collision">
       <UniqueIdentifier>{eabcecc3-3048-41be-93c5-073347fadcf3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\06. UI">
+      <UniqueIdentifier>{54765842-920d-4e6a-835b-826bfeccac3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\06. UI\Game">
+      <UniqueIdentifier>{d2666fe7-d977-4ed0-90c2-23060a7248a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zelda-clone.h">
@@ -152,6 +158,21 @@
     <ClInclude Include="CollisionManager.h">
       <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TestButton.h">
+      <Filter>Source Files\06. UI\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Panel.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
+    <ClInclude Include="TestPanel.h">
+      <Filter>Source Files\06. UI\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="zelda-clone.rc">
@@ -244,6 +265,21 @@
     </ClCompile>
     <ClCompile Include="CollisionManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TestButton.cpp">
+      <Filter>Source Files\06. UI\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Panel.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="TestPanel.cpp">
+      <Filter>Source Files\06. UI\Game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
