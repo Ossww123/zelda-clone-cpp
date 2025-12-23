@@ -57,6 +57,9 @@
     <Filter Include="Source Files\06. UI\Game">
       <UniqueIdentifier>{d2666fe7-d977-4ed0-90c2-23060a7248a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\04. Resources\Paper2D">
+      <UniqueIdentifier>{a911ce0e-f331-4a8c-a51a-9f276207c78c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zelda-clone.h">
@@ -122,9 +125,6 @@
     <ClInclude Include="Texture.h">
       <Filter>Source Files\04. Resources\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>Source Files\04. Resources</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Source Files\03. Objects\Game</Filter>
     </ClInclude>
@@ -136,9 +136,6 @@
     </ClInclude>
     <ClInclude Include="Component.h">
       <Filter>Source Files\05. Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Flipbook.h">
-      <Filter>Source Files\04. Resources</Filter>
     </ClInclude>
     <ClInclude Include="FlipbookActor.h">
       <Filter>Source Files\03. Objects\Unreal</Filter>
@@ -164,14 +161,20 @@
     <ClInclude Include="Button.h">
       <Filter>Source Files\06. UI</Filter>
     </ClInclude>
-    <ClInclude Include="TestButton.h">
-      <Filter>Source Files\06. UI\Game</Filter>
-    </ClInclude>
     <ClInclude Include="Panel.h">
       <Filter>Source Files\06. UI</Filter>
     </ClInclude>
-    <ClInclude Include="TestPanel.h">
-      <Filter>Source Files\06. UI\Game</Filter>
+    <ClInclude Include="Flipbook.h">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Tilemap.h">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClInclude>
+    <ClInclude Include="TilemapActor.h">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +233,6 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files\04. Resources\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>Source Files\04. Resources</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Source Files\03. Objects\Game</Filter>
     </ClCompile>
@@ -244,9 +244,6 @@
     </ClCompile>
     <ClCompile Include="Component.cpp">
       <Filter>Source Files\05. Component</Filter>
-    </ClCompile>
-    <ClCompile Include="Flipbook.cpp">
-      <Filter>Source Files\04. Resources</Filter>
     </ClCompile>
     <ClCompile Include="FlipbookActor.cpp">
       <Filter>Source Files\03. Objects\Unreal</Filter>
@@ -272,14 +269,20 @@
     <ClCompile Include="Button.cpp">
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
-    <ClCompile Include="TestButton.cpp">
-      <Filter>Source Files\06. UI\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Panel.cpp">
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
-    <ClCompile Include="TestPanel.cpp">
-      <Filter>Source Files\06. UI\Game</Filter>
+    <ClCompile Include="Flipbook.cpp">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Tilemap.cpp">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClCompile>
+    <ClCompile Include="TilemapActor.cpp">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

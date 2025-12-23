@@ -11,7 +11,8 @@
 #include "Player.h"
 #include "UI.h"
 #include "Button.h"
-#include "TestPanel.h"
+#include "Tilemap.h"
+#include "TilemapActor.h"
 
 #include "InputManager.h"
 #include "TimeManager.h"
@@ -30,6 +31,7 @@ DevScene::~DevScene ( )
 void DevScene::Init ( )
 {
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage01" , L"Sprite\\Map\\Stage01.bmp" );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Tile" , L"Sprite\\Map\\Tile.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Sword" , L"Sprite\\Item\\Sword.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Potion" , L"Sprite\\UI\\Mp.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerUp" , L"Sprite\\Player\\PlayerUp.bmp" , RGB(128, 128, 128));
@@ -41,6 +43,8 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Exit" , L"Sprite\\UI\\Exit.bmp" );
 
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage01" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage01" ) , 0, 0, 0, 0);
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileO" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 0 , 0 , 48 , 48 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileX" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 48 , 0 , 48 , 48 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Start_Off" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Start" ) , 0 , 0 , 128 , 128 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Start_On" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Start" ) , 128 , 0 , 128 , 128 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Edit_Off" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Edit" ) , 0 , 0 , 128 , 128 );
@@ -84,16 +88,16 @@ void DevScene::Init ( )
 	{
 		Player* player = new Player ( );
 
-		{
+		/*{
 			SphereCollider* collider = new SphereCollider ( );
 			collider->SetRadius ( 100.f );
 			player->AddComponent ( collider );
 			GET_SINGLE ( CollisionManager )->AddCollider ( collider );
-		}
+		}*/
 		AddActor ( player );
 	}
 
-	{
+	/*{
 		Actor* player = new Actor ( );
 
 		{
@@ -104,59 +108,49 @@ void DevScene::Init ( )
 			player->SetPos ( { 400, 200 });
 		}
 		AddActor ( player );
-	}
+	}*/
 
 	{
-		TestPanel* ui = new TestPanel ( );
-		_uis.push_back ( ui );
+		TilemapActor* actor = new TilemapActor ( );
+		AddActor ( actor );
+
+		_tilemapActor = actor;
+		{
+			auto* tm = GET_SINGLE ( ResourceManager )->CreateTilemap ( L"Tilemap_01" );
+			tm->SetMapSize ( { 40, 32 } );
+			tm->SetTileSize ( 64 );
+
+			_tilemapActor->SetTilemap ( tm );
+			_tilemapActor->SetShowDebug ( true );
+		}
 	}
 
-	//
-	for ( const vector<Actor*>& actors : _actors )
-		for ( Actor* actor : actors )
-			actor->BeginPlay ( );
-
-	for ( UI* ui : _uis )
-		ui->BeginPlay ( );
+	Super::Init ( );
 }
 
 void DevScene::Update ( )
 {
+	Super::Update ( );
+
 	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
-
-	GET_SINGLE ( CollisionManager )->Update ( );
-
-	for ( const vector<Actor*>& actors : _actors )
-		for ( Actor* actor : actors )
-			actor->Tick ( );
-
-	for ( UI* ui : _uis )
-		ui->Tick ( );
 }
 
 void DevScene::Render ( HDC hdc )
 {
-	for (const vector<Actor*>& actors: _actors )
+	Super::Render ( hdc );
+}
+
+void DevScene::Clear ( )
+{
+	for ( const vector<Actor*>& actors : _actors )
 		for ( Actor* actor : actors )
-			actor->Render ( hdc );
+			SAFE_DELETE ( actor );
+
+	for ( vector<Actor*>& actors : _actors )
+		actors.clear ( );
 
 	for ( UI* ui : _uis )
-		ui->Render ( hdc );
-}
+		SAFE_DELETE ( ui );
 
-void DevScene::AddActor ( Actor* actor )
-{
-	if ( actor == nullptr )
-		return;
-
-	_actors[ actor->GetLayer ( ) ].push_back ( actor );
-}
-
-void DevScene::RemoveActor ( Actor* actor )
-{
-	if ( actor == nullptr )
-		return;
-
-	vector<Actor*>& v = _actors[ actor->GetLayer ( ) ];
-	v.erase ( std::remove ( v.begin ( ) , v.end ( ) , actor ) , v.end ( ) );
+	_uis.clear ( );
 }
