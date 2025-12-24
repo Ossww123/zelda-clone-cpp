@@ -11,7 +11,7 @@
 #include <string>
 #include <algorithm>
 #include <functional>
-
+#include <assert.h>
 using namespace std;
 
 #include "Types.h"

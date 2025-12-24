@@ -22,7 +22,7 @@ public:
 	virtual ~Tilemap ( ) override;
 
 	virtual void LoadFile ( const wstring& path ) override;
-	virtual void SaveFile ( const wstring& psyh ) override;
+	virtual void SaveFile ( const wstring& path ) override;
 
 	Vec2Int GetMapSize ( ) { return _mapSize; }
 	int32 GetTileSize ( ) { return _tileSize; }

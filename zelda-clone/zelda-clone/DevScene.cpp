@@ -133,6 +133,15 @@ void DevScene::Update ( )
 	Super::Update ( );
 
 	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
+
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::Q ) )
+	{
+		GET_SINGLE ( ResourceManager )->SaveTilemap ( L"Tilemap_01" , L"Tilemap\\Tilemap01.txt" );
+	}
+	else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::E ) )
+	{
+		GET_SINGLE ( ResourceManager )->LoadTilemap ( L"Tilemap_01" , L"Tilemap\\Tilemap01.txt" );
+	}
 }
 
 void DevScene::Render ( HDC hdc )
