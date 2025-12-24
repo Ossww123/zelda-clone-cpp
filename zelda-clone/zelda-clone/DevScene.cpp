@@ -13,11 +13,13 @@
 #include "Button.h"
 #include "Tilemap.h"
 #include "TilemapActor.h"
+#include "Sound.h"
 
 #include "InputManager.h"
 #include "TimeManager.h"
 #include "ResourceManager.h"
 #include "CollisionManager.h"
+#include "SoundManager.h"
 
 
 DevScene::DevScene ( )
@@ -123,6 +125,13 @@ void DevScene::Init ( )
 			_tilemapActor->SetTilemap ( tm );
 			_tilemapActor->SetShowDebug ( true );
 		}
+	}
+
+	GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
+	{
+		Sound* sound = GET_SINGLE ( ResourceManager )->GetSound ( L"BGM" );
+		sound->Play ( true );
+
 	}
 
 	Super::Init ( );
