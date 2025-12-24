@@ -176,6 +176,12 @@
     <ClInclude Include="TilemapActor.h">
       <Filter>Source Files\03. Objects\Unreal</Filter>
     </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="zelda-clone.rc">
@@ -283,6 +289,12 @@
     </ClCompile>
     <ClCompile Include="TilemapActor.cpp">
       <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Source Files\04. Resources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
