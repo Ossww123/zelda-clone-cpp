@@ -7,6 +7,7 @@
 #include "Actor.h"
 #include "SpriteActor.h"
 #include "Flipbook.h"
+#include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "Player.h"
 #include "UI.h"
@@ -89,31 +90,40 @@ void DevScene::Init ( )
 
 	{
 		Player* player = new Player ( );
+		player->SetPos ( { 100, 100 } );
+		{
+			BoxCollider* collider = new BoxCollider ( );
+			collider->SetSize ( { 100, 100 } );
+			collider->SetCollisionLayer ( CLT_OBJECT );
 
-		/*{
-			SphereCollider* collider = new SphereCollider ( );
-			collider->SetRadius ( 100.f );
-			player->AddComponent ( collider );
+			collider->AddCollisionFlagLayer ( CLT_WALL );
+			collider->AddCollisionFlagLayer ( CLT_OBJECT );
+
 			GET_SINGLE ( CollisionManager )->AddCollider ( collider );
-		}*/
+			player->AddComponent ( collider );
+		}
 		AddActor ( player );
 	}
 
-	/*{
-		Actor* player = new Actor ( );
-
+	{
+		Actor* test = new Actor ( );
+		test->SetLayer ( LAYER_OBJECT );
+		test->SetPos ( { 200, 400 } );
 		{
-			SphereCollider* collider = new SphereCollider ( );
-			collider->SetRadius ( 50.f );
-			player->AddComponent ( collider );
+			BoxCollider* collider = new BoxCollider ( );
+			collider->SetSize ( { 10000, 100 } );
+			collider->SetCollisionLayer ( CLT_GROUND );
+			uint32 flag = 0;
+
+			collider->SetCollisionFlag ( 1 << CLT_WALL );
 			GET_SINGLE ( CollisionManager )->AddCollider ( collider );
-			player->SetPos ( { 400, 200 });
+			test->AddComponent ( collider );
 		}
-		AddActor ( player );
-	}*/
+		AddActor ( test );
+	}
 
 	{
-		TilemapActor* actor = new TilemapActor ( );
+		/*TilemapActor* actor = new TilemapActor ( );
 		AddActor ( actor );
 
 		_tilemapActor = actor;
@@ -124,15 +134,14 @@ void DevScene::Init ( )
 
 			_tilemapActor->SetTilemap ( tm );
 			_tilemapActor->SetShowDebug ( true );
-		}
+		}*/
 	}
 
-	GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
+	/*GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
 	{
 		Sound* sound = GET_SINGLE ( ResourceManager )->GetSound ( L"BGM" );
 		sound->Play ( true );
-
-	}
+	}*/
 
 	Super::Init ( );
 }
