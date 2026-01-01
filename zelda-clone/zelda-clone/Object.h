@@ -8,6 +8,12 @@ enum class ObjectType
 	Projectile,
 };
 
+enum class MoveDir
+{
+	Left ,
+	Right ,
+};
+
 class Object
 {
 public:
@@ -24,9 +30,13 @@ public:
 	Pos		GetPos ( ) { return _pos; }
 	void	SetPos ( Pos pos ) { _pos = pos; }
 
+	float	GetRadius ( ) { return _radius; }
+
 protected:
 	ObjectType	_type = ObjectType::None;
+	MoveDir		_dir = MoveDir::Right;
 	Stat		_stat = {};
-	Pos			_pos = {};
+	Vector		_pos = {};
+	float		_radius = 0.f;
 };
 

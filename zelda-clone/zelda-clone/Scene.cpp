@@ -13,6 +13,16 @@ Scene::Scene ( )
 
 Scene::~Scene ( )
 {
+	for ( const vector<Actor*>& actors : _actors )
+		for ( Actor* actor : actors )
+			SAFE_DELETE ( actor );
+
+	_actors->clear ( );
+
+	for ( UI* ui : _uis )
+		SAFE_DELETE ( ui );
+
+	_uis.clear ( );
 }
 
 void Scene::Init()
