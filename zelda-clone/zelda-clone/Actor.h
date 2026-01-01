@@ -22,12 +22,15 @@ public:
 	void AddComponent ( Component* component );
 	void RemoveComponent ( Component* component );
 
+	Component* GetCollider ( );
+
 	//
 	virtual void OnComponentBeginOverlap ( Collider* collider , Collider* other );
 	virtual void OnComponentEndOverlap ( Collider* collider , Collider* other );
 
 protected:
 	Vec2 _pos = { 0, 0 };
+	Vec2 _destPos = { 0, 0 };
 	LAYER_TYPE _layer = LAYER_OBJECT;
 	vector<Component*> _components;
 };

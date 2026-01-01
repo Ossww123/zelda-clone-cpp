@@ -23,10 +23,18 @@ enum class ColliderType
 	Sphere,
 };
 
-enum COLLISION_LAYER_TYPE
+enum COLLISION_LAYER_TYPE : uint8
 {
 	CLT_OBJECT,
 	CLT_GROUND,
 	CLT_WALL,
 	// ..
+};
+
+enum Dir
+{
+	DIR_UP ,
+	DIR_DOWN ,
+	DIR_LEFT ,
+	DIR_RIGHT ,
 };
