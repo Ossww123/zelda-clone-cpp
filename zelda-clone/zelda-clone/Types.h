@@ -11,10 +11,12 @@ using uint16	= unsigned __int16;
 using uint32	= unsigned __int32;
 using uint64	= unsigned __int64;
 
-struct Stat
+struct Status
 {
 	int32 hp = 0;
 	int32 maxHp = 0;
+	int32 attack = 0;
+	int32 defence = 0;
 	float speed = 0;
 };
 
