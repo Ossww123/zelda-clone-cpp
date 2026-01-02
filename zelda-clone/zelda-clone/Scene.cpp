@@ -42,7 +42,8 @@ void Scene::Update()
 
 	GET_SINGLE(CollisionManager)->Update();
 
-	for (const vector<Actor*>& actors : _actors)
+	// 복사
+	for (const vector<Actor*> actors : _actors)
 		for (Actor* actor : actors)
 			actor->Tick();
 
