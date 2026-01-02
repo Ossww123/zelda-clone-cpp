@@ -15,6 +15,11 @@ Monster::Monster()
 	_flipbookMove[DIR_DOWN] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeDown");
 	_flipbookMove[DIR_LEFT] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeLeft");
 	_flipbookMove[DIR_RIGHT] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeRight");
+
+	_status.hp = 50;
+	_status.maxHp = 50;
+	_status.attack = 10;
+	_status.defence = 0;
 }
 
 Monster::~Monster()

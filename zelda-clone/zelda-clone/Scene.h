@@ -15,8 +15,8 @@ public:
 	virtual void Render ( HDC hdc );
 
 public:
-	void AddActor ( Actor* actor );
-	void RemoveActor ( Actor* actor );
+	virtual void AddActor ( Actor* actor );
+	virtual void RemoveActor ( Actor* actor );
 
 	Creature* GetCreatureAt ( Vec2Int cellPos );
 
