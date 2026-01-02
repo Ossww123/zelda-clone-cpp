@@ -60,6 +60,15 @@
     <Filter Include="Source Files\04. Resources\Paper2D">
       <UniqueIdentifier>{a911ce0e-f331-4a8c-a51a-9f276207c78c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\03. Objects\Game\Creature">
+      <UniqueIdentifier>{91731a0a-cd66-436d-8368-1391d8a87959}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects\Game\Effect">
+      <UniqueIdentifier>{f807cd1b-6a0f-4d19-a85c-0e3d73d7cb1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects\Game\Projectile">
+      <UniqueIdentifier>{b91ceb55-5e2e-4f91-baa1-ec576b7da591}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="zelda-clone.h">
@@ -107,9 +116,6 @@
     <ClInclude Include="DevScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Source Files\03. Objects</Filter>
-    </ClInclude>
     <ClInclude Include="EditScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
@@ -124,9 +130,6 @@
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Source Files\04. Resources\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Source Files\03. Objects\Game</Filter>
     </ClInclude>
     <ClInclude Include="Actor.h">
       <Filter>Source Files\03. Objects\Unreal</Filter>
@@ -182,6 +185,27 @@
     <ClInclude Include="Sound.h">
       <Filter>Source Files\04. Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="Arrow.h">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="HitEffect.h">
+      <Filter>Source Files\03. Objects\Game\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Creature.h">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Source Files\03. Objects\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="zelda-clone.rc">
@@ -224,9 +248,6 @@
     <ClCompile Include="DevScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files\03. Objects</Filter>
-    </ClCompile>
     <ClCompile Include="EditScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
@@ -238,9 +259,6 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files\04. Resources\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files\03. Objects\Game</Filter>
     </ClCompile>
     <ClCompile Include="Actor.cpp">
       <Filter>Source Files\03. Objects\Unreal</Filter>
@@ -295,6 +313,27 @@
     </ClCompile>
     <ClCompile Include="Sound.cpp">
       <Filter>Source Files\04. Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="Arrow.cpp">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="HitEffect.cpp">
+      <Filter>Source Files\03. Objects\Game\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Creature.cpp">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files\03. Objects\Game</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -165,11 +165,11 @@ void DevScene::Init ( )
 		}
 	}
 
-	GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
-	{
-		Sound* sound = GET_SINGLE ( ResourceManager )->GetSound ( L"BGM" );
-		sound->Play ( true );
-	}
+	//GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
+	//{
+	//	Sound* sound = GET_SINGLE ( ResourceManager )->GetSound ( L"BGM" );
+	//	sound->Play ( true );
+	//}
 
 	GET_SINGLE ( ResourceManager )->LoadSound ( L"Attack" , L"Sound\\Sword.wav" );
 
