@@ -144,6 +144,16 @@ struct VectorInt
 		y -= other.y;
 	}
 
+	bool operator==( const VectorInt& other )
+	{
+		return x == other.x && y == other.y;
+	}
+
+	bool operator!=( const VectorInt& other )
+	{
+		return x != other.x || y != other.y;
+	}
+
 	float Dot ( VectorInt other )
 	{
 		return x * other.x + y * other.y;
