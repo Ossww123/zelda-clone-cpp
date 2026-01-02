@@ -81,6 +81,19 @@ bool GameObject::CanGo ( Vec2Int cellPos )
 	return scene->CanGo ( cellPos );
 }
 
+Dir GameObject::GetLookAtDir ( Vec2Int cellPos )
+{
+	Vec2Int dir = cellPos - GetCellPos ( );
+	if ( dir.x > 0 )
+		return DIR_RIGHT;
+	else if ( dir.x < 0 )
+		return DIR_LEFT;
+	else if ( dir.y > 0 )
+		return DIR_DOWN;
+	else
+		return DIR_UP;
+}
+
 void GameObject::SetCellPos ( Vec2Int cellPos , bool teleport )
 {
 	_cellPos = cellPos;

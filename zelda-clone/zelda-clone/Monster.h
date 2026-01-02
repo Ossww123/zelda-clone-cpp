@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Creature.h"
 
+class Player;
+
 class Monster : public Creature
 {
 	using Super = Creature;
@@ -23,5 +25,8 @@ private:
 protected:
 	// TODO
 	Flipbook* _flipbookMove[ 4 ];
+	float _waitSeconds = 0.f;
+
+	Player* _target = nullptr; // TEMP
 };
 
