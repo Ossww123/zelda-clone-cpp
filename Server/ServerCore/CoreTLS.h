@@ -1,5 +1,3 @@
 #pragma once
-class CoreTLS
-{
-};
 
+extern thread_local uint32 LThreadId;

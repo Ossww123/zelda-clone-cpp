@@ -37,6 +37,9 @@
     <ClInclude Include="CoreTLS.h">
       <Filter>Source Files\Main</Filter>
     </ClInclude>
+    <ClInclude Include="ThreadManager.h">
+      <Filter>Source Files\Thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -53,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="CoreTLS.cpp">
       <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadManager.cpp">
+      <Filter>Source Files\Thread</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
