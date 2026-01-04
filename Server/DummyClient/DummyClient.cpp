@@ -8,45 +8,55 @@
 
 int main()
 {
-	WSADATA wsaData;
-	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		return 0;
+	SocketUtils::Init();
 
 	SOCKET clientSocket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (clientSocket == INVALID_SOCKET)
 		return 0;
 
+	u_long on = 1;
+	if (::ioctlsocket(clientSocket, FIONBIO, &on) == INVALID_SOCKET)
+		return 0;
+
 	SOCKADDR_IN serverAddr;
 	::memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
-	// serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
+
 	::inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 	serverAddr.sin_port = ::htons(7777); // 80 : HTTP
 
-	if (::connect(clientSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
-		return 0;
-
-	// --------
-	// 연결 성공
-	cout << "Connected To Server!" << endl;
-
+	// Connect
 	while (true)
 	{
-		char sendBuffer[100] = "Hello! I am Client!";
-		int32 resultCode = ::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
-		if (resultCode == SOCKET_ERROR)
-			return 0;
+		if (::connect(clientSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+		{
+			// 아무도 접속 X
+			if (::WSAGetLastError() == WSAEWOULDBLOCK)
+				continue;
+			
 
-		char recvBuffer[100];
-		int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
-		if (recvLen <= 0)
-			return 0;
+			// 이미 연결된 상태
+			if (::WSAGetLastError() == WSAEISCONN)
+				break;
+		}
+	}
 
-		cout << "Echo Data : " << recvBuffer << endl;
+	// Send
+	while (true)
+	{
+		char sendBuffer[100] = "Hello I am Client!";
+		int32 sendLen = sizeof(sendBuffer);
+
+		if (::send(clientSocket, sendBuffer, sendLen, 0) == SOCKET_ERROR)
+		{
+			if (::WSAGetLastError() == WSAEWOULDBLOCK)
+				continue;
+		}
+
+		cout << "Send Data! Len = " << sendLen << endl;
 
 		this_thread::sleep_for(1s);
 	}
 
-	::closesocket(clientSocket);
-	::WSACleanup();
+	SocketUtils::Clear();
 }
