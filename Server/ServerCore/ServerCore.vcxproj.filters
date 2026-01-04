@@ -40,6 +40,9 @@
     <ClInclude Include="ThreadManager.h">
       <Filter>Source Files\Thread</Filter>
     </ClInclude>
+    <ClInclude Include="SocketUtils.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -59,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="ThreadManager.cpp">
       <Filter>Source Files\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketUtils.cpp">
+      <Filter>Source Files\Network</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

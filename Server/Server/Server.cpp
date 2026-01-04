@@ -12,8 +12,8 @@ using namespace std;
 // 서버
 // 1) 새로운 소켓 생성 (socket)
 // 2) 소켓에 주소/포트 번호 설정 (bind)
-// 3) 소켓 일 시키기 (listen)
-// 4) 손님 접속 (accept)
+// 3) 소켓 일 시키기 (listen) - TCP
+// 4) 손님 접속 (accept) - TCP
 // 5) 클라와 통신
 
 int main()
@@ -31,6 +31,41 @@ int main()
 	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (listenSocket == INVALID_SOCKET)
 		return 0;
+
+	/* 
+
+	// 소켓 옵션
+	// - 1) level (SOL_SOCKET, IPPROTO_IP, UPPROTO_TCP)
+	// - 2) optname
+	// - 3) optval
+
+	// SO_KEEPALIVE - 주기적으로 연결 상태 확인(TCP)
+	bool enable = true;
+	::setsockopt(listenSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&enable, sizeof(enable));
+
+	// SO_LINGER - 지연. 송신 버퍼에 있는 메시지를 보낼지말지.
+	// SO_SNDBUF
+	// SD_RCVBUF
+
+	int32 sendBufferSize;
+	int32 optionLen = sizeof(sendBufferSize);
+	::getsockopt(listenSocket, SOL_SOCKET, SO_SNDBUF, (char*)&sendBufferSize, &optionLen);
+	cout << "송신 버퍼 크기 : " << sendBufferSize << endl; // 64KB
+
+	//
+
+	// SO_REUSEADDR
+	{
+		bool enable = true;
+		::setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable, sizeof(enable));
+	}
+
+	// IPPROTO_TCP
+	// TCP_NODELAY - Nagle 알고리즘 작동 여부
+
+
+	*/ 
+
 
 	// 2) 주소/포트 번호 설정 (bind)
 	SOCKADDR_IN serverAddr;

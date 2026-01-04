@@ -19,6 +19,9 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <iostream>
+#include <assert.h>
+
+#include "SocketUtils.h"
 using namespace std;
 
 #pragma comment(lib, "ws2_32.lib")
