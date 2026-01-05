@@ -9,13 +9,13 @@
 #include <queue>
 using namespace std;
 
-// Select 모델 = (select 함수)
+// WSAEventSelect - WSAEventSelect가 핵심이 되는
+// 소켓과 관련된 네트워크 이벤트를 [이벤트 객체]를 통해 감지
 
-// socket set
-// 1) 읽기[] 쓰기[] 예외[] 관찰 대상
-// 2) select(readSet, writeSet, exceptSet); -> 관찰 시작
-// 3) 적어도 하나의 소켓 준비되면 리턴 -> 낙오자는 알아서 제거
-// 4) 남은 소켓 체크해서 진행
+// 생성 : WSACreateEvent (수동 리셋 + Manual-Reset + Non-Signasted 상태 시작)
+// 삭제 : WsaCloswEvent
+// 신호 상태 감지 : WSAWaitForMultipleEvents
+// 구체적인 네트워크 이벤트 알아내기 : WSAEnumNetworkEvents
 
 const int32 BUF_SIZE = 1000;
 
@@ -47,59 +47,72 @@ int main()
 	if (SocketUtils::Listen(listenSocket) == false)
 		return 0;
 
+	SOCKADDR_IN clientAddr;
+	int32 addrLen = sizeof(clientAddr);
+
+	vector<WSAEVENT> wsaEvents;
 	vector<Session> sessions;
 	sessions.reserve(100);
 
-	fd_set reads;
-	fd_set writes;
+	WSAEVENT listenEvent = ::WSACreateEvent();
+	wsaEvents.push_back(listenEvent);
+	sessions.push_back(Session{ listenSocket });
+
+	if (::WSAEventSelect(listenSocket, listenEvent, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR)
+		return 0;
 
 	while (true)
 	{
-		// 소켓 셋 초기화
-		FD_ZERO(&reads);
+		int32 index = ::WSAWaitForMultipleEvents(wsaEvents.size(), &wsaEvents[0], FALSE, WSA_INFINITE, FALSE);
+		if (index == WSA_WAIT_FAILED)
+			continue;
 
-		// ListenSocket 등록
-		FD_SET(listenSocket, &reads);
+		index -= WSA_WAIT_EVENT_0;
 
-		// 소켓 등록
-		for (Session& s : sessions)
-			FD_SET(s.socket, &reads);
+		WSANETWORKEVENTS networkEvents;
+		if (::WSAEnumNetworkEvents(sessions[index].socket, wsaEvents[index], &networkEvents) == SOCKET_ERROR)
+		continue;
 
-		// [옵션] 마지막 timeout 인자 설정 가능
-		int32 retVal = ::select(0, &reads, nullptr, nullptr, nullptr);
-		if (retVal == SOCKET_ERROR)
-			break;
-
-		if (FD_ISSET(listenSocket, &reads))
+		if (networkEvents.lNetworkEvents & FD_ACCEPT)
 		{
+			// Error-Check
+			if (networkEvents.iErrorCode[FD_ACCEPT_BIT] != 0)
+				continue;
+
 			SOCKADDR_IN clientAddr;
 			int32 addrLen = sizeof(clientAddr);
-			SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
 
+			SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
 			if (clientSocket != INVALID_SOCKET)
 			{
-				if (::WSAGetLastError() == WSAEWOULDBLOCK)
-					continue;
-
 				cout << "Client Connected" << endl;
+
+				WSAEVENT clientEvent = ::WSACreateEvent();
+				wsaEvents.push_back(clientEvent);
 				sessions.push_back(Session{ clientSocket });
+				if (::WSAEventSelect(clientSocket, clientEvent, FD_READ | FD_WRITE | FD_CLOSE) == SOCKET_ERROR)
+					return 0;
 			}
 		}
 
-		// 나머지 소켓 체크
-		for (Session& s : sessions)
+		// Client Session 소켓 체크
+		if (networkEvents.lNetworkEvents & FD_READ)
 		{
-			if (FD_ISSET(s.socket, &reads))
-			{
-				int32 recvLen = ::recv(s.socket, s.recvBuffer, BUF_SIZE, 0);
-				if (recvLen = 0)
-				{
-					continue;
-				}
+			if (networkEvents.iErrorCode[FD_READ_BIT] != 0)
+				continue;
 
-				cout << "RecvData = " << s.recvBuffer << endl;
-				cout << "RecvLen = " << recvLen << endl;
+			Session& s = sessions[index];
+
+			// Read
+			int32 recvLen = ::recv(s.socket, s.recvBuffer, BUF_SIZE, 0);
+			if (recvLen == SOCKET_ERROR && ::WSAGetLastError() != WSAEWOULDBLOCK)
+			{
+				if (recvLen <= 0)
+					continue;
 			}
+
+			cout << "Recv Data = " << s.recvBuffer << endl;
+			cout << "RecvLen = " << recvLen << endl;
 		}
 	}
 	
