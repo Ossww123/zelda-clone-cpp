@@ -16,7 +16,26 @@ using namespace std;
 
 class GameSession : public Session
 {
+public:
+	// TODO
+	~GameSession()
+	{
+		cout << "~GameSession()" << endl;
+	}
 
+	virtual int32 OnRecv(BYTE* buffer, int32 len) override
+	{
+		cout << "OnRecv Len = " << len << endl;
+
+		Send(buffer, len);
+
+		return len;
+	}
+
+	virtual void OnSend(int32 len) override
+	{
+		cout << "OnSend Len = " << len << endl;
+	}
 };
 
 int main()
