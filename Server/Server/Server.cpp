@@ -38,17 +38,20 @@ void WorkerThreadMain(HANDLE iocpHandle)
 {
 	while (true)
 	{
-		// TODO
-
-		// GQCS
 		DWORD bytesTransferred = 0;
 		Session* session = nullptr;
 		OverlappedEx* overlappedEx = nullptr;
-		bool ret = ::GetQueuedCompletionStatus(iocpHandle, &bytesTransferred,
+
+		BOOL ret = ::GetQueuedCompletionStatus(iocpHandle, &bytesTransferred,
 			(ULONG_PTR*)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
 
 		if (ret == false || bytesTransferred == 0)
+		{
+			// 연결 끊김
 			continue;
+		}
+
+		assert(overlappedEx->type == IO_TYPE::READ);
 
 		cout << "Recv Data Len = " << bytesTransferred << endl;
 		cout << "Recv Data IOCP = " << session->recvBuffer << endl;
@@ -56,9 +59,6 @@ void WorkerThreadMain(HANDLE iocpHandle)
 		WSABUF wsaBuf;
 		wsaBuf.buf = session->recvBuffer;
 		wsaBuf.len = BUF_SIZE;
-
-		OverlappedEx* overlappedEx = new OverlappedEx();
-		overlappedEx->type = IO_TYPE::READ;
 
 		DWORD recvLen = 0;
 		DWORD flags = 0;
@@ -84,7 +84,7 @@ int main()
 
 	vector<Session*> sessionManager;
 
-	// CP
+	// CP 생성
 	HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	
 	// WorkerTheads
@@ -107,6 +107,7 @@ int main()
 
 		cout << "Client Connected" << endl;
 
+		// 소켓을 CP에 등록
 		::CreateIoCompletionPort((HANDLE)clientSocket, iocpHandle, /*Key*/(ULONG_PTR)session, 0);
 
 		WSABUF wsaBuf;
@@ -116,9 +117,10 @@ int main()
 		OverlappedEx* overlappedEx = new OverlappedEx();
 		overlappedEx->type = IO_TYPE::READ;
 
+		// ADD_REF
 		DWORD recvLen = 0;
 		DWORD flags = 0;
-		::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, /*Overlapped PTR*/&overlappedEx->overlapped, NULL);
+		::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
 	}
 
 	SocketUtils::Clear();
