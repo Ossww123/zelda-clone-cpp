@@ -75,13 +75,13 @@ void Listener::Dispatch(IocpEvent* acceptEvent, int32 numOfBytes)
 
 void Listener::RegisterAccept(IocpEvent* acceptEvent)
 {
-	SessionRef session = _service->CreateSession();
+	SessionRef session = _service->CreateSession(); // Register IOCP
 
 	acceptEvent->Init();
 	acceptEvent->session = session;
 
 	DWORD bytesReceived = 0;
-	if (false == SocketUtils::AcceptEx(_socket, session->GetSocket(), session->_recvBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, OUT &bytesReceived, static_cast<LPOVERLAPPED>(acceptEvent)))
+	if (false == SocketUtils::AcceptEx(_socket, session->GetSocket(), session->_recvBuffer.WritePos(), 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, OUT & bytesReceived, static_cast<LPOVERLAPPED>(acceptEvent)))
 	{
 		const int32 errorCode = ::WSAGetLastError();
 		if (errorCode != WSA_IO_PENDING)
