@@ -58,6 +58,9 @@
     <ClInclude Include="Session.h">
       <Filter>Source Files\Network</Filter>
     </ClInclude>
+    <ClInclude Include="Service.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -94,6 +97,9 @@
       <Filter>Source Files\Network</Filter>
     </ClCompile>
     <ClCompile Include="Session.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Service.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
   </ItemGroup>
