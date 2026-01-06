@@ -8,24 +8,62 @@
 #include <map>
 #include <queue>
 using namespace std;
-
-// Overlapped IO (비동기 + 논블로킹)
+#include "ThreadManager.h"
 
 const int32 BUF_SIZE = 1000;
 
 struct Session
 {
-	WSAOVERLAPPED overlapped = {};
 	SOCKET socket = INVALID_SOCKET;
 	char recvBuffer[BUF_SIZE] = {};
 	int32 recvBytes = 0;
 };
 
-void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlapped, DWORD flags)
+enum IO_TYPE
 {
-	cout << "Data Recv Len Callback = " << recvLen << endl;
-	// TODO
+	READ,
+	WRITE,
+	ACCEPT,
+	CONNECT,
+};
 
+struct OverlappedEx
+{
+	WSAOVERLAPPED overlapped = {};
+	int32 type = 0;
+	// TODO
+};
+
+void WorkerThreadMain(HANDLE iocpHandle)
+{
+	while (true)
+	{
+		// TODO
+
+		// GQCS
+		DWORD bytesTransferred = 0;
+		Session* session = nullptr;
+		OverlappedEx* overlappedEx = nullptr;
+		bool ret = ::GetQueuedCompletionStatus(iocpHandle, &bytesTransferred,
+			(ULONG_PTR*)&session, (LPOVERLAPPED*)&overlappedEx, INFINITE);
+
+		if (ret == false || bytesTransferred == 0)
+			continue;
+
+		cout << "Recv Data Len = " << bytesTransferred << endl;
+		cout << "Recv Data IOCP = " << session->recvBuffer << endl;
+
+		WSABUF wsaBuf;
+		wsaBuf.buf = session->recvBuffer;
+		wsaBuf.len = BUF_SIZE;
+
+		OverlappedEx* overlappedEx = new OverlappedEx();
+		overlappedEx->type = IO_TYPE::READ;
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
+		::WSARecv(session->socket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
+	}
 }
 
 int main()
@@ -36,11 +74,6 @@ int main()
 	if (listenSocket == INVALID_SOCKET)
 		return 0;
 
-	// 논블로킹
-	u_long on = 1;
-	if (::ioctlsocket(listenSocket, FIONBIO, &on) == INVALID_SOCKET)
-		return 0;
-
 	SocketUtils::SetReuseAddress(listenSocket, true);
 
 	if (SocketUtils::BindAnyAddress(listenSocket, 7777) == false)
@@ -49,53 +82,44 @@ int main()
 	if (SocketUtils::Listen(listenSocket) == false)
 		return 0;
 
+	vector<Session*> sessionManager;
+
+	// CP
+	HANDLE iocpHandle = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+	
+	// WorkerTheads
+	for (int32 i = 0; i < 5; i++)
+		GThreadManager->Launch([=]() {WorkerThreadMain(iocpHandle); });
+
+	// Accept
 	while (true)
 	{
 		SOCKADDR_IN clientAddr;
 		int32 addrLen = sizeof(clientAddr);
 
-		SOCKET clientSocket;
-		while (true)
-		{
-			clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-			if (clientSocket != INVALID_SOCKET)
-				break;
-
-			if (::WSAGetLastError() == WSAEWOULDBLOCK)
-				continue;
-
+		SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+		if (clientSocket == INVALID_SOCKET)
 			return 0;
-		}
 
-		Session session = Session{ clientSocket };
+		Session* session = new Session();
+		session->socket = clientSocket;
+		sessionManager.push_back(session);
 
 		cout << "Client Connected" << endl;
 
-		while (true)
-		{
-			WSABUF wsaBuf;
-			wsaBuf.buf = session.recvBuffer;
-			wsaBuf.len = BUF_SIZE;
+		::CreateIoCompletionPort((HANDLE)clientSocket, iocpHandle, /*Key*/(ULONG_PTR)session, 0);
 
-			DWORD recvLen = 0;
-			DWORD flags = 0;
-			if (::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &session.overlapped, RecvCallback) == SOCKET_ERROR)
-			{
-				if (::WSAGetLastError() == WSA_IO_PENDING)
-				{
-					// Alertable Wait
-					::SleepEx(INFINITE, TRUE);
-				}
-				else
-				{
-					// TODO
-					break;
-				}
-			}
+		WSABUF wsaBuf;
+		wsaBuf.buf = session->recvBuffer;
+		wsaBuf.len = BUF_SIZE;
 
-			cout << "Data Recv = " << session.recvBuffer << endl;
-		}
+		OverlappedEx* overlappedEx = new OverlappedEx();
+		overlappedEx->type = IO_TYPE::READ;
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
+		::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, /*Overlapped PTR*/&overlappedEx->overlapped, NULL);
 	}
-	
+
 	SocketUtils::Clear();
 }
