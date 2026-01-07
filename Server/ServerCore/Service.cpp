@@ -47,7 +47,6 @@ void Service::ReleaseSession(SessionRef session)
 	_sessionCount--;
 }
 
-
 /*-----------------
 	ClientService
 ------------------*/
@@ -59,13 +58,19 @@ ClientService::ClientService(NetAddress targetAddress, IocpCoreRef core, Session
 
 bool ClientService::Start()
 {
-	// TODO
+	if (CanStart() == false)
+		return false;
+
+	const int32 sessionCount = GetMaxSessionCount();
+	for (int32 i = 0; i < sessionCount; i++)
+	{
+		SessionRef session = CreateSession();
+		if (session->Connect() == false)
+			return false;
+	}
+
 	return true;
 }
-
-/*-----------------
-	ServerService
-------------------*/
 
 ServerService::ServerService(NetAddress address, IocpCoreRef core, SessionFactory factory, int32 maxSessionCount)
 	: Service(ServiceType::Server, address, core, factory, maxSessionCount)
