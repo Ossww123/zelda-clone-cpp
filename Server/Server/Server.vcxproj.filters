@@ -13,9 +13,21 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameSession.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSessionManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSessionManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSession.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
