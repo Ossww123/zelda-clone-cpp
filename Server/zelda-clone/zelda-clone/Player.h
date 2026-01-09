@@ -13,7 +13,7 @@ public:
 	virtual void Tick ( ) override;
 	virtual void Render ( HDC hdc ) override;
 
-private:
+protected:
 
 	virtual void TickIdle ( ) override;
 	virtual void TickMove ( ) override;
