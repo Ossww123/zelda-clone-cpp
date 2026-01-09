@@ -43,12 +43,12 @@ void Arrow::TickIdle ( )
 		return;
 
 	Vec2Int deltaXY[ 4 ] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
-	Vec2Int nextPos = GetCellPos ( ) + deltaXY[ _dir ];
+	Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir() ];
 
 	if ( CanGo ( nextPos ) )
 	{
 		SetCellPos ( nextPos );
-		SetState ( ObjectState::Move );
+		SetState ( MOVE );
 	}
 	else
 	{
@@ -70,12 +70,12 @@ void Arrow::TickMove ( )
 	Vec2 dir = ( _destPos - _pos );
 	if ( dir.Length ( ) < 5.f )
 	{
-		SetState ( ObjectState::Idle );
+		SetState ( IDLE );
 		_pos = _destPos;
 	}
 	else
 	{
-		switch ( _dir )
+		switch ( info.dir ( ) )
 		{
 		case DIR_UP:
 			_pos.y -= 600 * deltaTime;
@@ -95,5 +95,5 @@ void Arrow::TickMove ( )
 
 void Arrow::UpdateAnimation ( )
 {
-	SetFlipbook ( _flipbookMove[ _dir ] );
+	SetFlipbook ( _flipbookMove[ info.dir ( ) ] );
 }
