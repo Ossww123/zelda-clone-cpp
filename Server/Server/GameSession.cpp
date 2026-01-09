@@ -1,10 +1,18 @@
 #include "pch.h"
 #include "GameSession.h"
 #include "GameSessionManager.h"
+#include "ServerPacketHandler.h"
 
 void GameSession::OnConnected()
 {
 	GSessionManager.Add(static_pointer_cast<GameSession>(shared_from_this()));
+
+	// 로그인 패킷
+
+	Send(ServerPacketHandler::Make_S_EnterGame());
+
+	// 게임 입장
+	// GRoom->
 }
 
 void GameSession::OnDisconnected()
@@ -14,10 +22,7 @@ void GameSession::OnDisconnected()
 
 void GameSession::OnRecvPacket(BYTE* buffer, int32 len)
 {
-	PacketHeader header = *((PacketHeader*)buffer);
-	cout << "Packet ID : " << header.id << "Size : " << header.size << endl;
-
-
+	ServerPacketHandler::HandlePacket(buffer, len);
 }
 
 
