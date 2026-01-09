@@ -22,6 +22,7 @@
 #include "ResourceManager.h"
 #include "CollisionManager.h"
 #include "SoundManager.h"
+#include "MyPlayer.h"
 
 
 DevScene::DevScene ( )
@@ -70,7 +71,7 @@ void DevScene::Init ( )
 	//GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
 	//GET_SINGLE ( ResourceManager )->LoadSound ( L"Attack" , L"Sound\\Sword.wav" );
 
-	SpawnObject<Player> ( Vec2Int{ 5 , 5 } );
+	SpawnObjectAtRandomPos<MyPlayer> ( );
 	SpawnObject<Monster> ( Vec2Int{ 7 , 7 } );
 
 	Super::Init ( );
