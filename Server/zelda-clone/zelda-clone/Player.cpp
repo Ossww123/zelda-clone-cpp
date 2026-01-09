@@ -57,8 +57,8 @@ void Player::BeginPlay ( )
 {
 	Super::BeginPlay ( );
 
-	SetState ( ObjectState::Move );
-	SetState ( ObjectState::Idle );
+	SetState ( MOVE );
+	SetState ( IDLE );
 
 	SetCellPos ( { 5, 5 } , true );
 }
@@ -67,15 +67,15 @@ void Player::Tick ( )
 {
 	Super::Tick ( );
 
-	switch ( _state )
+	switch ( info.state() )
 	{
-	case ObjectState::Idle:
+	case IDLE:
 		TickIdle ( );
 		break;
-	case ObjectState::Move:
+	case MOVE:
 		TickMove ( );
 		break;
-	case ObjectState::Skill:
+	case SKILL:
 		TickSkill ( );
 		break;
 	}
@@ -97,48 +97,48 @@ void Player::TickIdle ( )
 	{
 		SetDir ( DIR_UP );
 
-		Vec2Int nextPos = _cellPos + deltaXY[ _dir ];
+		Vec2Int nextPos = GetCellPos() + deltaXY[info.dir() ];
 		if ( CanGo ( nextPos ) )
 		{
 			SetCellPos ( nextPos );
-			SetState ( ObjectState::Move );
+			SetState ( MOVE );
 		}
 	}
 	else  if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::S ) )
 	{
 		SetDir ( DIR_DOWN );
 
-		Vec2Int nextPos = _cellPos + deltaXY[ _dir ];
+		Vec2Int nextPos = GetCellPos() + deltaXY[info.dir()];
 		if ( CanGo ( nextPos ) )
 		{
 			SetCellPos ( nextPos );
-			SetState ( ObjectState::Move );
+			SetState ( MOVE );
 		}
 	}
 	else if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::A ) )
 	{
 		SetDir ( DIR_LEFT );
-		Vec2Int nextPos = _cellPos + deltaXY[ _dir ];
+		Vec2Int nextPos = GetCellPos() + deltaXY[info.dir()];
 		if ( CanGo ( nextPos ) )
 		{
 			SetCellPos ( nextPos );
-			SetState ( ObjectState::Move );
+			SetState ( MOVE );
 		}
 	}
 	else if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::D ) )
 	{
 		SetDir ( DIR_RIGHT );
-		Vec2Int nextPos = _cellPos + deltaXY[ _dir ];
+		Vec2Int nextPos = GetCellPos() + deltaXY[info.dir()];
 		if ( CanGo ( nextPos ) )
 		{
 			SetCellPos ( nextPos );
-			SetState ( ObjectState::Move );
+			SetState ( MOVE );
 		}
 	}
 	else
 	{
 		_keyPressed = false;
-		if ( _state == ObjectState::Idle )
+		if ( info.state() == IDLE)
 			UpdateAnimation ( );
 	}
 
@@ -157,7 +157,7 @@ void Player::TickIdle ( )
 
 	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::SpaceBar ) )
 	{
-		SetState ( ObjectState::Skill );
+		SetState ( SKILL );
 	}
 }
 
@@ -168,12 +168,12 @@ void Player::TickMove ( )
 	Vec2 dir = ( _destPos - _pos );
 	if ( dir.Length ( ) < 5.f )
 	{
-		SetState ( ObjectState::Idle );
+		SetState ( IDLE );
 		_pos = _destPos;
 	}
 	else
 	{
-		switch ( _dir )
+		switch (info.dir())
 		{
 		case DIR_UP:
 			_pos.y -= 200 * deltaTime;
@@ -214,34 +214,34 @@ void Player::TickSkill ( )
 		}
 		else if ( _weaponType == WeaponType::Bow )
 		{
-			Arrow* arrow = scene->SpawnObject<Arrow> ( _cellPos );
-			arrow->SetDir ( _dir );
+			Arrow* arrow = scene->SpawnObject<Arrow> ( GetCellPos() );
+			arrow->SetDir (info.dir());
 		}
 
-		SetState ( ObjectState::Idle );
+		SetState ( IDLE );
 	}
 }
 
 void Player::UpdateAnimation ( )
 {
-	switch ( _state )
+	switch ( info.state() )
 	{
-	case ObjectState::Idle:
+	case IDLE:
 		if ( _keyPressed )
-			SetFlipbook ( _flipbookMove[ _dir ] );
+			SetFlipbook ( _flipbookMove[info.dir()] );
 		else
-			SetFlipbook ( _flipbookIdle[ _dir ] );
+			SetFlipbook ( _flipbookIdle[info.dir()] );
 		break;
-	case ObjectState::Move:
-		SetFlipbook ( _flipbookMove[ _dir ] );
+	case MOVE:
+		SetFlipbook ( _flipbookMove[info.dir()] );
 		break;
-	case ObjectState::Skill:
+	case SKILL:
 		if (_weaponType == WeaponType::Sword )
-			SetFlipbook ( _flipbookAttack[ _dir ] );
+			SetFlipbook ( _flipbookAttack[info.dir()] );
 		else if ( _weaponType == WeaponType::Bow )
-			SetFlipbook ( _flipbookBow[ _dir ] );
+			SetFlipbook ( _flipbookBow[info.dir()] );
 		else if ( _weaponType == WeaponType::Staff )
-			SetFlipbook ( _flipbookStaff[ _dir ] );
+			SetFlipbook ( _flipbookStaff[info.dir()] );
 		break;
 	}
 }
