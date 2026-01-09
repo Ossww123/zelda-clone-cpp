@@ -1,8 +1,9 @@
-#pragma once
+ï»¿#pragma once
 
 enum
 {
-	S_TEST = 1
+	S_TEST = 1 ,
+	S_EnterGame = 2 ,
 };
 
 class ClientPacketHandler
@@ -10,10 +11,11 @@ class ClientPacketHandler
 public:
 	static void HandlePacket(BYTE* buffer, int32 len);
 
-	// ¹Þ±â
+	// ë°›ê¸°
 	static void Handle_S_TEST(BYTE* buffer, int32 len);
+	static void Handle_S_EnterGame ( BYTE* buffer , int32 len );
 
-	// º¸³»±â
+	// ë³´ë‚´ê¸°
 	template<typename T>
 	static SendBufferRef MakeSendBuffer(T& pkt, uint16 pktId)
 	{
