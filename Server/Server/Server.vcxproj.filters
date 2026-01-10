@@ -64,6 +64,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>Source Files\Game\Object</Filter>
     </ClCompile>
+    <ClCompile Include="Tilemap.cpp">
+      <Filter>Source Files\Game\Room</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -101,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="Monster.h">
       <Filter>Source Files\Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Tilemap.h">
+      <Filter>Source Files\Game\Room</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

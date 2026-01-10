@@ -572,6 +572,10 @@ Vec2Int DevScene::GetRandomEmptyCellPos ( )
 
 void DevScene::TickMonsterSpawn ( )
 {
+	return;
+
+
+	// 레거시 코드 //
 	if ( _monsterCount < DESIRED_MONSTER_COUNT )
 		SpawnObjectAtRandomPos<Monster> ( );
 }
