@@ -22,6 +22,7 @@
 #include "ResourceManager.h"
 #include "CollisionManager.h"
 #include "SoundManager.h"
+#include "SceneManager.h"
 #include "MyPlayer.h"
 
 
@@ -311,6 +312,59 @@ void DevScene::LoadTilemap ( )
 		_tilemapActor->SetTilemap ( tm );
 		_tilemapActor->SetShowDebug ( false );
 	}
+}
+
+void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
+{
+	uint64 myPlayerId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+
+	const int32 size = pkt.objects_size ( );
+	for ( int32 i = 0; i < size; i++ )
+	{
+		const Protocol::ObjectInfo& info = pkt.objects ( i );
+		if ( myPlayerId == info.objectid ( ) )
+			continue;
+
+		if ( info.objecttype ( ) == Protocol::OBJECT_TYPE_PLAYER )
+		{
+			Player* player = SpawnObject<Player> ( Vec2Int{ info.posx ( ), info.posy ( ) } );
+			player->SetDir ( info.dir ( ) );
+			player->SetState ( info.state ( ) );
+			player->info = info;
+		}
+		else if ( info.objecttype ( ) == Protocol::OBJECT_TYPE_MONSTER )
+		{
+			Monster* monster = SpawnObject<Monster> ( Vec2Int{ info.posx ( ), info.posy ( ) } );
+			monster->SetDir ( info.dir ( ) );
+			monster->SetState ( info.state ( ) );
+			monster->info = info;
+		}
+	}
+}
+
+void DevScene::Handle_S_RemoveObject ( Protocol::S_RemoveObject& pkt )
+{
+	const int32 size = pkt.ids_size ( );
+	for ( int32 i = 0; i < size; i++ )
+	{
+		int32 id = pkt.ids ( i );
+
+		GameObject* object =  GetObject( id );
+		if ( object )
+			RemoveActor ( object );
+	}
+}
+
+GameObject* DevScene::GetObject ( uint64 id )
+{
+	for ( Actor* actor : _actors[ LAYER_OBJECT ] )
+	{
+		GameObject* gameObject = dynamic_cast< GameObject* >( actor );
+		if ( gameObject && gameObject->info.objectid ( ) == id )
+			return gameObject;
+	}
+
+	return nullptr;
 }
 
 Player* DevScene::FindClosestPlayer ( Vec2Int cellPos )
