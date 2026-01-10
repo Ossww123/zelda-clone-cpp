@@ -16,10 +16,12 @@ using namespace std;
 #include "GameSession.h"
 #include "GameSessionManager.h"
 #include "ServerPacketHandler.h"
+#include "GameRoom.h"
 
 int main()
 {
 	SocketUtils::Init();
+	GRoom->Init();
 
 	ServerServiceRef service = make_shared<ServerService>(
 	NetAddress(L"127.0.0.1", 7777),

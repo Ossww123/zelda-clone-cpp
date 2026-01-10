@@ -30,6 +30,8 @@ void GameObject::BeginPlay ( )
 
 void GameObject::Tick ( )
 {
+	_dirtyFlag = false;
+
 	Super::Tick ( );
 
 	switch ( info.state() )
@@ -58,12 +60,14 @@ void GameObject::SetState ( ObjectState state )
 
 	info.set_state(state);
 	UpdateAnimation ( );
+	_dirtyFlag = true;
 }
 
 void GameObject::SetDir ( Dir dir )
 {
 	info.set_dir ( dir );
 	UpdateAnimation ( );
+	_dirtyFlag = true;
 }
 
 bool GameObject::HasReachedDest ( )
@@ -107,6 +111,8 @@ void GameObject::SetCellPos ( Vec2Int cellPos , bool teleport )
 
 	if ( teleport )
 		_pos = _destPos;
+
+	_dirtyFlag = true;
 }
 
 Vec2Int GameObject::GetCellPos ( )
