@@ -56,6 +56,10 @@ void Monster::TickIdle()
 	if (scene == nullptr)
 		return;
 
+	return;
+	
+	// 레거시 코드 //
+
 	// Find Player
 	if (_target == nullptr)
 		_target = scene->FindClosestPlayer(GetCellPos());

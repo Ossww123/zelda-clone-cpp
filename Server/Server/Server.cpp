@@ -31,16 +31,26 @@ int main()
 
 	assert(service->Start());
 
-	for (int32 i = 0; i < 5; i++)
+	while (true)
 	{
-		GThreadManager->Launch([=]()
-			{
-				while (true)
-				{
-					service->GetIocpCore()->Dispatch();
-				}
-			});
+		service->GetIocpCore()->Dispatch(0);
+		GRoom->Update();
 	}
+
+
+
+	// 멀티스레드
+
+	//for (int32 i = 0; i < 5; i++)
+	//{
+	//	GThreadManager->Launch([=]()
+	//		{
+	//			while (true)
+	//			{
+	//				service->GetIocpCore()->Dispatch();
+	//			}
+	//		});
+	//}
 
 	GThreadManager->Join();
 
