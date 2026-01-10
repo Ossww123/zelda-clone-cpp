@@ -4,6 +4,8 @@
 #include "DevScene.h"
 #include "EditScene.h"
 
+#include "MyPlayer.h"
+
 void SceneManager::Init ( )
 {
 
@@ -49,4 +51,14 @@ void SceneManager::ChangeScene ( SceneType sceneType )
 	_sceneType = sceneType;
 
 	newScene->Init ( );
+}
+
+DevScene* SceneManager::GetDevScene ( )
+{
+	return dynamic_cast< DevScene* >( GetCurrentScene ( ) );
+}
+
+uint64 SceneManager::GetMyPlayerId ( )
+{
+	return _myPlayer ? _myPlayer->info.objectid() : 0;
 }

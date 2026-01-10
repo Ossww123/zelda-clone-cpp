@@ -14,6 +14,15 @@
     <Filter Include="Source Files\Protocol\Proto">
       <UniqueIdentifier>{4f95a93e-302f-4290-b485-077041e297d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{93398055-6227-4fec-9e63-269dc2067bc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Object">
+      <UniqueIdentifier>{d45b8ee2-5c27-41cd-a5da-306aafc48f7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Room">
+      <UniqueIdentifier>{a966848f-9718-42f1-9336-33238364fd8c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -40,6 +49,21 @@
     <ClCompile Include="Protocol.pb.cc">
       <Filter>Source Files\Protocol</Filter>
     </ClCompile>
+    <ClCompile Include="GameRoom.cpp">
+      <Filter>Source Files\Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files\Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Creature.cpp">
+      <Filter>Source Files\Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>Source Files\Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Game\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -62,6 +86,21 @@
     </ClInclude>
     <ClInclude Include="Enum.pb.h">
       <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="GameRoom.h">
+      <Filter>Source Files\Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Source Files\Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Source Files\Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Creature.h">
+      <Filter>Source Files\Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Source Files\Game\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
