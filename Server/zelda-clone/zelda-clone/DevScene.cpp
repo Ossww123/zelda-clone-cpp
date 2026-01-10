@@ -71,8 +71,8 @@ void DevScene::Init ( )
 	//GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
 	//GET_SINGLE ( ResourceManager )->LoadSound ( L"Attack" , L"Sound\\Sword.wav" );
 
-	SpawnObjectAtRandomPos<MyPlayer> ( );
-	SpawnObject<Monster> ( Vec2Int{ 7 , 7 } );
+	/*SpawnObjectAtRandomPos<MyPlayer> ( );
+	SpawnObject<Monster> ( Vec2Int{ 7 , 7 } );*/
 
 	Super::Init ( );
 }
