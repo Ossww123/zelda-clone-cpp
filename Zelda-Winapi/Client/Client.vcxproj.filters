@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\00. MainGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files\00. MainGame</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\02. Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="DevScene.cpp">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="EditScene.cpp">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor.cpp">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="FlipbookActor.cpp">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="TilemapActor.cpp">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteActor.cpp">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="Creature.cpp">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="MyPlayer.cpp">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="HitEffect.cpp">
+      <Filter>Source Files\03. Objects\Game\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Arrow.cpp">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files\04. Resources\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Flipbook.cpp">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Tilemap.cpp">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceBase.cpp">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Collider.cpp">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxCollider.cpp">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollider.cpp">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraComponent.cpp">
+      <Filter>Source Files\05. Component\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>Source Files\05. Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Panel.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientPacketHandler.cpp">
+      <Filter>Source Files\07. Network</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerSession.cpp">
+      <Filter>Source Files\07. Network</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="Enum.pb.cc">
+      <Filter>Source Files\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Protocol.pb.cc">
+      <Filter>Source Files\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Struct.pb.cc">
+      <Filter>Source Files\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files\03. Objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game.h">
+      <Filter>Source Files\00. MainGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>Source Files\00. MainGame</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeManager.h">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Source Files\02. Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="DevScene.h">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="EditScene.h">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor.h">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClInclude>
+    <ClInclude Include="FlipbookActor.h">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClInclude>
+    <ClInclude Include="TilemapActor.h">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteActor.h">
+      <Filter>Source Files\03. Objects\Unreal</Filter>
+    </ClInclude>
+    <ClInclude Include="Creature.h">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="MyPlayer.h">
+      <Filter>Source Files\03. Objects\Game\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="HitEffect.h">
+      <Filter>Source Files\03. Objects\Game\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Arrow.h">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Source Files\03. Objects\Game\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Source Files\04. Resources\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Flipbook.h">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Tilemap.h">
+      <Filter>Source Files\04. Resources\Paper2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceBase.h">
+      <Filter>Source Files\04. Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Collider.h">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxCollider.h">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="SphereCollider.h">
+      <Filter>Source Files\05. Component\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraComponent.h">
+      <Filter>Source Files\05. Component\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Source Files\05. Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Panel.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientPacketHandler.h">
+      <Filter>Source Files\07. Network</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerSession.h">
+      <Filter>Source Files\07. Network</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Source Files\99. Headers\Default</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>Source Files\99. Headers\Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Source Files\99. Headers\Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Enums.h">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Values.h">
+      <Filter>Source Files\99. Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Enum.pb.h">
+      <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol.pb.h">
+      <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.pb.h">
+      <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Source Files\03. Objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Client.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9076c41c-1761-4f74-902f-00d158600fc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{6ea571e8-0b8d-4d68-a77e-40a98db4a7b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\00. MainGame">
+      <UniqueIdentifier>{b0673708-15b7-40f8-892a-d491f67be467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\01. Manager">
+      <UniqueIdentifier>{5964c44b-0e16-43e2-b855-5d3129a45a2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\02. Scene">
+      <UniqueIdentifier>{02efe74c-07bf-4bec-826e-0c2c492f6fe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects">
+      <UniqueIdentifier>{519e8249-bc1c-4280-8b76-53adca3921ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\04. Resources">
+      <UniqueIdentifier>{5483b1c2-195a-4c89-b1b7-1a6608f39a46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\05. Component">
+      <UniqueIdentifier>{fc59f91f-8c86-4d76-a312-fcb400acaffa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\06. UI">
+      <UniqueIdentifier>{0aeba277-14b3-4f29-afdb-2add9f5e39d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\07. Network">
+      <UniqueIdentifier>{8a91b4a0-f70a-4c90-b380-6e6ac08a508c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\99. Headers">
+      <UniqueIdentifier>{d678e07a-b251-458d-b535-3ff8a036bdd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Protocol">
+      <UniqueIdentifier>{5aebeddc-2c1c-4d9c-9b87-0a22f41718ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\02. Scene\Game">
+      <UniqueIdentifier>{391d3441-c351-45f7-8657-a03ce0d2056f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects\Game">
+      <UniqueIdentifier>{61acfe43-9314-4592-b57e-60a4a7b47628}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects\Unreal">
+      <UniqueIdentifier>{98121ea8-bb98-4958-b60c-5525b635b842}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects\Game\Creature">
+      <UniqueIdentifier>{4a31bc7d-9aff-457e-b68e-5500c14b8ea6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects\Game\Effect">
+      <UniqueIdentifier>{e353ac4c-24d3-49b8-bf60-785ad96ae516}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\03. Objects\Game\Projectile">
+      <UniqueIdentifier>{b8d7d138-ff0e-45f2-bc8b-93314fd47c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\04. Resources\Game">
+      <UniqueIdentifier>{2d9ef0e1-7212-412e-88b4-54e3545b6e9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\04. Resources\Paper2D">
+      <UniqueIdentifier>{0ca64be5-aed0-455f-b0e6-33700bc6fcdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\05. Component\Camera">
+      <UniqueIdentifier>{4c338353-5681-4d6b-9073-a97cb85ec21a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\05. Component\Collision">
+      <UniqueIdentifier>{d8a75171-eac6-4acf-82e7-602444d9a6f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\99. Headers\Default">
+      <UniqueIdentifier>{4c7ff09a-417f-4ceb-89c9-2287f97ddf96}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Client.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
