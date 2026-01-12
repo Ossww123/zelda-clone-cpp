@@ -32,7 +32,7 @@ void MyPlayer::Tick ( )
 {
 	Super::Tick ( );
 
-	SyncToServer ( );
+	// SyncToServer ( );
 }
 
 void MyPlayer::Render ( HDC hdc )
@@ -84,6 +84,7 @@ void MyPlayer::TickInput ( )
 	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::SpaceBar ) )
 	{
 		SetState ( SKILL );
+		TrySkill ( );
 	}
 }
 
@@ -92,48 +93,24 @@ void MyPlayer::TryMove ( )
 	if ( _keyPressed == false )
 		return;
 
-	Vec2Int deltaXY[ 4 ] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
+	Vec2Int deltaXY[ 4 ] = { {0,-1}, {0,1}, {-1,0}, {1,0} };
 
-	if ( info.dir() == DIR_UP )
-	{
-		Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir ( ) ];
-		if ( CanGo ( nextPos ) )
-		{
-			SetCellPos ( nextPos );
-			SetState ( MOVE );
-		}
-	}
-	else  if ( info.dir ( ) == DIR_DOWN )
-	{
-		SetDir ( DIR_DOWN );
+	Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir ( ) ];
+	if ( CanGo ( nextPos ) == false )
+		return;
 
-		Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir ( ) ];
-		if ( CanGo ( nextPos ) )
-		{
-			SetCellPos ( nextPos );
-			SetState ( MOVE );
-		}
-	}
-	else if ( info.dir ( ) == DIR_LEFT )
-	{
-		SetDir ( DIR_LEFT );
-		Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir ( ) ];
-		if ( CanGo ( nextPos ) )
-		{
-			SetCellPos ( nextPos );
-			SetState ( MOVE );
-		}
-	}
-	else if ( info.dir ( ) == DIR_RIGHT )
-	{
-		SetDir ( DIR_RIGHT );
-		Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir ( ) ];
-		if ( CanGo ( nextPos ) )
-		{
-			SetCellPos ( nextPos );
-			SetState ( MOVE );
-		}
-	}
+	SetCellPos ( nextPos );
+	SetState ( MOVE );
+
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Move ( info.dir ( ) , nextPos.x , nextPos.y );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+}
+
+void MyPlayer::TrySkill ( )
+{
+	Protocol::WEAPON_TYPE weapon = ToProtoWeaponType(GetWeaponType ( ));
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Attack ( info.dir ( ) , weapon );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }
 
 void MyPlayer::TickIdle ( )
@@ -154,9 +131,6 @@ void MyPlayer::TickSkill ( )
 
 void MyPlayer::SyncToServer ( )
 {
-	if ( _dirtyFlag == false )
-		return;
-
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Move ( );
-	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+	//SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Move ( );
+	//GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }

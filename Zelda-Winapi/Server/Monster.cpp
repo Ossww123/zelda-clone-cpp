@@ -8,7 +8,7 @@ Monster::Monster()
 	info.set_name("MonsterName");
 	info.set_hp(50);
 	info.set_maxhp(50);
-	info.set_attack(5);
+	info.set_attack(7);
 	info.set_defence(0);
 }
 

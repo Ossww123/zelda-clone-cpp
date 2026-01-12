@@ -4,6 +4,7 @@
 #include "DevScene.h"
 #include "MyPlayer.h"
 #include "SceneManager.h"
+#include "HitEffect.h"
 
 void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer, int32 len)
 {
@@ -31,6 +32,12 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 		break;
 	case S_Move:
 		Handle_S_Move ( session , buffer , len );
+		break;
+	case S_Attack:
+		Handle_S_Attack ( session , buffer , len );
+		break;
+	case S_Damaged:
+		Handle_S_Damaged ( session , buffer , len );
 		break;
 	}
 }
@@ -151,13 +158,74 @@ void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffe
 	}
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Move ( )
+void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	//uint16 id = header->id;
+	uint16 size = header->size;
+
+	Protocol::S_Attack pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	//
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene )
+	{
+		GameObject* gameObject = scene->GetObjectW ( pkt.attackerid ( ) );
+		if ( gameObject )
+		{
+			gameObject->SetDir ( pkt.dir ( ) );
+
+			if ( Player* player = dynamic_cast< Player* >( gameObject ) )
+				player->SetWeaponType ( Player::FromProtoWeaponType ( pkt.weapontype ( ) ) );
+
+			gameObject->SetState ( SKILL );
+		}
+	}
+}
+
+void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	//uint16 id = header->id;
+	uint16 size = header->size;
+
+	Protocol::S_Damaged pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	//
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene )
+	{
+		// GameObject* attackerGameObject = scene->GetObjectW ( pkt.attackerid ( ) );
+		GameObject* targetGameObject = scene->GetObjectW ( pkt.targetid ( ) );
+		// int32 damage = pkt.damage ( );
+		if ( targetGameObject )
+		{
+			if ( Creature* creature = dynamic_cast< Creature* >( targetGameObject ) )
+			{
+				creature->info.set_hp ( pkt.newhp ( ) );
+				scene->SpawnObject<HitEffect> ( targetGameObject->GetCellPos ( ) );
+			}
+		}
+	}
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Move ( Protocol::DIR_TYPE dir , int32 x , int32 y  )
 {
 	Protocol::C_Move pkt;
-
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-
-	*pkt.mutable_info ( ) = myPlayer->info;
+	pkt.set_dir ( dir );
+	pkt.set_targetx ( x );
+	pkt.set_targety ( y );
 
 	return MakeSendBuffer ( pkt , C_Move );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon )
+{
+	Protocol::C_Attack pkt;
+	pkt.set_dir ( dir );
+	pkt.set_weapontype ( weapon );
+
+	return MakeSendBuffer ( pkt , C_Attack );
 }

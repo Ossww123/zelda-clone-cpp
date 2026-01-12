@@ -11,6 +11,10 @@ enum
 
 	C_Move = 10 ,
 	S_Move = 11 ,
+
+	C_Attack = 12 ,
+	S_Attack = 13 ,
+	S_Damaged = 14 ,
 };
 
 class ClientPacketHandler
@@ -25,9 +29,12 @@ public:
 	static void Handle_S_AddObject ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_RemoveObject ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_Move ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_Attack ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_Damaged ( ServerSessionRef session , BYTE* buffer , int32 len );
 
 	// 보내기
-	static SendBufferRef Make_C_Move ( );
+	static SendBufferRef Make_C_Move ( Protocol::DIR_TYPE dir , int32 x , int32 y );
+	static SendBufferRef Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon );
 
 	template<typename T>
 	static SendBufferRef MakeSendBuffer(T& pkt, uint16 pktId)

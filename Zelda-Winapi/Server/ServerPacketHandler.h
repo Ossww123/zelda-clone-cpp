@@ -11,6 +11,10 @@ enum
 
 	C_Move = 10,
 	S_Move = 11,
+
+	C_Attack = 12,
+	S_Attack = 13,
+	S_Damaged = 14,
 };
 
 struct BuffData
@@ -26,6 +30,7 @@ public:
 
 	// 받기
 	static void Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len);
 
 	// 보내기
 	static SendBufferRef Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs);
@@ -34,6 +39,8 @@ public:
 	static SendBufferRef Make_S_AddObject(const Protocol::S_AddObject& pkt);
 	static SendBufferRef Make_S_RemoveObject(const Protocol::S_RemoveObject& pkt);
 	static SendBufferRef Make_S_Move(const Protocol::ObjectInfo& info);
+	static SendBufferRef Make_S_Attack(const Protocol::S_Attack& pkt);
+	static SendBufferRef Make_S_Damaged(const Protocol::S_Damaged& pkt);
 
 	template<typename T>
 	static SendBufferRef MakeSendBuffer(T& pkt, uint16 pktId)

@@ -20,8 +20,30 @@ protected:
 	virtual void TickSkill ( ) override;
 	virtual void UpdateAnimation ( ) override;
 
+public:
 	void SetWeaponType ( WeaponType weaponType ) { _weaponType = weaponType; }
 	WeaponType GetWeaponType ( ) { return _weaponType; }
+
+	static Protocol::WEAPON_TYPE ToProtoWeaponType ( WeaponType wt )
+	{
+		switch ( wt )
+		{
+		case WeaponType::Sword: return Protocol::WEAPON_TYPE_SWORD;
+		case WeaponType::Bow:   return Protocol::WEAPON_TYPE_BOW;
+		case WeaponType::Staff: return Protocol::WEAPON_TYPE_STAFF;
+		}
+		return Protocol::WEAPON_TYPE_SWORD;
+	}
+	static WeaponType FromProtoWeaponType ( Protocol::WEAPON_TYPE wt )
+	{
+		switch ( wt )
+		{
+		case Protocol::WEAPON_TYPE_SWORD: return WeaponType::Sword;
+		case Protocol::WEAPON_TYPE_BOW:   return WeaponType::Bow;
+		case Protocol::WEAPON_TYPE_STAFF: return WeaponType::Staff;
+		default:                          return WeaponType::Sword;
+		}
+	}
 
 private:
 	Flipbook* _flipbookIdle[ 4 ] = {};
