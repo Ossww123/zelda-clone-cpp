@@ -17,11 +17,6 @@ Monster::Monster()
 	_flipbookMove[DIR_DOWN] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeDown");
 	_flipbookMove[DIR_LEFT] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeLeft");
 	_flipbookMove[DIR_RIGHT] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeRight");
-
-	_status.hp = 50;
-	_status.maxHp = 50;
-	_status.attack = 10;
-	_status.defence = 0;
 }
 
 Monster::~Monster()
@@ -52,48 +47,6 @@ void Monster::Render(HDC hdc)
 
 void Monster::TickIdle()
 {
-	DevScene* scene = dynamic_cast<DevScene*>(GET_SINGLE(SceneManager)->GetCurrentScene());
-	if (scene == nullptr)
-		return;
-
-	return;
-	
-	// 레거시 코드 //
-
-	// Find Player
-	if (_target == nullptr)
-		_target = scene->FindClosestPlayer(GetCellPos());
-
-	if (_target)
-	{
-		Vec2Int dir = _target->GetCellPos() - GetCellPos();
-		int32 dist = abs(dir.x) + abs(dir.y);
-		if (dist == 1)
-		{
-			// 공격
-			SetDir(GetLookAtDir(_target->GetCellPos()));
-			SetState(SKILL);
-			_waitSeconds = 0.5f; // 공격 종료 시간
-		}
-		else
-		{
-			vector<Vec2Int> path;
-			if (scene->FindPath(GetCellPos(), _target->GetCellPos(), OUT path))
-			{
-				if (path.size() > 1)
-				{
-					Vec2Int nextPos = path[1];
-					if (scene->CanGo(nextPos))
-					{
-						SetCellPos(nextPos);
-						SetState(MOVE);
-					}
-				}
-				else
-					SetCellPos(path[0]);
-			}
-		}
-	}
 }
 
 void Monster::TickMove()
@@ -137,25 +90,8 @@ void Monster::TickSkill()
 	if (_flipbook == nullptr)
 		return;
 
-	if (_waitSeconds > 0)
-	{
-		float deltaTime = GET_SINGLE(TimeManager)->GetDeltaTime();
-		_waitSeconds = max(0, _waitSeconds - deltaTime);
-		return;
-	}
-
-	DevScene* scene = dynamic_cast<DevScene*>(GET_SINGLE(SceneManager)->GetCurrentScene());
-	if (scene == nullptr)
-		return;
-
-	Creature* creature = scene->GetCreatureAt(GetFrontCellPos());
-	if (creature)
-	{
-		scene->SpawnObject<HitEffect>(GetFrontCellPos());
-		creature->OnDamaged(this);
-	}
-
-	SetState(IDLE);
+	if ( IsAnimationEnded ( ) )
+		SetState ( IDLE );
 }
 
 void Monster::UpdateAnimation()

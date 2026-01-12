@@ -10,22 +10,22 @@ Creature::~Creature()
 {
 }
 
-void Creature::OnDamaged(CreatureRef attacker)
+bool Creature::OnDamaged(CreatureRef attacker, int32& outDamage)
 {
+	outDamage = 0;
 	if (attacker == nullptr)
-		return;
+		return false;
 
 	Protocol::ObjectInfo& attackerInfo = attacker->info;
 	Protocol::ObjectInfo& info = this->info;
 
 	int32 damage = attackerInfo.attack() - info.defence();
 	if (damage <= 0)
-		return;
+		return false;
 
-	info.set_hp(max(0, info.hp() - damage));
+	int32 newHp = max(0, info.hp() - damage);
+	info.set_hp(newHp);
 
-	if (info.hp() == 0)
-	{
-		GRoom->RemoveObject(info.objectid());
-	}
+	outDamage = damage;
+	return true;
 }

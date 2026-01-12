@@ -1040,25 +1040,36 @@ class C_Move final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kInfoFieldNumber = 1,
+    kDirFieldNumber = 1,
+    kTargetxFieldNumber = 2,
+    kTargetyFieldNumber = 3,
   };
-  // .Protocol.ObjectInfo info = 1;
-  bool has_info() const;
+  // .Protocol.DIR_TYPE dir = 1;
+  void clear_dir();
+  ::Protocol::DIR_TYPE dir() const;
+  void set_dir(::Protocol::DIR_TYPE value);
   private:
-  bool _internal_has_info() const;
+  ::Protocol::DIR_TYPE _internal_dir() const;
+  void _internal_set_dir(::Protocol::DIR_TYPE value);
   public:
-  void clear_info();
-  const ::Protocol::ObjectInfo& info() const;
-  PROTOBUF_NODISCARD ::Protocol::ObjectInfo* release_info();
-  ::Protocol::ObjectInfo* mutable_info();
-  void set_allocated_info(::Protocol::ObjectInfo* info);
+
+  // int32 targetx = 2;
+  void clear_targetx();
+  int32_t targetx() const;
+  void set_targetx(int32_t value);
   private:
-  const ::Protocol::ObjectInfo& _internal_info() const;
-  ::Protocol::ObjectInfo* _internal_mutable_info();
+  int32_t _internal_targetx() const;
+  void _internal_set_targetx(int32_t value);
   public:
-  void unsafe_arena_set_allocated_info(
-      ::Protocol::ObjectInfo* info);
-  ::Protocol::ObjectInfo* unsafe_arena_release_info();
+
+  // int32 targety = 3;
+  void clear_targety();
+  int32_t targety() const;
+  void set_targety(int32_t value);
+  private:
+  int32_t _internal_targety() const;
+  void _internal_set_targety(int32_t value);
+  public:
 
   // @@protoc_insertion_point(class_scope:Protocol.C_Move)
  private:
@@ -1068,7 +1079,9 @@ class C_Move final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   struct Impl_ {
-    ::Protocol::ObjectInfo* info_;
+    int dir_;
+    int32_t targetx_;
+    int32_t targety_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -1684,7 +1697,7 @@ class S_Damaged final :
 
   enum : int {
     kAttackerIdFieldNumber = 1,
-    kVictimIdFieldNumber = 2,
+    kTargetIdFieldNumber = 2,
     kNewHpFieldNumber = 3,
     kDamageFieldNumber = 4,
   };
@@ -1697,13 +1710,13 @@ class S_Damaged final :
   void _internal_set_attackerid(uint64_t value);
   public:
 
-  // uint64 victimId = 2;
-  void clear_victimid();
-  uint64_t victimid() const;
-  void set_victimid(uint64_t value);
+  // uint64 targetId = 2;
+  void clear_targetid();
+  uint64_t targetid() const;
+  void set_targetid(uint64_t value);
   private:
-  uint64_t _internal_victimid() const;
-  void _internal_set_victimid(uint64_t value);
+  uint64_t _internal_targetid() const;
+  void _internal_set_targetid(uint64_t value);
   public:
 
   // int32 newHp = 3;
@@ -1733,7 +1746,7 @@ class S_Damaged final :
   typedef void DestructorSkippable_;
   struct Impl_ {
     uint64_t attackerid_;
-    uint64_t victimid_;
+    uint64_t targetid_;
     int32_t newhp_;
     int32_t damage_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -2078,89 +2091,64 @@ S_RemoveObject::mutable_ids() {
 
 // C_Move
 
-// .Protocol.ObjectInfo info = 1;
-inline bool C_Move::_internal_has_info() const {
-  return this != internal_default_instance() && _impl_.info_ != nullptr;
+// .Protocol.DIR_TYPE dir = 1;
+inline void C_Move::clear_dir() {
+  _impl_.dir_ = 0;
 }
-inline bool C_Move::has_info() const {
-  return _internal_has_info();
+inline ::Protocol::DIR_TYPE C_Move::_internal_dir() const {
+  return static_cast< ::Protocol::DIR_TYPE >(_impl_.dir_);
 }
-inline const ::Protocol::ObjectInfo& C_Move::_internal_info() const {
-  const ::Protocol::ObjectInfo* p = _impl_.info_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Protocol::ObjectInfo&>(
-      ::Protocol::_ObjectInfo_default_instance_);
+inline ::Protocol::DIR_TYPE C_Move::dir() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_Move.dir)
+  return _internal_dir();
 }
-inline const ::Protocol::ObjectInfo& C_Move::info() const {
-  // @@protoc_insertion_point(field_get:Protocol.C_Move.info)
-  return _internal_info();
-}
-inline void C_Move::unsafe_arena_set_allocated_info(
-    ::Protocol::ObjectInfo* info) {
-  if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.info_);
-  }
-  _impl_.info_ = info;
-  if (info) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Protocol.C_Move.info)
-}
-inline ::Protocol::ObjectInfo* C_Move::release_info() {
+inline void C_Move::_internal_set_dir(::Protocol::DIR_TYPE value) {
   
-  ::Protocol::ObjectInfo* temp = _impl_.info_;
-  _impl_.info_ = nullptr;
-#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
-  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
-  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  if (GetArenaForAllocation() == nullptr) { delete old; }
-#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
-  if (GetArenaForAllocation() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
-  return temp;
+  _impl_.dir_ = value;
 }
-inline ::Protocol::ObjectInfo* C_Move::unsafe_arena_release_info() {
-  // @@protoc_insertion_point(field_release:Protocol.C_Move.info)
+inline void C_Move::set_dir(::Protocol::DIR_TYPE value) {
+  _internal_set_dir(value);
+  // @@protoc_insertion_point(field_set:Protocol.C_Move.dir)
+}
+
+// int32 targetx = 2;
+inline void C_Move::clear_targetx() {
+  _impl_.targetx_ = 0;
+}
+inline int32_t C_Move::_internal_targetx() const {
+  return _impl_.targetx_;
+}
+inline int32_t C_Move::targetx() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_Move.targetx)
+  return _internal_targetx();
+}
+inline void C_Move::_internal_set_targetx(int32_t value) {
   
-  ::Protocol::ObjectInfo* temp = _impl_.info_;
-  _impl_.info_ = nullptr;
-  return temp;
+  _impl_.targetx_ = value;
 }
-inline ::Protocol::ObjectInfo* C_Move::_internal_mutable_info() {
+inline void C_Move::set_targetx(int32_t value) {
+  _internal_set_targetx(value);
+  // @@protoc_insertion_point(field_set:Protocol.C_Move.targetx)
+}
+
+// int32 targety = 3;
+inline void C_Move::clear_targety() {
+  _impl_.targety_ = 0;
+}
+inline int32_t C_Move::_internal_targety() const {
+  return _impl_.targety_;
+}
+inline int32_t C_Move::targety() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_Move.targety)
+  return _internal_targety();
+}
+inline void C_Move::_internal_set_targety(int32_t value) {
   
-  if (_impl_.info_ == nullptr) {
-    auto* p = CreateMaybeMessage<::Protocol::ObjectInfo>(GetArenaForAllocation());
-    _impl_.info_ = p;
-  }
-  return _impl_.info_;
+  _impl_.targety_ = value;
 }
-inline ::Protocol::ObjectInfo* C_Move::mutable_info() {
-  ::Protocol::ObjectInfo* _msg = _internal_mutable_info();
-  // @@protoc_insertion_point(field_mutable:Protocol.C_Move.info)
-  return _msg;
-}
-inline void C_Move::set_allocated_info(::Protocol::ObjectInfo* info) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
-  if (message_arena == nullptr) {
-    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.info_);
-  }
-  if (info) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(
-                reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info));
-    if (message_arena != submessage_arena) {
-      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, info, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  _impl_.info_ = info;
-  // @@protoc_insertion_point(field_set_allocated:Protocol.C_Move.info)
+inline void C_Move::set_targety(int32_t value) {
+  _internal_set_targety(value);
+  // @@protoc_insertion_point(field_set:Protocol.C_Move.targety)
 }
 
 // -------------------------------------------------------------------
@@ -2384,24 +2372,24 @@ inline void S_Damaged::set_attackerid(uint64_t value) {
   // @@protoc_insertion_point(field_set:Protocol.S_Damaged.attackerId)
 }
 
-// uint64 victimId = 2;
-inline void S_Damaged::clear_victimid() {
-  _impl_.victimid_ = uint64_t{0u};
+// uint64 targetId = 2;
+inline void S_Damaged::clear_targetid() {
+  _impl_.targetid_ = uint64_t{0u};
 }
-inline uint64_t S_Damaged::_internal_victimid() const {
-  return _impl_.victimid_;
+inline uint64_t S_Damaged::_internal_targetid() const {
+  return _impl_.targetid_;
 }
-inline uint64_t S_Damaged::victimid() const {
-  // @@protoc_insertion_point(field_get:Protocol.S_Damaged.victimId)
-  return _internal_victimid();
+inline uint64_t S_Damaged::targetid() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_Damaged.targetId)
+  return _internal_targetid();
 }
-inline void S_Damaged::_internal_set_victimid(uint64_t value) {
+inline void S_Damaged::_internal_set_targetid(uint64_t value) {
   
-  _impl_.victimid_ = value;
+  _impl_.targetid_ = value;
 }
-inline void S_Damaged::set_victimid(uint64_t value) {
-  _internal_set_victimid(value);
-  // @@protoc_insertion_point(field_set:Protocol.S_Damaged.victimId)
+inline void S_Damaged::set_targetid(uint64_t value) {
+  _internal_set_targetid(value);
+  // @@protoc_insertion_point(field_set:Protocol.S_Damaged.targetId)
 }
 
 // int32 newHp = 3;

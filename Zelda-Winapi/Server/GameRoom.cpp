@@ -105,23 +105,80 @@ GameObjectRef GameRoom::FindObject(uint64 id)
 	return nullptr;
 }
 
-void GameRoom::Handle_C_Move(Protocol::C_Move& pkt)
+void GameRoom::Handle_C_Move(GameSessionRef session, Protocol::C_Move& pkt)
 {
-	uint64 id = pkt.info().objectid();
-	GameObjectRef gameObject = FindObject(id);
+	PlayerRef player = session->player.lock();
+	if (!player)
+		return;
+
+	GameObjectRef gameObject = player;
 	if (gameObject == nullptr)
 		return;
 
 	// TODO : Validation
 
-	gameObject->info.set_state(pkt.info().state());
-	gameObject->info.set_dir(pkt.info().dir());
-	gameObject->info.set_posx(pkt.info().posx());
-	gameObject->info.set_posy(pkt.info().posy());
+	gameObject->info.set_state(MOVE);
+	gameObject->info.set_dir(pkt.dir());
+	gameObject->info.set_posx(pkt.targetx());
+	gameObject->info.set_posy(pkt.targety());
 
 	{
-		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(pkt.info());
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(gameObject->info);
 		Broadcast(sendBuffer);
+	}
+}
+
+void GameRoom::Handle_C_Attack(GameSessionRef session, Protocol::C_Attack& pkt)
+{
+	PlayerRef attacker = session->player.lock();
+	if (!attacker)
+		return;
+
+	{
+		Protocol::S_Attack atk;
+		atk.set_attackerid(attacker->info.objectid());
+		atk.set_dir(pkt.dir());
+		atk.set_weapontype(pkt.weapontype());
+
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Attack(atk);
+		Broadcast(sendBuffer);
+	}
+
+	Vec2Int frontPos = attacker->GetFrontCellPos();
+	GameObjectRef obj = GetGameObjectAt(frontPos);
+	CreatureRef target = std::dynamic_pointer_cast<Creature>(obj);
+
+	if (!target)
+	{
+		cout << "frontPos=" << frontPos.x << "," << frontPos.y << endl;
+		if (obj)
+		{
+			cout << " objType=" << obj->info.objecttype() << endl;
+			cout << " objId=" << obj->info.objectid() << endl;
+		}
+		cout << "attackerDir(server)=" << attacker->info.dir() << endl;
+		cout << " pktDir=" << pkt.dir() << endl;
+		return;
+	}
+
+	int32 damage = 0;
+	if (!target->OnDamaged(attacker, damage))
+		return;
+
+	{
+		Protocol::S_Damaged dmgPkt;
+		dmgPkt.set_attackerid(attacker->info.objectid());
+		dmgPkt.set_targetid(target->info.objectid());
+		dmgPkt.set_damage(damage);
+		dmgPkt.set_newhp(target->info.hp());
+
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
+		Broadcast(sendBuffer);
+	}
+
+	if (target->info.hp() == 0)
+	{
+		RemoveObject(target->info.objectid());
 	}
 }
 

@@ -17,12 +17,14 @@ public:
 private:
 	void TickInput ( );
 	void TryMove ( );
+	void TrySkill ( );
 
 	virtual void TickIdle ( ) override;
 	virtual void TickMove ( ) override;
 	virtual void TickSkill ( ) override;
 
-	void SyncToServer ( );
+	void SyncToServer ( );  // 미사용
+
 private:
 	bool _keyPressed = false;
 };
