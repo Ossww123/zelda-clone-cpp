@@ -194,6 +194,9 @@
     <None Include="..\Common\protoc-21.12-win64\bin\GenPackets.bat" />
     <None Include="..\Common\protoc-21.12-win64\bin\Protocol.proto" />
     <None Include="..\Common\protoc-21.12-win64\bin\Struct.proto" />
+    <None Include="..\Datasheets\MonsterTemplate.csv" />
+    <None Include="..\Datasheets\PlayerTemplate.csv" />
+    <None Include="..\Datasheets\ProjectileTemplate.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
