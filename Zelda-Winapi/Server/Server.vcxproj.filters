@@ -23,6 +23,9 @@
     <Filter Include="Source Files\Game\Room">
       <UniqueIdentifier>{a966848f-9718-42f1-9336-33238364fd8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Main\DataSheets">
+      <UniqueIdentifier>{d9a02cd8-98ef-4fba-bf9b-0ef9798b4a32}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -121,6 +124,15 @@
     </None>
     <None Include="..\Common\protoc-21.12-win64\bin\GenPackets.bat">
       <Filter>Source Files\Protocol</Filter>
+    </None>
+    <None Include="..\Datasheets\MonsterTemplate.csv">
+      <Filter>Source Files\Main\DataSheets</Filter>
+    </None>
+    <None Include="..\Datasheets\PlayerTemplate.csv">
+      <Filter>Source Files\Main\DataSheets</Filter>
+    </None>
+    <None Include="..\Datasheets\ProjectileTemplate.csv">
+      <Filter>Source Files\Main\DataSheets</Filter>
     </None>
   </ItemGroup>
 </Project>

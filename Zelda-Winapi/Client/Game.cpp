@@ -32,13 +32,22 @@ void Game::Init ( HWND hwnd )
 	HBITMAP prev = ( HBITMAP )::SelectObject ( _hdcBack , _bmpBack );
 	::DeleteObject ( prev );
 
+
+
 	GET_SINGLE ( TimeManager  )->Init ( );
 	GET_SINGLE ( InputManager )->Init ( hwnd );
 	GET_SINGLE ( SceneManager )->Init ( );
-	GET_SINGLE ( ResourceManager )->Init (hwnd, fs::path(L"../Resources" ));
+
+	wchar_t buffer[ MAX_PATH ];
+	GetModuleFileNameW ( nullptr , buffer , MAX_PATH );
+
+	fs::path exePath ( buffer );
+	fs::path resourcePath = exePath.parent_path ( ) / L"..\\..\\..\\Resources";
+	resourcePath = fs::weakly_canonical ( resourcePath );
+
+	GET_SINGLE ( ResourceManager )->Init ( hwnd , resourcePath );
 	GET_SINGLE ( SoundManager )->Init ( hwnd );
 	GET_SINGLE ( SceneManager )->ChangeScene ( SceneType::DevScene );
-
 	GET_SINGLE ( NetworkManager )->Init ( );
 }
 

@@ -1,0 +1,5 @@
+templateId,playerType,name,maxHp,attack,defence
+1,PLAYER_TYPE_DEFAULT,Player,100,20,5
+2,PLAYER_TYPE_KNIGHT,Knight,120,12,6
+3,PLAYER_TYPE_MAGE,Mage,80,18,3
+4,PLAYER_TYPE_ARCHER,Archer,90,14,4
