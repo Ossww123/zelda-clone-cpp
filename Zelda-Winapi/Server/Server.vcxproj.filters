@@ -134,5 +134,11 @@
     <None Include="..\Datasheets\ProjectileTemplate.csv">
       <Filter>Source Files\Main\DataSheets</Filter>
     </None>
+    <None Include="..\Common\protoc-21.12-win64\bin\GenNetworkFunc.py">
+      <Filter>Source Files\Protocol</Filter>
+    </None>
+    <None Include="..\Common\protoc-21.12-win64\bin\GenNetworkFunc.bat">
+      <Filter>Source Files\Protocol</Filter>
+    </None>
   </ItemGroup>
 </Project>

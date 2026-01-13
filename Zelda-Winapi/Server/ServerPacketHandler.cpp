@@ -21,7 +21,8 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	case C_Attack:
 		Handle_C_Attack(session, buffer, len);
 		break;
-
+	// [AUTO-GEN SWITCH BEGIN]
+	// [AUTO-GEN SWITCH END]
 	default:
 		break;
 	}

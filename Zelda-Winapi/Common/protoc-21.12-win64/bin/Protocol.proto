@@ -1,0 +1,67 @@
+syntax = "proto3";
+package Protocol;
+
+import "Enum.proto";
+import "Struct.proto";
+
+message S_TEST
+{
+	uint64 id = 1;
+	uint32 hp = 2;
+	uint32 attack = 3;
+	repeated BuffData buffs = 4;
+}
+
+message S_EnterGame
+{
+	bool success = 1;
+	uint64 accountId = 2;
+}
+
+message S_MyPlayer
+{
+	ObjectInfo info = 1;
+}
+
+message S_AddObject
+{
+	repeated ObjectInfo objects = 1;
+}
+
+message S_RemoveObject
+{
+	repeated uint64 ids = 1;
+}
+
+message C_Move
+{
+	DIR_TYPE dir = 1;
+	int32 targetx = 2;
+	int32 targety = 3;
+}
+
+message S_Move
+{
+	ObjectInfo info = 1;
+}
+
+message C_Attack
+{
+    DIR_TYPE dir = 1;
+    WEAPON_TYPE weaponType = 2;
+}
+
+message S_Attack
+{
+    uint64 attackerId = 1;
+    DIR_TYPE dir = 2;
+    WEAPON_TYPE weaponType = 3;
+}
+
+message S_Damaged
+{
+    uint64 attackerId = 1;
+    uint64 targetId = 2;
+    int32 newHp = 3;
+    int32 damage = 4;
+}
