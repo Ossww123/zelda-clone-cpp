@@ -22,3 +22,9 @@ x64/
 *.dll
 *.lib
 *.exp
+
+!Zelda-Winapi/
+!Zelda-Winapi/Common/
+!Zelda-Winapi/Common/protoc-21.12-win64/
+!Zelda-Winapi/Common/protoc-21.12-win64/bin/
+!Zelda-Winapi/Common/protoc-21.12-win64/bin/**

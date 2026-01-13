@@ -1,0 +1,7 @@
+[OK] Updated enum/decls/switch blocks (merge). Implementations untouched.
+[INFO] Proto: C:\Users\User\Desktop\zelda\zelda-clone-cpp\Zelda-Winapi\Common\protoc-21.12-win64\bin\Protocol.proto
+[INFO] New messages: ['C_TESTPACKET', 'S_TESTPACKET']
+  - C_TESTPACKET = 103
+    params: int32 testValueONE
+  - S_TESTPACKET = 209
+    params: int32 testValueTWO

@@ -191,6 +191,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Common\protoc-21.12-win64\bin\Enum.proto" />
+    <None Include="..\Common\protoc-21.12-win64\bin\GenNetworkFunc.bat" />
+    <None Include="..\Common\protoc-21.12-win64\bin\GenNetworkFunc.py" />
     <None Include="..\Common\protoc-21.12-win64\bin\GenPackets.bat" />
     <None Include="..\Common\protoc-21.12-win64\bin\Protocol.proto" />
     <None Include="..\Common\protoc-21.12-win64\bin\Struct.proto" />
