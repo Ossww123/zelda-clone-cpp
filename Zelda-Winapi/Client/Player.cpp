@@ -119,25 +119,6 @@ void Player::TickSkill ( )
 
 	if ( IsAnimationEnded ( ) )
 	{
-		DevScene* scene = dynamic_cast<DevScene*>(GET_SINGLE ( SceneManager )->GetCurrentScene ( ));
-		if ( scene == nullptr )
-			return;
-
-		if ( _weaponType == WeaponType::Sword )
-		{
-			//Creature* creature = scene->GetCreatureAt ( GetFrontCellPos());
-			//if ( creature )
-			//{
-			//	scene->SpawnObject<HitEffect> ( GetFrontCellPos ( ) );
-			//	creature->OnDamaged ( this );
-			//}
-		}
-		else if ( _weaponType == WeaponType::Bow )
-		{
-			Arrow* arrow = scene->SpawnObject<Arrow> ( GetCellPos() );
-			arrow->SetDir (info.dir());
-		}
-
 		SetState ( IDLE );
 	}
 }

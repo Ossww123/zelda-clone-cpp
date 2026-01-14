@@ -2,6 +2,7 @@
 
 class Player;
 class Monster;
+class Arrow;
 
 class GameObject
 {
@@ -13,6 +14,7 @@ public:
 
 	static PlayerRef CreatePlayer();
 	static MonsterRef CreateMonster();
+	static shared_ptr<Arrow> CreateArrow();
 
 	void SetState(ObjectState state, bool broadcast = false);
 	void SetDir(Dir dir, bool broadcast = false);

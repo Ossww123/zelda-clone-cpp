@@ -60,11 +60,9 @@ def replace_block(text: str, begin_pat: str, end_pat: str, new_block: str) -> st
     if not b or not e or b.end() > e.start():
         raise RuntimeError(f"Markers not found or invalid: {begin_pat} ~ {end_pat}")
 
-    # BEGIN 마커 라인의 indent를 읽어서 END 마커 라인에도 적용
     begin_line_start = text.rfind("\n", 0, b.start()) + 1
     begin_indent = re.match(r"[ \t]*", text[begin_line_start:b.start()]).group(0)
 
-    # END 마커 라인이 있는 줄의 시작~끝 범위를 찾음
     end_line_start = text.rfind("\n", 0, e.start()) + 1
     end_line_end = text.find("\n", e.start())
     if end_line_end == -1:
@@ -73,10 +71,8 @@ def replace_block(text: str, begin_pat: str, end_pat: str, new_block: str) -> st
     end_line = text[end_line_start:end_line_end]
     end_line_no_indent = end_line.lstrip(" \t")
 
-    # END 마커 라인을 BEGIN indent로 교정
     fixed_end_line = begin_indent + end_line_no_indent
 
-    # 본문 치환 + END 라인 교정 반영
     before = text[:b.end()] + "\n" + new_block.rstrip() + "\n" + text[b.end():e.start()]
     after = fixed_end_line + text[end_line_end:]
     return text[:b.end()] + "\n" + new_block.rstrip() + "\n" + text[b.end():end_line_start] + fixed_end_line + text[end_line_end:]
@@ -225,7 +221,7 @@ def merge_enum_block(existing_block: str, id_map: Dict[str, int], new_msgs: List
 
     ordered = sorted(block_ids.keys(), key=lambda x: (0 if x.startswith("C_") else 1, x))
 
-    indent = detect_indent_from_block(existing_block, "\t")  # ✅ 추가
+    indent = detect_indent_from_block(existing_block, "\t")
 
     lines: List[str] = []
     last_prefix = None
@@ -233,7 +229,7 @@ def merge_enum_block(existing_block: str, id_map: Dict[str, int], new_msgs: List
         prefix = "C_" if name.startswith("C_") else ("S_" if name.startswith("S_") else "")
         if last_prefix is not None and prefix != last_prefix:
             lines.append("")
-        lines.append(f"{indent}{name} = {block_ids[name]} ,")  # ✅ indent 사용
+        lines.append(f"{indent}{name} = {block_ids[name]} ,")
         last_prefix = prefix
 
     return "\n".join(lines).rstrip()
@@ -267,7 +263,6 @@ def cpp_type_for_proto(proto_type: str) -> str:
     """
     if proto_type in PROTO_SCALARS:
         return PROTO_SCALARS[proto_type]
-    # enum/message 둘 다 Protocol 네임스페이스로
     return f"Protocol::{proto_type}"
 
 def cpp_param_for_field(is_repeated: bool, proto_type: str, field_name: str) -> str:
@@ -286,19 +281,14 @@ def cpp_param_for_field(is_repeated: bool, proto_type: str, field_name: str) -> 
 
     # repeated
     if is_repeated:
-        # vector<...> 형태
-        # message/enum도 base_cpp가 Protocol::Type로 들어가므로 OK
         return f"const vector<{base_cpp}>& {field_name}"
 
     # non-repeated
     if proto_type in PROTO_SCALARS:
-        # string/bytes는 const ref
         if proto_type in ("string", "bytes"):
             return f"const {base_cpp}& {field_name}"
         return f"{base_cpp} {field_name}"
 
-    # non-scalar (enum/message) -> enum은 값으로, message는 const ref가 더 좋음
-    # enum과 message를 구분하기 어렵기 때문에, 안전하게 const ref를 사용(복사 비용 방지)
     return f"const {base_cpp}& {field_name}"
 
 def make_param_list(fields: List[Tuple[bool, str, str]]) -> str:
@@ -450,11 +440,9 @@ def main():
     client_h_text = read_text(client_h)
     server_h_text = read_text(server_h)
 
-    # 기존 id 수집(양쪽 헤더에서)
     existing_ids = extract_enum_ids_anywhere(client_h_text)
     existing_ids.update(extract_enum_ids_anywhere(server_h_text))
 
-    # 새 메시지에 id 부여(기존 유지)
     id_map = assign_ids_for_new_messages(existing_ids, new_msgs, c_start=101, s_start=201)
 
     # ---- client.h: enum block ----
@@ -496,11 +484,9 @@ def main():
     write_text(server_cpp, sc)
 
     # ---- Protocol.proto: remove // [NEW PACKET] markers after successful generation ----
-    # marker 문자열이 포함된 라인 자체를 제거
     proto_lines = proto_text.splitlines()
     filtered = [ln for ln in proto_lines if NEW_PACKET_MARKER not in ln]
 
-    # 줄바꿈 유지(대충이라도 원본 스타일 유지)
     new_proto_text = "\n".join(filtered).rstrip() + "\n"
     write_text(proto_path, new_proto_text)
 
