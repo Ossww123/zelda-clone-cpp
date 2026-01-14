@@ -10,6 +10,7 @@
 #include "BoxCollider.h"
 #include "SphereCollider.h"
 #include "Player.h"
+#include "Arrow.h"
 #include "UI.h"
 #include "Button.h"
 #include "Tilemap.h"
@@ -338,6 +339,14 @@ void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
 			monster->SetDir ( info.dir ( ) );
 			monster->SetState ( info.state ( ) );
 			monster->info = info;
+		}
+		if (info.objecttype() == Protocol::OBJECT_TYPE_PROJECTILE)
+		{
+			 Arrow* arrow = SpawnObject<Arrow>( Vec2Int{info.posx(), info.posy()});
+			 arrow->info = info;
+			 arrow->SetDir(info.dir());
+			 arrow->SetState(info.state());
+			 arrow->SetCellPos({info.posx(), info.posy()}, true);
 		}
 	}
 }

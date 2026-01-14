@@ -9,6 +9,7 @@ using GameObjectRef = shared_ptr<class GameObject>;
 using CreatureRef = shared_ptr<class Creature>;
 using PlayerRef = shared_ptr<class Player>;
 using MonsterRef = shared_ptr<class Monster>;
+using ArrowRef = shared_ptr<class Arrow>;
 
 #include "Enum.pb.h"
 using Dir = Protocol::DIR_TYPE;

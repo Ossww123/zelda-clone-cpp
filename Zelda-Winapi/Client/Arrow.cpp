@@ -38,29 +38,6 @@ void Arrow::Render ( HDC hdc )
 
 void Arrow::TickIdle ( )
 {
-	DevScene* scene = dynamic_cast< DevScene* >( GET_SINGLE ( SceneManager )->GetCurrentScene ( ) );
-	if ( scene == nullptr )
-		return;
-
-	Vec2Int deltaXY[ 4 ] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
-	Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir() ];
-
-	if ( CanGo ( nextPos ) )
-	{
-		SetCellPos ( nextPos );
-		SetState ( MOVE );
-	}
-	else
-	{
-		Creature* creature = scene->GetCreatureAt ( nextPos );
-		if ( creature )
-		{
-			scene->SpawnObject<HitEffect> ( nextPos );
-			//creature->OnDamaged(this);
-		}
-
-		scene->RemoveActor ( this );
-	}
 }
 
 void Arrow::TickMove ( )
@@ -70,26 +47,24 @@ void Arrow::TickMove ( )
 	Vec2 dir = ( _destPos - _pos );
 	if ( dir.Length ( ) < 5.f )
 	{
-		SetState ( IDLE );
 		_pos = _destPos;
+		return;
 	}
-	else
+
+	switch ( info.dir ( ) )
 	{
-		switch ( info.dir ( ) )
-		{
-		case DIR_UP:
-			_pos.y -= 600 * deltaTime;
-			break;
-		case DIR_DOWN:
-			_pos.y += 600 * deltaTime;
-			break;
-		case DIR_LEFT:
-			_pos.x -= 600 * deltaTime;
-			break;
-		case DIR_RIGHT:
-			_pos.x += 600 * deltaTime;
-			break;
-		}
+	case DIR_UP:
+		_pos.y -= 600 * deltaTime;
+		break;
+	case DIR_DOWN:
+		_pos.y += 600 * deltaTime;
+		break;
+	case DIR_LEFT:
+		_pos.x -= 600 * deltaTime;
+		break;
+	case DIR_RIGHT:
+		_pos.x += 600 * deltaTime;
+		break;
 	}
 }
 

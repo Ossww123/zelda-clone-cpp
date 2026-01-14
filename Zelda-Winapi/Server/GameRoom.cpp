@@ -1,7 +1,10 @@
 #include "pch.h"
 #include "GameRoom.h"
+#include "Creature.h"
 #include "Player.h"
 #include "Monster.h"
+#include "Projectile.h"
+#include "Arrow.h"
 #include "GameSession.h"
 
 GameRoomRef GRoom = make_shared<GameRoom>();
@@ -34,6 +37,13 @@ void GameRoom::Update()
 	for (auto& item : _monsters)
 	{
 		item.second->Update();
+	}
+
+	for (auto it = _projectiles.begin(); it != _projectiles.end(); )
+	{
+		GameObjectRef obj = it->second;
+		++it;
+		obj->Update();
 	}
 }
 
@@ -71,6 +81,12 @@ void GameRoom::EnterRoom(GameSessionRef session)
 			*info = item.second->info;
 		}
 
+		for (auto item : _projectiles)
+		{
+			Protocol::ObjectInfo* info = pkt.add_objects();
+			*info = item.second->info;
+		}
+
 		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_AddObject(pkt);
 		session->Send(sendBuffer);
 	}
@@ -99,6 +115,11 @@ GameObjectRef GameRoom::FindObject(uint64 id)
 	{
 		auto findIt = _monsters.find(id);
 		if (findIt != _monsters.end())
+			return findIt->second;
+	}
+	{
+		auto findIt = _projectiles.find(id);
+		if (findIt != _projectiles.end())
 			return findIt->second;
 	}
 
@@ -144,41 +165,49 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, Protocol::C_Attack& pkt)
 		Broadcast(sendBuffer);
 	}
 
-	Vec2Int frontPos = attacker->GetFrontCellPos();
-	GameObjectRef obj = GetGameObjectAt(frontPos);
-	CreatureRef target = std::dynamic_pointer_cast<Creature>(obj);
+	Protocol::WEAPON_TYPE weaponType = pkt.weapontype();
 
-	if (!target)
+	if (weaponType == Protocol::WEAPON_TYPE_SWORD)
 	{
-		cout << "frontPos=" << frontPos.x << "," << frontPos.y << endl;
-		if (obj)
+		Vec2Int frontPos = attacker->GetFrontCellPos();
+		GameObjectRef obj = GetGameObjectAt(frontPos);
+		CreatureRef target = std::dynamic_pointer_cast<Creature>(obj);
+
+		if (!target)
+			return;
+
+		int32 damage = 0;
+		if (!target->OnDamaged(attacker, damage))
+			return;
+
 		{
-			cout << " objType=" << obj->info.objecttype() << endl;
-			cout << " objId=" << obj->info.objectid() << endl;
+			Protocol::S_Damaged dmgPkt;
+			dmgPkt.set_attackerid(attacker->info.objectid());
+			dmgPkt.set_targetid(target->info.objectid());
+			dmgPkt.set_damage(damage);
+			dmgPkt.set_newhp(target->info.hp());
+
+			SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
+			Broadcast(sendBuffer);
 		}
-		cout << "attackerDir(server)=" << attacker->info.dir() << endl;
-		cout << " pktDir=" << pkt.dir() << endl;
-		return;
+
+		if (target->info.hp() == 0)
+		{
+			RemoveObject(target->info.objectid());
+		}
 	}
-
-	int32 damage = 0;
-	if (!target->OnDamaged(attacker, damage))
-		return;
-
+	else if (weaponType == Protocol::WEAPON_TYPE_BOW)
 	{
-		Protocol::S_Damaged dmgPkt;
-		dmgPkt.set_attackerid(attacker->info.objectid());
-		dmgPkt.set_targetid(target->info.objectid());
-		dmgPkt.set_damage(damage);
-		dmgPkt.set_newhp(target->info.hp());
+		ArrowRef arrow = GameObject::CreateArrow();
+		arrow->info.set_dir(pkt.dir());
 
-		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
-		Broadcast(sendBuffer);
-	}
+		Vec2Int start = attacker->GetCellPos();
+		arrow->info.set_posx(start.x);
+		arrow->info.set_posy(start.y);
 
-	if (target->info.hp() == 0)
-	{
-		RemoveObject(target->info.objectid());
+		arrow->SetOwner(attacker->info.objectid());
+
+		AddObject(arrow);
 	}
 }
 
@@ -195,6 +224,9 @@ void GameRoom::AddObject(GameObjectRef gameObject)
 		break;
 	case Protocol::OBJECT_TYPE_MONSTER:
 		_monsters[id] = static_pointer_cast<Monster>(gameObject);
+		break;
+	case Protocol::OBJECT_TYPE_PROJECTILE:
+		_projectiles[id] = static_pointer_cast<Projectile>(gameObject);
 		break;
 	default:
 		return;
@@ -227,6 +259,9 @@ void GameRoom::RemoveObject(uint64 id)
 		break;
 	case Protocol::OBJECT_TYPE_MONSTER:
 		_monsters.erase(id);
+		break;
+	case Protocol::OBJECT_TYPE_PROJECTILE:
+		_projectiles.erase(id);
 		break;
 	default:
 		return;
@@ -398,8 +433,7 @@ bool GameRoom::CanGo(Vec2Int cellPos)
 	if (tile == nullptr)
 		return false;
 
-	// 몬스터 충돌?
-	if (GetGameObjectAt(cellPos) != nullptr)
+	if (GetCreatureAt(cellPos) != nullptr)
 		return false;
 
 	return tile->value != 1;
@@ -423,6 +457,15 @@ Vec2Int GameRoom::GetRandomEmptyCellPos()
 	}
 }
 
+bool GameRoom::IsBlockedByWall(Vec2Int cellPos)
+{
+	Tile* tile = _tilemap.GetTileAt(cellPos);
+	if (tile == nullptr)
+		return true;
+
+	return tile->value == 1;
+}
+
 GameObjectRef GameRoom::GetGameObjectAt(Vec2Int cellPos)
 {
 	for (auto& item : _players)
@@ -431,6 +474,40 @@ GameObjectRef GameRoom::GetGameObjectAt(Vec2Int cellPos)
 			return item.second;
 	}
 
+	for (auto& item : _monsters)
+	{
+		if (item.second->GetCellPos() == cellPos)
+			return item.second;
+	}
+
+	for (auto& item : _projectiles)
+	{
+		if (item.second->GetCellPos() == cellPos)
+			return item.second;
+	}
+
+	return nullptr;
+}
+
+CreatureRef GameRoom::GetCreatureAt(Vec2Int cellPos)
+{
+	for (auto& item : _players)
+	{
+		if (item.second->GetCellPos() == cellPos)
+			return item.second;
+	}
+
+	for (auto& item : _monsters)
+	{
+		if (item.second->GetCellPos() == cellPos)
+			return item.second;
+	}
+
+	return nullptr;
+}
+
+MonsterRef GameRoom::GetMonsterAt(Vec2Int cellPos)
+{
 	for (auto& item : _monsters)
 	{
 		if (item.second->GetCellPos() == cellPos)

@@ -41,11 +41,15 @@ public:
 	bool FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 maxDepth = 10);
 	bool CanGo(Vec2Int cellPos);
 	Vec2Int GetRandomEmptyCellPos();
+	bool IsBlockedByWall(Vec2Int cellPos);
 	GameObjectRef GetGameObjectAt(Vec2Int cellPos);
+	CreatureRef GetCreatureAt(Vec2Int cellPos);
+	MonsterRef GetMonsterAt(Vec2Int cellPos);
 
 private:
 	map<uint64, PlayerRef> _players;
 	map<uint64, MonsterRef> _monsters;
+	map<uint64, GameObjectRef> _projectiles;
 	Tilemap _tilemap;
 };
 

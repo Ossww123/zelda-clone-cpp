@@ -26,6 +26,12 @@
     <Filter Include="Source Files\Main\DataSheets">
       <UniqueIdentifier>{d9a02cd8-98ef-4fba-bf9b-0ef9798b4a32}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Object\Creature">
+      <UniqueIdentifier>{a17ec937-4bbe-416e-9101-481c1a1500e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Object\Projectile">
+      <UniqueIdentifier>{0357775f-b83f-4d6c-9724-7c5ee58d6942}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -58,17 +64,23 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>Source Files\Game\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Creature.cpp">
-      <Filter>Source Files\Game\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Monster.cpp">
-      <Filter>Source Files\Game\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Source Files\Game\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Tilemap.cpp">
       <Filter>Source Files\Game\Room</Filter>
+    </ClCompile>
+    <ClCompile Include="Creature.cpp">
+      <Filter>Source Files\Game\Object\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>Source Files\Game\Object\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Game\Object\Creature</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Source Files\Game\Object\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="Arrow.cpp">
+      <Filter>Source Files\Game\Object\Projectile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,17 +111,23 @@
     <ClInclude Include="GameObject.h">
       <Filter>Source Files\Game\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Source Files\Game\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Creature.h">
-      <Filter>Source Files\Game\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Monster.h">
-      <Filter>Source Files\Game\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Tilemap.h">
       <Filter>Source Files\Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="Creature.h">
+      <Filter>Source Files\Game\Object\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Source Files\Game\Object\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Source Files\Game\Object\Creature</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Source Files\Game\Object\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="Arrow.h">
+      <Filter>Source Files\Game\Object\Projectile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
