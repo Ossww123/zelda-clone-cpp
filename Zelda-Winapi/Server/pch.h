@@ -46,7 +46,7 @@ struct VectorInt
 	VectorInt(int32 x, int32 y) : x(x), y(y) {}
 	VectorInt(POINT pt) : x(pt.x), y(pt.y) { }
 
-	VectorInt operator+(const VectorInt& other)
+	VectorInt operator+(const VectorInt& other) const
 	{
 		VectorInt ret;
 		ret.x = x + other.x;
@@ -54,7 +54,7 @@ struct VectorInt
 		return ret;
 	}
 
-	VectorInt operator-(const VectorInt& other)
+	VectorInt operator-(const VectorInt& other) const
 	{
 		VectorInt ret;
 		ret.x = x - other.x;
@@ -62,7 +62,7 @@ struct VectorInt
 		return ret;
 	}
 
-	VectorInt operator*(int32 value)
+	VectorInt operator*(int32 value) const
 	{
 		VectorInt ret;
 		ret.x = x * value;
@@ -86,7 +86,7 @@ struct VectorInt
 		return y > other.y;
 	}
 
-	bool operator==(const VectorInt& other)
+	bool operator==(const VectorInt& other) const
 	{
 		return x == other.x && y == other.y;
 	}

@@ -7,8 +7,6 @@
 #include "Arrow.h"
 #include "GameSession.h"
 
-GameRoomRef GRoom = make_shared<GameRoom>();
-
 GameRoom::GameRoom()
 {
 }
