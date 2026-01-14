@@ -57,6 +57,11 @@ private:
 	map<uint64, MonsterRef> _monsters;
 	map<uint64, GameObjectRef> _projectiles;
 	Tilemap _tilemap;
-};
 
-extern GameRoomRef GRoom;
+public:
+	void SetRoomId(uint64 id) { _roomId = id; }
+	uint64 GetRoomId() const { return _roomId; }
+
+private:
+	uint64 _roomId = 0;
+};

@@ -2,8 +2,6 @@
 
 class GameSession;
 
-using GameSessionRef = shared_ptr<GameSession>;
-
 class GameSessionManager
 {
 public:

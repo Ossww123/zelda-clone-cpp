@@ -3,6 +3,7 @@
 #include "GameSessionManager.h"
 #include "ServerPacketHandler.h"
 #include "GameRoom.h"
+#include "GameRoomManager.h"
 
 void GameSession::OnConnected()
 {
@@ -13,7 +14,9 @@ void GameSession::OnConnected()
 	Send(ServerPacketHandler::Make_S_EnterGame());
 
 	// 게임 입장
-	GRoom->EnterRoom(GetSessionRef());
+	GameRoomRef room = GRoomManager.GetDefaultRoom();
+	if (room)
+		room->EnterRoom(GetSessionRef());
 }
 
 void GameSession::OnDisconnected()
@@ -21,7 +24,9 @@ void GameSession::OnDisconnected()
 	GSessionManager.Remove(static_pointer_cast<GameSession>(shared_from_this()));
 
 	// 게임 나가기
-	GRoom->LeaveRoom(GetSessionRef());
+	GameRoomRef room = GRoomManager.GetDefaultRoom();
+	if (room)
+		room->LeaveRoom(GetSessionRef());
 }
 
 void GameSession::OnRecvPacket(BYTE* buffer, int32 len)

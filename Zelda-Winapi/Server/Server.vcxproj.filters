@@ -82,6 +82,9 @@
     <ClCompile Include="Arrow.cpp">
       <Filter>Source Files\Game\Object\Projectile</Filter>
     </ClCompile>
+    <ClCompile Include="GameRoomManager.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -128,6 +131,9 @@
     </ClInclude>
     <ClInclude Include="Arrow.h">
       <Filter>Source Files\Game\Object\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="GameRoomManager.h">
+      <Filter>Source Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
