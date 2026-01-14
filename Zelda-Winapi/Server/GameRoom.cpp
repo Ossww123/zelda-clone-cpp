@@ -155,59 +155,23 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, Protocol::C_Attack& pkt)
 	if (!attacker)
 		return;
 
-	{
-		Protocol::S_Attack atk;
-		atk.set_attackerid(attacker->info.objectid());
-		atk.set_dir(pkt.dir());
-		atk.set_weapontype(pkt.weapontype());
-
-		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Attack(atk);
-		Broadcast(sendBuffer);
-	}
+	BroadcastAttack(attacker, pkt);
 
 	Protocol::WEAPON_TYPE weaponType = pkt.weapontype();
 
-	if (weaponType == Protocol::WEAPON_TYPE_SWORD)
+	switch (pkt.weapontype())
 	{
-		Vec2Int frontPos = attacker->GetFrontCellPos();
-		GameObjectRef obj = GetGameObjectAt(frontPos);
-		CreatureRef target = std::dynamic_pointer_cast<Creature>(obj);
+	case Protocol::WEAPON_TYPE_SWORD:
+		Handle_SwordAttack(attacker, pkt);
+		break;
 
-		if (!target)
-			return;
+	case Protocol::WEAPON_TYPE_BOW:
+		Handle_BowAttack(attacker, pkt);
+		break;
 
-		int32 damage = 0;
-		if (!target->OnDamaged(attacker, damage))
-			return;
-
-		{
-			Protocol::S_Damaged dmgPkt;
-			dmgPkt.set_attackerid(attacker->info.objectid());
-			dmgPkt.set_targetid(target->info.objectid());
-			dmgPkt.set_damage(damage);
-			dmgPkt.set_newhp(target->info.hp());
-
-			SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
-			Broadcast(sendBuffer);
-		}
-
-		if (target->info.hp() == 0)
-		{
-			RemoveObject(target->info.objectid());
-		}
-	}
-	else if (weaponType == Protocol::WEAPON_TYPE_BOW)
-	{
-		ArrowRef arrow = GameObject::CreateArrow();
-		arrow->info.set_dir(pkt.dir());
-
-		Vec2Int start = attacker->GetCellPos();
-		arrow->info.set_posx(start.x);
-		arrow->info.set_posy(start.y);
-
-		arrow->SetOwner(attacker->info.objectid());
-
-		AddObject(arrow);
+	case Protocol::WEAPON_TYPE_STAFF:
+	default:
+		break;
 	}
 }
 
@@ -515,4 +479,60 @@ MonsterRef GameRoom::GetMonsterAt(Vec2Int cellPos)
 	}
 
 	return nullptr;
+}
+
+void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
+{
+	Vec2Int frontPos = attacker->GetFrontCellPos();
+	GameObjectRef obj = GetGameObjectAt(frontPos);
+	CreatureRef target = std::dynamic_pointer_cast<Creature>(obj);
+
+	if (!target)
+		return;
+
+	int32 damage = 0;
+	if (!target->OnDamaged(attacker, damage))
+		return;
+
+	BroadcastDamaged(attacker, target, damage);
+
+	if (target->info.hp() == 0)
+		RemoveObject(target->info.objectid());
+}
+
+void GameRoom::Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
+{
+	ArrowRef arrow = GameObject::CreateArrow();
+	arrow->info.set_dir(pkt.dir());
+
+	Vec2Int start = attacker->GetCellPos();
+	arrow->info.set_posx(start.x);
+	arrow->info.set_posy(start.y);
+
+	arrow->SetOwner(attacker->info.objectid());
+
+	AddObject(arrow);
+}
+
+void GameRoom::BroadcastAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
+{
+	Protocol::S_Attack atk;
+	atk.set_attackerid(attacker->info.objectid());
+	atk.set_dir(pkt.dir());
+	atk.set_weapontype(pkt.weapontype());
+
+	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Attack(atk);
+	Broadcast(sendBuffer);
+}
+
+void GameRoom::BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 damage)
+{
+	Protocol::S_Damaged dmgPkt;
+	dmgPkt.set_attackerid(attacker->info.objectid());
+	dmgPkt.set_targetid(target->info.objectid());
+	dmgPkt.set_damage(damage);
+	dmgPkt.set_newhp(target->info.hp());
+
+	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
+	Broadcast(sendBuffer);
 }

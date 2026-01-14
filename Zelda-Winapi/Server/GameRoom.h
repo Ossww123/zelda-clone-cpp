@@ -45,6 +45,12 @@ public:
 	GameObjectRef GetGameObjectAt(Vec2Int cellPos);
 	CreatureRef GetCreatureAt(Vec2Int cellPos);
 	MonsterRef GetMonsterAt(Vec2Int cellPos);
+	
+private:
+	void Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
+	void Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
+	void BroadcastAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
+	void BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 damage);
 
 private:
 	map<uint64, PlayerRef> _players;
