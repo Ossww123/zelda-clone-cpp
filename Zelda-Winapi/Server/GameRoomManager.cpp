@@ -16,17 +16,23 @@ void GameRoomManager::Init()
 {
     {
         GameRoomRef room = make_shared<GameRoom>();
+        room->SetFieldId(FieldId::Town);
+        room->SetChannel(1);
+        room->SetInstanceId(0);
+
         room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
         room->Init();
-
         _staticRooms[{FieldId::Town, 1}] = room;
     }
 
     {
         GameRoomRef room = make_shared<GameRoom>();
+        room->SetFieldId(FieldId::Town);
+        room->SetChannel(2);
+        room->SetInstanceId(0);
+
         room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
         room->Init();
-
         _staticRooms[{FieldId::Town, 2}] = room;
     }
 }
@@ -44,6 +50,16 @@ void GameRoomManager::Update()
     {
         kv.second->Update();
     }
+
+    // 던전 삭제 (Update 마지막에)
+    if (_pendingRemoveDungeon.empty() == false)
+    {
+        for (uint64 instanceId : _pendingRemoveDungeon)
+        {
+            RemoveDungeonInstance(instanceId);
+        }
+        _pendingRemoveDungeon.clear();
+    }
 }
 
 GameRoomRef GameRoomManager::GetStaticRoom(FieldId field, int32 channel)
@@ -60,6 +76,10 @@ uint64 GameRoomManager::CreateDungeonInstance()
     uint64 instanceId = _instanceIdGen++;
 
     GameRoomRef room = make_shared<GameRoom>();
+    room->SetFieldId(FieldId::Dungeon);
+    room->SetChannel(0);
+    room->SetInstanceId(instanceId);
+
     room->LoadMap(L"../Resources/Tilemap/Tilemap_02.txt");
     room->Init();
 
@@ -79,4 +99,9 @@ GameRoomRef GameRoomManager::GetDungeonInstance(uint64 instanceId)
 void GameRoomManager::RemoveDungeonInstance(uint64 instanceId)
 {
     _dungeonInstances.erase(instanceId);
+}
+
+void GameRoomManager::RequestRemoveDungeonInstance(uint64 instanceId)
+{
+    _pendingRemoveDungeon.push_back(instanceId);
 }

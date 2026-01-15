@@ -28,6 +28,20 @@ public:
 	void LoadMap(const wchar_t* path);
 
 public:
+	// 던전/필드
+	void SetFieldId(FieldId id) { _fieldId = id; }
+	FieldId GetFieldId() const { return _fieldId; }
+
+	void SetChannel(int32 ch) { _channel = ch; }
+	int32 GetChannel() const { return _channel; }
+
+	void SetInstanceId(uint64 id) { _instanceId = id; }
+	uint64 GetInstanceId() const { return _instanceId; }
+
+	bool IsDungeonInstance() const { return _fieldId == FieldId::Dungeon; }
+	int32 GetPlayerCount() const { return static_cast<int32>(_players.size()); }
+
+public:
 	// PacketHandler
 	void Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt);
 	void Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack& pkt);
@@ -68,6 +82,10 @@ public:
 
 private:
 	uint64 _roomId = 0;
+	FieldId _fieldId = FieldId::Town;
+	int32 _channel = 0;
+
+	uint64 _instanceId = 0;
 
 	Mutex _jobLock;
 	queue<function<void()>> _jobs;

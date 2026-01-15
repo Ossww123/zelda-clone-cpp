@@ -6,6 +6,7 @@
 #include "Projectile.h"
 #include "Arrow.h"
 #include "GameSession.h"
+#include "GameRoomManager.h"
 
 GameRoom::GameRoom()
 {
@@ -113,6 +114,15 @@ void GameRoom::LeaveRoom(GameSessionRef session)
 
 	uint64 id = session->player.lock()->info.objectid();
 	RemoveObject(id);
+
+	if (IsDungeonInstance() && GetPlayerCount() == 0)
+	{
+		uint64 instanceId = GetInstanceId();
+		if (instanceId != 0)
+		{
+			GRoomManager.RequestRemoveDungeonInstance(instanceId);
+		}
+	}
 }
 
 GameObjectRef GameRoom::FindObject(uint64 id)
