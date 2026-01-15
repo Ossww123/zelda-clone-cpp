@@ -21,8 +21,6 @@ void GameRoom::Init()
 	monster->info.set_posx(8);
 	monster->info.set_posy(8);
 	AddObject(monster);
-
-	_tilemap.LoadFile(L"../Resources/Tilemap/Tilemap_01.txt");
 }
 
 void GameRoom::Update()
@@ -136,6 +134,11 @@ GameObjectRef GameRoom::FindObject(uint64 id)
 	}
 
 	return nullptr;
+}
+
+void GameRoom::LoadMap(const wchar_t* path)
+{
+	_tilemap.LoadFile(path);
 }
 
 void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt)
