@@ -128,3 +128,9 @@ struct VectorInt
 };
 
 using Vec2Int = VectorInt;
+
+enum class FieldId : int32
+{
+	Town = 1,
+	Dungeon = 2,
+};
