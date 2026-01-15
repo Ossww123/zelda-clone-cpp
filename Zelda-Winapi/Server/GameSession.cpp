@@ -7,7 +7,7 @@
 
 void GameSession::OnConnected()
 {
-	GSessionManager.Add(static_pointer_cast<GameSession>(shared_from_this()));
+	GSessionManager.Add(GetSessionRef());
 
 	// 로그인 패킷
 
@@ -16,17 +16,29 @@ void GameSession::OnConnected()
 	// 게임 입장
 	GameRoomRef room = GRoomManager.GetDefaultRoom();
 	if (room)
-		room->EnterRoom(GetSessionRef());
+	{
+		GameSessionRef self = GetSessionRef();
+		room->PushJob([room, self]()
+			{
+				room->EnterRoom(self);
+			});
+	}
 }
 
 void GameSession::OnDisconnected()
 {
-	GSessionManager.Remove(static_pointer_cast<GameSession>(shared_from_this()));
+	GSessionManager.Remove(GetSessionRef());
 
 	// 게임 나가기
-	GameRoomRef room = GRoomManager.GetDefaultRoom();
+	GameRoomRef room = gameRoom.lock();
 	if (room)
-		room->LeaveRoom(GetSessionRef());
+	{
+		GameSessionRef self = GetSessionRef();
+		room->PushJob([room, self]()
+			{
+				room->LeaveRoom(self);
+			});
+	}
 }
 
 void GameSession::OnRecvPacket(BYTE* buffer, int32 len)
