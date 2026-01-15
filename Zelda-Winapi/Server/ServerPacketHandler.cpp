@@ -39,8 +39,13 @@ void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, in
 
 	//
 	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom)
-		gameRoom->Handle_C_Move(session, pkt);
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([gameRoom, session, pkt]()
+		{
+			gameRoom->Handle_C_Move(session, pkt);
+		});
 }
 
 void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len)
@@ -54,8 +59,13 @@ void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, 
 
 	//
 	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom)
-		gameRoom->Handle_C_Attack(session, pkt);
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([gameRoom, session, pkt]()
+		{
+			gameRoom->Handle_C_Attack(session, pkt);
+		});
 }
 
 SendBufferRef ServerPacketHandler::Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs)

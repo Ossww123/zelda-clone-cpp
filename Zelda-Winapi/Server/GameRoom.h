@@ -28,8 +28,11 @@ public:
 
 public:
 	// PacketHandler
-	void Handle_C_Move(GameSessionRef session, Protocol::C_Move& pkt);
-	void Handle_C_Attack(GameSessionRef session, Protocol::C_Attack& pkt);
+	void Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt);
+	void Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack& pkt);
+
+public:
+	void PushJob(function<void()> job);
 
 public:
 	void AddObject(GameObjectRef gameObject);
@@ -64,4 +67,7 @@ public:
 
 private:
 	uint64 _roomId = 0;
+
+	Mutex _jobLock;
+	queue<function<void()>> _jobs;
 };

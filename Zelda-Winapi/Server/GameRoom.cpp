@@ -27,6 +27,20 @@ void GameRoom::Init()
 
 void GameRoom::Update()
 {
+	{
+		queue<function<void()>> jobs;
+		{
+			LockGuard guard(_jobLock);
+			std::swap(jobs, _jobs);
+		}
+
+		while (!jobs.empty())
+		{
+			jobs.front()();
+			jobs.pop();
+		}
+	}
+
 	for (auto& item : _players)
 	{
 		item.second->Update();
@@ -124,7 +138,7 @@ GameObjectRef GameRoom::FindObject(uint64 id)
 	return nullptr;
 }
 
-void GameRoom::Handle_C_Move(GameSessionRef session, Protocol::C_Move& pkt)
+void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt)
 {
 	PlayerRef player = session->player.lock();
 	if (!player)
@@ -147,7 +161,7 @@ void GameRoom::Handle_C_Move(GameSessionRef session, Protocol::C_Move& pkt)
 	}
 }
 
-void GameRoom::Handle_C_Attack(GameSessionRef session, Protocol::C_Attack& pkt)
+void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack& pkt)
 {
 	PlayerRef attacker = session->player.lock();
 	if (!attacker)
@@ -171,6 +185,12 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, Protocol::C_Attack& pkt)
 	default:
 		break;
 	}
+}
+
+void GameRoom::PushJob(function<void()> job)
+{
+	LockGuard guard(_jobLock);
+	_jobs.push(std::move(job));
 }
 
 void GameRoom::AddObject(GameObjectRef gameObject)

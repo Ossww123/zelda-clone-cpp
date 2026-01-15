@@ -38,7 +38,7 @@ public:
 public:
 	ServiceType			GetServiceType() { return _type; }
 	NetAddress			GetNetAddress() { return _netAddress; }
-	IocpCoreRef& GetIocpCore() { return _iocpCore; }
+	IocpCoreRef&		GetIocpCore() { return _iocpCore; }
 
 protected:
 	USE_LOCK;
