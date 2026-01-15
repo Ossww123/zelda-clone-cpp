@@ -25,6 +25,7 @@ public:
 	void LeaveRoom(GameSessionRef session);
 	GameObjectRef FindObject(uint64 id);
 	GameRoomRef GetRoomRef() { return shared_from_this(); }
+	void LoadMap(const wchar_t* path);
 
 public:
 	// PacketHandler

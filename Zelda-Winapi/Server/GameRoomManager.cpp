@@ -14,40 +14,69 @@ GameRoomManager::~GameRoomManager()
 
 void GameRoomManager::Init()
 {
-    GameRoomRef room = CreateRoom();
-    room->Init();
-    _defaultRoom = room;
+    {
+        GameRoomRef room = make_shared<GameRoom>();
+        room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
+        room->Init();
+
+        _staticRooms[{FieldId::Town, 1}] = room;
+    }
+
+    {
+        GameRoomRef room = make_shared<GameRoom>();
+        room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
+        room->Init();
+
+        _staticRooms[{FieldId::Town, 2}] = room;
+    }
 }
 
 void GameRoomManager::Update()
 {
-    for (auto& [id, room] : _rooms)
+    // 마을 룸 업데이트
+    for (auto& kv : _staticRooms)
     {
-        room->Update();
+        kv.second->Update();
+    }
+
+    // 던전 룸 업데이트
+    for (auto& kv : _dungeonInstances)
+    {
+        kv.second->Update();
     }
 }
 
-GameRoomManager::GameRoomRef GameRoomManager::CreateRoom()
+GameRoomRef GameRoomManager::GetStaticRoom(FieldId field, int32 channel)
 {
-    RoomId id = _roomIdGenerator++;
-
-    GameRoomRef room = make_shared<GameRoom>();
-    room->SetRoomId(id);
-    _rooms.emplace(id, room);
-
-    return room;
-}
-
-GameRoomManager::GameRoomRef GameRoomManager::FindRoom(RoomId roomId)
-{
-    auto it = _rooms.find(roomId);
-    if (it == _rooms.end())
+    auto it = _staticRooms.find({ field, channel });
+    if (it == _staticRooms.end())
         return nullptr;
 
     return it->second;
 }
 
-void GameRoomManager::RemoveRoom(RoomId roomId)
+uint64 GameRoomManager::CreateDungeonInstance()
 {
-    _rooms.erase(roomId);
+    uint64 instanceId = _instanceIdGen++;
+
+    GameRoomRef room = make_shared<GameRoom>();
+    room->LoadMap(L"../Resources/Tilemap/Tilemap_02.txt");
+    room->Init();
+
+    _dungeonInstances[instanceId] = room;
+    return instanceId;
+}
+
+GameRoomRef GameRoomManager::GetDungeonInstance(uint64 instanceId)
+{
+    auto it = _dungeonInstances.find(instanceId);
+    if (it == _dungeonInstances.end())
+        return nullptr;
+
+    return it->second;
+}
+
+void GameRoomManager::RemoveDungeonInstance(uint64 instanceId)
+{
+    _dungeonInstances.erase(instanceId);
 }

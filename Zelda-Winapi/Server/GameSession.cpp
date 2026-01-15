@@ -14,7 +14,7 @@ void GameSession::OnConnected()
 	Send(ServerPacketHandler::Make_S_EnterGame());
 
 	// 게임 입장
-	GameRoomRef room = GRoomManager.GetDefaultRoom();
+	GameRoomRef room = GRoomManager.GetStaticRoom(FieldId::Town, 1);
 	if (room)
 	{
 		GameSessionRef self = GetSessionRef();
