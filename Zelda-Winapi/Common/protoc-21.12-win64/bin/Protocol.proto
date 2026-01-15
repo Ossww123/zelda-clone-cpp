@@ -65,3 +65,17 @@ message S_Damaged
     int32 newHp = 3;
     int32 damage = 4;
 }
+
+message C_ChangeMap
+{
+    MAP_ID mapId = 1;
+    int32 channel = 2;
+}
+
+message S_ChangeMap
+{
+    bool success = 1;
+    MAP_ID mapId = 2;
+    int32 channel = 3;
+    uint64 instanceId = 4;
+}

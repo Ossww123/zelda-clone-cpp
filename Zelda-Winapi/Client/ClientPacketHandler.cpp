@@ -39,7 +39,12 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	case S_Damaged:
 		Handle_S_Damaged ( session , buffer , len );
 		break;
+	case S_ChangeMap:
+		Handle_S_ChangeMap ( session , buffer , len );
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
+
+
 	// [AUTO-GEN SWITCH END]
 	default:
 		break;

@@ -38,3 +38,10 @@ enum WEAPON_TYPE
     WEAPON_TYPE_BOW = 1;
     WEAPON_TYPE_STAFF = 2;
 }
+
+enum MAP_ID
+{
+    MAP_ID_NONE = 0;
+    MAP_ID_TOWN = 1;
+    MAP_ID_DUNGEON = 2;
+}

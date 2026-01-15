@@ -4,6 +4,7 @@ enum
 {
 	C_Move = 101 ,
 	C_Attack = 102 ,
+	C_ChangeMap = 103 ,
 
 	S_TEST = 201 ,
 	S_EnterGame = 202 ,
@@ -13,7 +14,10 @@ enum
 	S_Move = 206 ,
 	S_Attack = 207 ,
 	S_Damaged = 208 ,
+	S_ChangeMap = 209 ,
 	// [AUTO-GEN ENUM BEGIN]
+
+
 	// [AUTO-GEN ENUM END]
 };
 
@@ -31,11 +35,16 @@ public:
 	static void Handle_S_Move ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_Attack ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_Damaged ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_ChangeMap ( ServerSessionRef session , BYTE* buffer , int32 len );
 
 	// 보내기
 	static SendBufferRef Make_C_Move ( Protocol::DIR_TYPE dir , int32 x , int32 y );
 	static SendBufferRef Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon );
+	static SendBufferRef Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel );
 	// [AUTO-GEN DECLS BEGIN]
+
+	
+
 	// [AUTO-GEN DECLS END]
 
 	template<typename T>
