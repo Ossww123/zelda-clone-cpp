@@ -22,7 +22,7 @@ namespace _pbi = _pb::internal;
 
 namespace Protocol {
 }  // namespace Protocol
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_Enum_2eproto[5];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_Enum_2eproto[6];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_Enum_2eproto = nullptr;
 const uint32_t TableStruct_Enum_2eproto::offsets[1] = {};
 static constexpr ::_pbi::MigrationSchema* schemas = nullptr;
@@ -41,12 +41,13 @@ const char descriptor_table_protodef_Enum_2eproto[] PROTOBUF_SECTION_VARIABLE(pr
   "\022\017\n\013DIR_TYPE_UP\020\000\022\021\n\rDIR_TYPE_DOWN\020\001\022\021\n\r"
   "DIR_TYPE_LEFT\020\002\022\022\n\016DIR_TYPE_RIGHT\020\003*P\n\013W"
   "EAPON_TYPE\022\025\n\021WEAPON_TYPE_SWORD\020\000\022\023\n\017WEA"
-  "PON_TYPE_BOW\020\001\022\025\n\021WEAPON_TYPE_STAFF\020\002b\006p"
-  "roto3"
+  "PON_TYPE_BOW\020\001\022\025\n\021WEAPON_TYPE_STAFF\020\002*>\n"
+  "\006MAP_ID\022\017\n\013MAP_ID_NONE\020\000\022\017\n\013MAP_ID_TOWN\020"
+  "\001\022\022\n\016MAP_ID_DUNGEON\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_Enum_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_Enum_2eproto = {
-    false, false, 525, descriptor_table_protodef_Enum_2eproto,
+    false, false, 589, descriptor_table_protodef_Enum_2eproto,
     "Enum.proto",
     &descriptor_table_Enum_2eproto_once, nullptr, 0, 0,
     schemas, file_default_instances, TableStruct_Enum_2eproto::offsets,
@@ -128,6 +129,21 @@ const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* WEAPON_TYPE_descriptor() {
   return file_level_enum_descriptors_Enum_2eproto[4];
 }
 bool WEAPON_TYPE_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MAP_ID_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_Enum_2eproto);
+  return file_level_enum_descriptors_Enum_2eproto[5];
+}
+bool MAP_ID_IsValid(int value) {
   switch (value) {
     case 0:
     case 1:

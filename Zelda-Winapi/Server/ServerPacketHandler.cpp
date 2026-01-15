@@ -4,6 +4,7 @@
 #include "BufferWriter.h"
 #include "GameSession.h"
 #include "GameRoom.h"
+#include "GameRoomManager.h"
 
 
 void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int32 len)
@@ -21,7 +22,13 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	case C_Attack:
 		Handle_C_Attack(session, buffer, len);
 		break;
+	case C_ChangeMap:
+		Handle_C_ChangeMap(session, buffer, len);
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
+
+		
+
 	// [AUTO-GEN SWITCH END]
 	default:
 		break;
@@ -67,6 +74,71 @@ void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, 
 			gameRoom->Handle_C_Attack(session, pkt);
 		});
 }
+
+void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	PacketHeader* header = (PacketHeader*)buffer;
+	uint16 size = header->size;
+
+	Protocol::C_ChangeMap pkt;
+	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+
+	GameRoomRef fromRoom = session->gameRoom.lock();
+	if (!fromRoom)
+		return;
+
+	fromRoom->PushJob([session, pkt]()
+		{
+			GameRoomRef from = session->gameRoom.lock();
+			if (!from)
+				return;
+
+			GameRoomRef to = nullptr;
+			uint64 instanceId = 0;
+
+			if (pkt.mapid() == Protocol::MAP_ID_TOWN)
+			{
+				to = GRoomManager.GetStaticRoom(FieldId::Town, pkt.channel());
+			}
+			else if (pkt.mapid() == Protocol::MAP_ID_DUNGEON)
+			{
+				instanceId = GRoomManager.CreateDungeonInstance();
+				to = GRoomManager.GetDungeonInstance(instanceId);
+			}
+
+			// 실패
+			if (!to)
+			{
+				Protocol::S_ChangeMap sendPkt;
+				sendPkt.set_success(false);
+				sendPkt.set_mapid(pkt.mapid());
+				sendPkt.set_channel(pkt.channel());
+				sendPkt.set_instanceid(0);
+
+				session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
+				return;
+			}
+
+			// 성공
+			{
+				Protocol::S_ChangeMap sendPkt;
+				sendPkt.set_success(true);
+				sendPkt.set_mapid(pkt.mapid());
+				sendPkt.set_channel(pkt.channel());
+				sendPkt.set_instanceid(instanceId);
+
+				session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
+			}
+
+			from->LeaveRoom(session);
+
+			to->PushJob([to, session]()
+				{
+					to->EnterRoom(session);
+				});
+		});
+}
+
 
 SendBufferRef ServerPacketHandler::Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs)
 {
@@ -145,4 +217,9 @@ SendBufferRef ServerPacketHandler::Make_S_Attack(const Protocol::S_Attack& pkt)
 SendBufferRef ServerPacketHandler::Make_S_Damaged(const Protocol::S_Damaged& pkt)
 {
 	return MakeSendBuffer(pkt, S_Damaged);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_ChangeMap(const Protocol::S_ChangeMap& pkt)
+{
+	return MakeSendBuffer(pkt, S_ChangeMap);
 }

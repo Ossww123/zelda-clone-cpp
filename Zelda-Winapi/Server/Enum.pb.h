@@ -180,6 +180,32 @@ inline bool WEAPON_TYPE_Parse(
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<WEAPON_TYPE>(
     WEAPON_TYPE_descriptor(), name, value);
 }
+enum MAP_ID : int {
+  MAP_ID_NONE = 0,
+  MAP_ID_TOWN = 1,
+  MAP_ID_DUNGEON = 2,
+  MAP_ID_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  MAP_ID_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+bool MAP_ID_IsValid(int value);
+constexpr MAP_ID MAP_ID_MIN = MAP_ID_NONE;
+constexpr MAP_ID MAP_ID_MAX = MAP_ID_DUNGEON;
+constexpr int MAP_ID_ARRAYSIZE = MAP_ID_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MAP_ID_descriptor();
+template<typename T>
+inline const std::string& MAP_ID_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, MAP_ID>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function MAP_ID_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    MAP_ID_descriptor(), enum_t_value);
+}
+inline bool MAP_ID_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, MAP_ID* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<MAP_ID>(
+    MAP_ID_descriptor(), name, value);
+}
 // ===================================================================
 
 
@@ -226,6 +252,11 @@ template <> struct is_proto_enum< ::Protocol::WEAPON_TYPE> : ::std::true_type {}
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::WEAPON_TYPE>() {
   return ::Protocol::WEAPON_TYPE_descriptor();
+}
+template <> struct is_proto_enum< ::Protocol::MAP_ID> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::MAP_ID>() {
+  return ::Protocol::MAP_ID_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

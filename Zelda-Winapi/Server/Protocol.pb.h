@@ -50,6 +50,9 @@ namespace Protocol {
 class C_Attack;
 struct C_AttackDefaultTypeInternal;
 extern C_AttackDefaultTypeInternal _C_Attack_default_instance_;
+class C_ChangeMap;
+struct C_ChangeMapDefaultTypeInternal;
+extern C_ChangeMapDefaultTypeInternal _C_ChangeMap_default_instance_;
 class C_Move;
 struct C_MoveDefaultTypeInternal;
 extern C_MoveDefaultTypeInternal _C_Move_default_instance_;
@@ -59,6 +62,9 @@ extern S_AddObjectDefaultTypeInternal _S_AddObject_default_instance_;
 class S_Attack;
 struct S_AttackDefaultTypeInternal;
 extern S_AttackDefaultTypeInternal _S_Attack_default_instance_;
+class S_ChangeMap;
+struct S_ChangeMapDefaultTypeInternal;
+extern S_ChangeMapDefaultTypeInternal _S_ChangeMap_default_instance_;
 class S_Damaged;
 struct S_DamagedDefaultTypeInternal;
 extern S_DamagedDefaultTypeInternal _S_Damaged_default_instance_;
@@ -80,9 +86,11 @@ extern S_TESTDefaultTypeInternal _S_TEST_default_instance_;
 }  // namespace Protocol
 PROTOBUF_NAMESPACE_OPEN
 template<> ::Protocol::C_Attack* Arena::CreateMaybeMessage<::Protocol::C_Attack>(Arena*);
+template<> ::Protocol::C_ChangeMap* Arena::CreateMaybeMessage<::Protocol::C_ChangeMap>(Arena*);
 template<> ::Protocol::C_Move* Arena::CreateMaybeMessage<::Protocol::C_Move>(Arena*);
 template<> ::Protocol::S_AddObject* Arena::CreateMaybeMessage<::Protocol::S_AddObject>(Arena*);
 template<> ::Protocol::S_Attack* Arena::CreateMaybeMessage<::Protocol::S_Attack>(Arena*);
+template<> ::Protocol::S_ChangeMap* Arena::CreateMaybeMessage<::Protocol::S_ChangeMap>(Arena*);
 template<> ::Protocol::S_Damaged* Arena::CreateMaybeMessage<::Protocol::S_Damaged>(Arena*);
 template<> ::Protocol::S_EnterGame* Arena::CreateMaybeMessage<::Protocol::S_EnterGame>(Arena*);
 template<> ::Protocol::S_Move* Arena::CreateMaybeMessage<::Protocol::S_Move>(Arena*);
@@ -1754,6 +1762,346 @@ class S_Damaged final :
   union { Impl_ _impl_; };
   friend struct ::TableStruct_Protocol_2eproto;
 };
+// -------------------------------------------------------------------
+
+class C_ChangeMap final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.C_ChangeMap) */ {
+ public:
+  inline C_ChangeMap() : C_ChangeMap(nullptr) {}
+  ~C_ChangeMap() override;
+  explicit PROTOBUF_CONSTEXPR C_ChangeMap(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  C_ChangeMap(const C_ChangeMap& from);
+  C_ChangeMap(C_ChangeMap&& from) noexcept
+    : C_ChangeMap() {
+    *this = ::std::move(from);
+  }
+
+  inline C_ChangeMap& operator=(const C_ChangeMap& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline C_ChangeMap& operator=(C_ChangeMap&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const C_ChangeMap& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const C_ChangeMap* internal_default_instance() {
+    return reinterpret_cast<const C_ChangeMap*>(
+               &_C_ChangeMap_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    10;
+
+  friend void swap(C_ChangeMap& a, C_ChangeMap& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(C_ChangeMap* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(C_ChangeMap* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  C_ChangeMap* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<C_ChangeMap>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const C_ChangeMap& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const C_ChangeMap& from) {
+    C_ChangeMap::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(C_ChangeMap* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.C_ChangeMap";
+  }
+  protected:
+  explicit C_ChangeMap(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kMapIdFieldNumber = 1,
+    kChannelFieldNumber = 2,
+  };
+  // .Protocol.MAP_ID mapId = 1;
+  void clear_mapid();
+  ::Protocol::MAP_ID mapid() const;
+  void set_mapid(::Protocol::MAP_ID value);
+  private:
+  ::Protocol::MAP_ID _internal_mapid() const;
+  void _internal_set_mapid(::Protocol::MAP_ID value);
+  public:
+
+  // int32 channel = 2;
+  void clear_channel();
+  int32_t channel() const;
+  void set_channel(int32_t value);
+  private:
+  int32_t _internal_channel() const;
+  void _internal_set_channel(int32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.C_ChangeMap)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    int mapid_;
+    int32_t channel_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
+// -------------------------------------------------------------------
+
+class S_ChangeMap final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.S_ChangeMap) */ {
+ public:
+  inline S_ChangeMap() : S_ChangeMap(nullptr) {}
+  ~S_ChangeMap() override;
+  explicit PROTOBUF_CONSTEXPR S_ChangeMap(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  S_ChangeMap(const S_ChangeMap& from);
+  S_ChangeMap(S_ChangeMap&& from) noexcept
+    : S_ChangeMap() {
+    *this = ::std::move(from);
+  }
+
+  inline S_ChangeMap& operator=(const S_ChangeMap& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_ChangeMap& operator=(S_ChangeMap&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_ChangeMap& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_ChangeMap* internal_default_instance() {
+    return reinterpret_cast<const S_ChangeMap*>(
+               &_S_ChangeMap_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(S_ChangeMap& a, S_ChangeMap& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(S_ChangeMap* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_ChangeMap* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_ChangeMap* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<S_ChangeMap>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const S_ChangeMap& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const S_ChangeMap& from) {
+    S_ChangeMap::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(S_ChangeMap* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.S_ChangeMap";
+  }
+  protected:
+  explicit S_ChangeMap(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSuccessFieldNumber = 1,
+    kMapIdFieldNumber = 2,
+    kInstanceIdFieldNumber = 4,
+    kChannelFieldNumber = 3,
+  };
+  // bool success = 1;
+  void clear_success();
+  bool success() const;
+  void set_success(bool value);
+  private:
+  bool _internal_success() const;
+  void _internal_set_success(bool value);
+  public:
+
+  // .Protocol.MAP_ID mapId = 2;
+  void clear_mapid();
+  ::Protocol::MAP_ID mapid() const;
+  void set_mapid(::Protocol::MAP_ID value);
+  private:
+  ::Protocol::MAP_ID _internal_mapid() const;
+  void _internal_set_mapid(::Protocol::MAP_ID value);
+  public:
+
+  // uint64 instanceId = 4;
+  void clear_instanceid();
+  uint64_t instanceid() const;
+  void set_instanceid(uint64_t value);
+  private:
+  uint64_t _internal_instanceid() const;
+  void _internal_set_instanceid(uint64_t value);
+  public:
+
+  // int32 channel = 3;
+  void clear_channel();
+  int32_t channel() const;
+  void set_channel(int32_t value);
+  private:
+  int32_t _internal_channel() const;
+  void _internal_set_channel(int32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.S_ChangeMap)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    bool success_;
+    int mapid_;
+    uint64_t instanceid_;
+    int32_t channel_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
 // ===================================================================
 
 
@@ -2432,9 +2780,141 @@ inline void S_Damaged::set_damage(int32_t value) {
   // @@protoc_insertion_point(field_set:Protocol.S_Damaged.damage)
 }
 
+// -------------------------------------------------------------------
+
+// C_ChangeMap
+
+// .Protocol.MAP_ID mapId = 1;
+inline void C_ChangeMap::clear_mapid() {
+  _impl_.mapid_ = 0;
+}
+inline ::Protocol::MAP_ID C_ChangeMap::_internal_mapid() const {
+  return static_cast< ::Protocol::MAP_ID >(_impl_.mapid_);
+}
+inline ::Protocol::MAP_ID C_ChangeMap::mapid() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_ChangeMap.mapId)
+  return _internal_mapid();
+}
+inline void C_ChangeMap::_internal_set_mapid(::Protocol::MAP_ID value) {
+  
+  _impl_.mapid_ = value;
+}
+inline void C_ChangeMap::set_mapid(::Protocol::MAP_ID value) {
+  _internal_set_mapid(value);
+  // @@protoc_insertion_point(field_set:Protocol.C_ChangeMap.mapId)
+}
+
+// int32 channel = 2;
+inline void C_ChangeMap::clear_channel() {
+  _impl_.channel_ = 0;
+}
+inline int32_t C_ChangeMap::_internal_channel() const {
+  return _impl_.channel_;
+}
+inline int32_t C_ChangeMap::channel() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_ChangeMap.channel)
+  return _internal_channel();
+}
+inline void C_ChangeMap::_internal_set_channel(int32_t value) {
+  
+  _impl_.channel_ = value;
+}
+inline void C_ChangeMap::set_channel(int32_t value) {
+  _internal_set_channel(value);
+  // @@protoc_insertion_point(field_set:Protocol.C_ChangeMap.channel)
+}
+
+// -------------------------------------------------------------------
+
+// S_ChangeMap
+
+// bool success = 1;
+inline void S_ChangeMap::clear_success() {
+  _impl_.success_ = false;
+}
+inline bool S_ChangeMap::_internal_success() const {
+  return _impl_.success_;
+}
+inline bool S_ChangeMap::success() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_ChangeMap.success)
+  return _internal_success();
+}
+inline void S_ChangeMap::_internal_set_success(bool value) {
+  
+  _impl_.success_ = value;
+}
+inline void S_ChangeMap::set_success(bool value) {
+  _internal_set_success(value);
+  // @@protoc_insertion_point(field_set:Protocol.S_ChangeMap.success)
+}
+
+// .Protocol.MAP_ID mapId = 2;
+inline void S_ChangeMap::clear_mapid() {
+  _impl_.mapid_ = 0;
+}
+inline ::Protocol::MAP_ID S_ChangeMap::_internal_mapid() const {
+  return static_cast< ::Protocol::MAP_ID >(_impl_.mapid_);
+}
+inline ::Protocol::MAP_ID S_ChangeMap::mapid() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_ChangeMap.mapId)
+  return _internal_mapid();
+}
+inline void S_ChangeMap::_internal_set_mapid(::Protocol::MAP_ID value) {
+  
+  _impl_.mapid_ = value;
+}
+inline void S_ChangeMap::set_mapid(::Protocol::MAP_ID value) {
+  _internal_set_mapid(value);
+  // @@protoc_insertion_point(field_set:Protocol.S_ChangeMap.mapId)
+}
+
+// int32 channel = 3;
+inline void S_ChangeMap::clear_channel() {
+  _impl_.channel_ = 0;
+}
+inline int32_t S_ChangeMap::_internal_channel() const {
+  return _impl_.channel_;
+}
+inline int32_t S_ChangeMap::channel() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_ChangeMap.channel)
+  return _internal_channel();
+}
+inline void S_ChangeMap::_internal_set_channel(int32_t value) {
+  
+  _impl_.channel_ = value;
+}
+inline void S_ChangeMap::set_channel(int32_t value) {
+  _internal_set_channel(value);
+  // @@protoc_insertion_point(field_set:Protocol.S_ChangeMap.channel)
+}
+
+// uint64 instanceId = 4;
+inline void S_ChangeMap::clear_instanceid() {
+  _impl_.instanceid_ = uint64_t{0u};
+}
+inline uint64_t S_ChangeMap::_internal_instanceid() const {
+  return _impl_.instanceid_;
+}
+inline uint64_t S_ChangeMap::instanceid() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_ChangeMap.instanceId)
+  return _internal_instanceid();
+}
+inline void S_ChangeMap::_internal_set_instanceid(uint64_t value) {
+  
+  _impl_.instanceid_ = value;
+}
+inline void S_ChangeMap::set_instanceid(uint64_t value) {
+  _internal_set_instanceid(value);
+  // @@protoc_insertion_point(field_set:Protocol.S_ChangeMap.instanceId)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
