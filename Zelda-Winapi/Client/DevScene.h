@@ -5,6 +5,7 @@ class Actor;
 class Player;
 class GameObject;
 class UI;
+class SpriteActor;
 
 struct PQNode
 {
@@ -37,6 +38,7 @@ public:
 	void LoadProjectiles ( );
 	void LoadEffect ( );
 	void LoadTilemap ( );
+	void LoadTilemap ( const wchar_t* tilemapFile );
 
 	template<typename T>
 	T* SpawnObject ( Vec2Int pos )
@@ -63,7 +65,7 @@ public:
 
 public:
 	void ChangeMap ( Protocol::MAP_ID mapId );
-	void LoadTilemap ( const wchar_t* tilemapFile );
+	void ChangeBackground ( Protocol::MAP_ID mapId );
 
 public:
 	void Handle_S_AddObject ( Protocol::S_AddObject& pkt );
@@ -79,6 +81,9 @@ public:
 	Vec2 ConvertPos ( Vec2Int cellPos );
 	Vec2Int GetRandomEmptyCellPos ( );
 
+public:
+	Vec2Int GetWorldPixelSize ( ) const;
+
 private:
 	void TickMonsterSpawn ( );
 
@@ -93,5 +98,6 @@ private:
 	int32 _monsterCount = 0;
 
 	class TilemapActor* _tilemapActor = nullptr;
+	SpriteActor* _background = nullptr;
 };
 

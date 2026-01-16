@@ -39,6 +39,7 @@ DevScene::~DevScene ( )
 void DevScene::Init ( )
 {
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage01" , L"Sprite\\Map\\Stage01.bmp" );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage02" , L"Sprite\\Map\\Stage02.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Tile" , L"Sprite\\Map\\Tile.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Sword" , L"Sprite\\Item\\Sword.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Arrow" , L"Sprite\\Item\\Arrow.bmp" , RGB ( 128 , 128 , 128 ) );
@@ -56,6 +57,7 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"MapButton" , L"Sprite\\UI\\MapButton.bmp" , RGB ( 211 , 249 , 188 ) );
 
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage01" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage01" ) , 0 , 0 , 0 , 0 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage02" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage02" ) , 0 , 0 , 0 , 0 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileO" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 0 , 0 , 48 , 48 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileX" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 48 , 0 , 48 , 48 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Start_Off" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Start" ) , 0 , 0 , 150 , 150 );
@@ -129,10 +131,12 @@ void DevScene::LoadMap ( )
 	SpriteActor* background = new SpriteActor ( );
 	background->SetSprite ( sprite );
 	background->SetLayer ( LAYER_BACKGROUND );
+
 	const Vec2Int size = sprite->GetSize ( );
 	background->SetPos ( Vec2 ( size.x / 2 , size.y / 2 ) );
 
 	AddActor ( background );
+	_background = background;
 }
 
 void DevScene::LoadPlayer ( )
@@ -322,11 +326,66 @@ void DevScene::LoadTilemap ( )
 		_tilemapActor->SetTilemap ( tm );
 		_tilemapActor->SetShowDebug ( false );
 	}
+
+	{
+		auto* tm = GET_SINGLE ( ResourceManager )->CreateTilemap ( L"Tilemap_02" );
+		tm->SetMapSize ( { 40, 32 } );
+		tm->SetTileSize ( 48 );
+
+		GET_SINGLE ( ResourceManager )->LoadTilemap ( L"Tilemap_02" , L"Tilemap\\Tilemap_02.txt" );
+	}
 }
+
+void DevScene::LoadTilemap ( const wchar_t* tilemapFile )
+{
+	if ( _tilemapActor == nullptr )
+	{
+		TilemapActor* actor = new TilemapActor ( );
+		actor->SetLayer ( LAYER_BACKGROUND );
+		AddActor ( actor );
+		_tilemapActor = actor;
+	}
+
+	const wchar_t* tilemapName = nullptr;
+	Vec2Int mapSize = {};
+
+	if ( wcscmp ( tilemapFile , L"Tilemap\\Tilemap_01.txt" ) == 0 )
+	{
+		tilemapName = L"Tilemap_01";
+		mapSize = { 63, 43 };
+	}
+	else if ( wcscmp ( tilemapFile , L"Tilemap\\Tilemap_02.txt" ) == 0 )
+	{
+		tilemapName = L"Tilemap_02";
+		mapSize = { 40, 32 };
+	}
+	else
+	{
+		return;
+	}
+
+	Tilemap* tm = GET_SINGLE ( ResourceManager )->GetTilemap ( tilemapName );
+	if ( tm == nullptr )
+	{
+		tm = GET_SINGLE ( ResourceManager )->CreateTilemap ( tilemapName );
+		if ( tm == nullptr )
+			return;
+
+		tm->SetTileSize ( 48 );
+		tm->SetMapSize ( mapSize );
+		GET_SINGLE ( ResourceManager )->LoadTilemap ( tilemapName , tilemapFile );
+	}
+
+	_tilemapActor->SetTilemap ( tm );
+	_tilemapActor->SetShowDebug ( false );
+}
+
+
 
 void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
 {
 	ClearWorldActors ( );
+	ChangeBackground ( mapId );
 
 	// 카운트 리셋
 	_monsterCount = 0;
@@ -342,10 +401,27 @@ void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
 	}
 }
 
-
-void DevScene::LoadTilemap ( const wchar_t* tilemapFile )
+void DevScene::ChangeBackground ( Protocol::MAP_ID mapId )
 {
+	if ( _background == nullptr )
+		return;
+
+	Sprite* sprite = nullptr;
+
+	if ( mapId == Protocol::MAP_ID_TOWN )
+		sprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Stage01" );
+	else if ( mapId == Protocol::MAP_ID_DUNGEON )
+		sprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Stage02" );
+
+	if ( sprite == nullptr )
+		return;
+
+	_background->SetSprite ( sprite );
+
+	const Vec2Int size = sprite->GetSize ( );
+	_background->SetPos ( Vec2 ( size.x / 2 , size.y / 2 ) );
 }
+
 
 void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
 {
@@ -610,6 +686,22 @@ Vec2Int DevScene::GetRandomEmptyCellPos ( )
 			return cellPos;
 	}
 }
+
+Vec2Int DevScene::GetWorldPixelSize ( ) const
+{
+	if ( _tilemapActor == nullptr )
+		return { 0, 0 };
+
+	Tilemap* tm = _tilemapActor->GetTilemap ( );
+	if ( tm == nullptr )
+		return { 0, 0 };
+
+	Vec2Int mapSize = tm->GetMapSize ( );
+	int32 tileSize = tm->GetTileSize ( );
+
+	return { mapSize.x * tileSize, mapSize.y * tileSize };
+}
+
 
 void DevScene::TickMonsterSpawn ( )
 {
