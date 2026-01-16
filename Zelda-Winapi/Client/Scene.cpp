@@ -97,3 +97,20 @@ Creature* Scene::GetCreatureAt ( Vec2Int cellPos )
 
 	return nullptr;
 }
+
+void Scene::ClearActorsInLayer ( int32 layer )
+{
+	vector<Actor*>& v = _actors[ layer ];
+
+	for ( Actor* actor : v )
+	{
+		SAFE_DELETE ( actor );
+	}
+
+	v.clear ( );
+}
+
+void Scene::ClearWorldActors ( )
+{
+	ClearActorsInLayer ( LAYER_OBJECT );
+}

@@ -217,6 +217,29 @@ void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* bu
 	}
 }
 
+void ClientPacketHandler::Handle_S_ChangeMap ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_ChangeMap pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	if ( pkt.success ( ) == false )
+	{
+		// 실패
+		return;
+	}
+
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene == nullptr )
+		return;
+
+	scene->ChangeMap ( pkt.mapid ( ) );
+	GET_SINGLE ( SceneManager )->SetMyPlayer ( nullptr );
+}
+
+
 SendBufferRef ClientPacketHandler::Make_C_Move ( Protocol::DIR_TYPE dir , int32 x , int32 y  )
 {
 	Protocol::C_Move pkt;
@@ -234,4 +257,13 @@ SendBufferRef ClientPacketHandler::Make_C_Attack ( Protocol::DIR_TYPE dir , Prot
 	pkt.set_weapontype ( weapon );
 
 	return MakeSendBuffer ( pkt , C_Attack );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel )
+{
+	Protocol::C_ChangeMap pkt;
+	pkt.set_mapid ( mapId );
+	pkt.set_channel ( channel );
+
+	return MakeSendBuffer ( pkt , C_ChangeMap );
 }

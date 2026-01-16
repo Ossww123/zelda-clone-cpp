@@ -62,6 +62,10 @@ public:
 	}
 
 public:
+	void ChangeMap ( Protocol::MAP_ID mapId );
+	void LoadTilemap ( const wchar_t* tilemapFile );
+
+public:
 	void Handle_S_AddObject ( Protocol::S_AddObject& pkt );
 	void Handle_S_RemoveObject ( Protocol::S_RemoveObject& pkt );
 
@@ -77,6 +81,12 @@ public:
 
 private:
 	void TickMonsterSpawn ( );
+
+private:
+	void CreateMapButtons ( );
+	void OnClickTown1 ( );
+	void OnClickTown2 ( );
+	void OnClickDungeon ( );
 
 private:
 	const int32 DESIRED_MONSTER_COUNT = 20;
