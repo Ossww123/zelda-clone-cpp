@@ -21,6 +21,10 @@ public:
 	Creature* GetCreatureAt ( Vec2Int cellPos );
 
 public:
+	void ClearActorsInLayer ( int32 layer );
+	void ClearWorldActors ( );
+
+public:
 	vector<Actor*> _actors[ LAYER_MAXCOUNT ];
 	vector<UI*> _uis;
 

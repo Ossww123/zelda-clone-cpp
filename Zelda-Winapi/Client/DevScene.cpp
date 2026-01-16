@@ -25,7 +25,8 @@
 #include "SoundManager.h"
 #include "SceneManager.h"
 #include "MyPlayer.h"
-
+#include "NetworkManager.h"
+#include "ClientPacketHandler.h"
 
 DevScene::DevScene ( )
 {
@@ -52,6 +53,7 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Start" , L"Sprite\\UI\\Start.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Edit" , L"Sprite\\UI\\Edit.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Exit" , L"Sprite\\UI\\Exit.bmp" );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"MapButton" , L"Sprite\\UI\\MapButton.bmp" , RGB ( 211 , 249 , 188 ) );
 
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage01" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage01" ) , 0 , 0 , 0 , 0 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileO" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 0 , 0 , 48 , 48 );
@@ -62,6 +64,10 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Edit_On" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Edit" ) , 150 , 0 , 150 , 150 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Exit_Off" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Exit" ) , 0 , 0 , 150 , 150 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Exit_On" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Exit" ) , 150 , 0 , 150 , 150 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town1" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 0 , 0 , 64 , 40 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town2" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 71 , 0 , 64 , 40 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Dungeon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 142 , 0 , 64 , 40 );
+
 
 	LoadMap ( );
 	LoadPlayer ( );
@@ -70,12 +76,13 @@ void DevScene::Init ( )
 	LoadEffect ( );
 	LoadTilemap ( );
 
-	//GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
-	//GET_SINGLE ( ResourceManager )->LoadSound ( L"Attack" , L"Sound\\Sword.wav" );
+	if (false)
+	{
+		GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
+		GET_SINGLE ( ResourceManager )->LoadSound ( L"Attack" , L"Sound\\Sword.wav" );
+	}
 
-	/*SpawnObjectAtRandomPos<MyPlayer> ( );
-	SpawnObject<Monster> ( Vec2Int{ 7 , 7 } );*/
-
+	CreateMapButtons ( );
 	Super::Init ( );
 }
 
@@ -300,6 +307,8 @@ void DevScene::LoadEffect ( )
 void DevScene::LoadTilemap ( )
 {
 	TilemapActor* actor = new TilemapActor ( );
+
+	actor->SetLayer ( LAYER_BACKGROUND );
 	AddActor ( actor );
 
 	_tilemapActor = actor;
@@ -313,6 +322,29 @@ void DevScene::LoadTilemap ( )
 		_tilemapActor->SetTilemap ( tm );
 		_tilemapActor->SetShowDebug ( false );
 	}
+}
+
+void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
+{
+	ClearWorldActors ( );
+
+	// 카운트 리셋
+	_monsterCount = 0;
+
+	// 타일맵 교체
+	if ( mapId == Protocol::MAP_ID_TOWN )
+	{
+		LoadTilemap ( L"Tilemap\\Tilemap_01.txt" );
+	}
+	else if ( mapId == Protocol::MAP_ID_DUNGEON )
+	{
+		LoadTilemap ( L"Tilemap\\Tilemap_02.txt" );
+	}
+}
+
+
+void DevScene::LoadTilemap ( const wchar_t* tilemapFile )
+{
 }
 
 void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
@@ -340,7 +372,7 @@ void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
 			monster->SetState ( info.state ( ) );
 			monster->info = info;
 		}
-		if (info.objecttype() == Protocol::OBJECT_TYPE_PROJECTILE)
+		else if ( info.objecttype() == Protocol::OBJECT_TYPE_PROJECTILE)
 		{
 			 Arrow* arrow = SpawnObject<Arrow>( Vec2Int{info.posx(), info.posy()});
 			 arrow->info = info;
@@ -587,4 +619,76 @@ void DevScene::TickMonsterSpawn ( )
 	// 레거시 코드 //
 	if ( _monsterCount < DESIRED_MONSTER_COUNT )
 		SpawnObjectAtRandomPos<Monster> ( );
+}
+
+void DevScene::CreateMapButtons ( )
+{
+	int32 screenW = GWinSizeX;
+	int32 screenH = GWinSizeY;
+
+	const int32 btnW = 64;
+	const int32 btnH = 40;
+	const int32 gap = 7;
+	const int32 totalW = btnW * 3 + gap * 2;
+
+	const int32 marginX = 10;
+	const int32 marginY = 10;
+
+	int32 startX = screenW - marginX - totalW;
+	int32 y = marginY + btnH / 2;
+
+	// 마을1 버튼
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town1" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &DevScene::OnClickTown1 );
+		_uis.push_back ( b );
+
+		startX += btnW + gap;
+	}
+
+	// 마을2 버튼
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town2" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &DevScene::OnClickTown2 );
+		_uis.push_back ( b );
+
+		startX += btnW + gap;
+	}
+
+	// 던전 버튼
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Dungeon" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &DevScene::OnClickDungeon );
+		_uis.push_back ( b );
+	}
+}
+
+void DevScene::OnClickTown1 ( )
+{
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 1 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+}
+
+void DevScene::OnClickTown2 ( )
+{
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 2 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+}
+
+void DevScene::OnClickDungeon ( )
+{
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_DUNGEON , 0 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }
