@@ -3,6 +3,7 @@
 
 #include "Actor.h"
 
+#include "DevScene.h"
 #include "SceneManager.h"
 
 CameraComponent::CameraComponent ( )
@@ -24,9 +25,27 @@ void CameraComponent::TickComponent ( )
 
 	Vec2 pos = _owner->GetPos ( );
 
-	// TEMP
-	pos.x = ::clamp ( pos.x , 400.f , 2560.f - 400.f );
-	pos.y = ::clamp ( pos.y , 300.f , 2048.f - 400.f );
+	DevScene* scene = dynamic_cast< DevScene* >( GET_SINGLE ( SceneManager )->GetCurrentScene ( ) );
+	if ( scene == nullptr )
+		return;
+
+	Vec2Int worldSize = scene->GetWorldPixelSize ( );
+	if ( worldSize.x <= 0 || worldSize.y <= 0 )
+		return;
+
+	const float halfW = ( float ) GWinSizeX * 0.5f;
+	const float halfH = ( float ) GWinSizeY * 0.5f;
+
+	float minX = halfW;
+	float maxX = ( float ) worldSize.x - halfW;
+	float minY = halfH;
+	float maxY = ( float ) worldSize.y - halfH;
+
+	if ( maxX < minX ) maxX = minX;
+	if ( maxY < minY ) maxY = minY;
+
+	pos.x = ::clamp ( pos.x , minX , maxX );
+	pos.y = ::clamp ( pos.y , minY , maxY );
 
 	GET_SINGLE ( SceneManager )->SetCameraPos ( pos );
 }
