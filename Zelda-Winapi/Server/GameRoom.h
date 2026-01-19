@@ -67,6 +67,7 @@ public:
 private:
 	void Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
 	void Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
+	void Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
 	void BroadcastAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
 	void BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 damage);
 
