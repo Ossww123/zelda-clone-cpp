@@ -576,9 +576,7 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 
 	Vec2Int center = pos + forward;
 
-	// 중복 방지
-	set<uint64> hitTargets;
-	vector<uint64> deadTargets;
+	std::vector<uint64> deadTargets;
 
 	for (int32 dy = -1; dy <= 1; dy++)
 	{
@@ -586,29 +584,12 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 		{
 			Vec2Int cell = { center.x + dx, center.y + dy };
 
-			Tile* tile = _tilemap.GetTileAt(cell);
-			if (tile == nullptr)
-				continue;
-
-			if (tile->value == 1)
-				continue;
-
-			CreatureRef target = GetCreatureAt(cell);
+			MonsterRef target = GetMonsterAt(cell);
 			if (!target)
 				continue;
 
-			// 자기 자신
-			if (target->info.objectid() == attacker->info.objectid())
-				continue;
-
-			// 중복 방지
-			if (hitTargets.find(target->info.objectid()) != hitTargets.end())
-				continue;
-
-			hitTargets.insert(target->info.objectid());
-
 			int32 damage = 0;
-			if (!target->OnDamaged(attacker, damage))
+			if (!target->OnDamaged(attacker, damage, 0.5f))
 				continue;
 
 			BroadcastDamaged(attacker, target, damage);
@@ -618,7 +599,6 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 		}
 	}
 
-	// 죽은 대상 제거는 마지막에
 	for (uint64 id : deadTargets)
 	{
 		RemoveObject(id);
