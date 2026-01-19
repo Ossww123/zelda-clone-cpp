@@ -195,6 +195,9 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack&
 		break;
 
 	case Protocol::WEAPON_TYPE_STAFF:
+		Handle_StaffAttack(attacker, pkt);
+		break;
+
 	default:
 		break;
 	}
@@ -544,6 +547,84 @@ void GameRoom::Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pk
 
 	AddObject(arrow);
 }
+
+void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
+{
+	if (!attacker)
+		return;
+
+	Vec2Int pos = attacker->GetCellPos();
+
+	Vec2Int forward = { 0, 0 };
+	switch (pkt.dir())
+	{
+	case Protocol::DIR_TYPE_UP:
+		forward = { 0, -1 };
+		break;
+	case Protocol::DIR_TYPE_DOWN:
+		forward = { 0,  1 };
+		break;
+	case Protocol::DIR_TYPE_LEFT:
+		forward = { -1, 0 };
+		break;
+	case Protocol::DIR_TYPE_RIGHT:
+		forward = { 1,  0 };
+		break;
+	default:
+		break;
+	}
+
+	Vec2Int center = pos + forward;
+
+	// 중복 방지
+	set<uint64> hitTargets;
+	vector<uint64> deadTargets;
+
+	for (int32 dy = -1; dy <= 1; dy++)
+	{
+		for (int32 dx = -1; dx <= 1; dx++)
+		{
+			Vec2Int cell = { center.x + dx, center.y + dy };
+
+			Tile* tile = _tilemap.GetTileAt(cell);
+			if (tile == nullptr)
+				continue;
+
+			if (tile->value == 1)
+				continue;
+
+			CreatureRef target = GetCreatureAt(cell);
+			if (!target)
+				continue;
+
+			// 자기 자신
+			if (target->info.objectid() == attacker->info.objectid())
+				continue;
+
+			// 중복 방지
+			if (hitTargets.find(target->info.objectid()) != hitTargets.end())
+				continue;
+
+			hitTargets.insert(target->info.objectid());
+
+			int32 damage = 0;
+			if (!target->OnDamaged(attacker, damage))
+				continue;
+
+			BroadcastDamaged(attacker, target, damage);
+
+			if (target->info.hp() == 0)
+				deadTargets.push_back(target->info.objectid());
+		}
+	}
+
+	// 죽은 대상 제거는 마지막에
+	for (uint64 id : deadTargets)
+	{
+		RemoveObject(id);
+	}
+}
+
 
 void GameRoom::BroadcastAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
 {
