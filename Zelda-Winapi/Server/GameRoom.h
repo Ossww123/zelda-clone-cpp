@@ -63,7 +63,21 @@ public:
 	GameObjectRef GetGameObjectAt(Vec2Int cellPos);
 	CreatureRef GetCreatureAt(Vec2Int cellPos);
 	MonsterRef GetMonsterAt(Vec2Int cellPos);
+
+private:
+	void SpawnDungeonMonsters();
+
+	struct RespawnRequest
+	{
+		uint64 when;
+		Vec2Int homePos;
+	};
+
+	vector<RespawnRequest> _respawnQueue;
 	
+	void ReserveMonsterRespawn(Vec2Int homePos);
+	void ProcessRespawn();
+
 private:
 	void Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
 	void Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
