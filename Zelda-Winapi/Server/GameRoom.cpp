@@ -18,10 +18,10 @@ GameRoom::~GameRoom()
 
 void GameRoom::Init()
 {
-	MonsterRef monster = GameObject::CreateMonster();
-	monster->info.set_posx(8);
-	monster->info.set_posy(8);
-	AddObject(monster);
+	if (IsDungeonInstance())
+	{
+		SpawnDungeonMonsters();
+	}
 }
 
 void GameRoom::Update()
@@ -56,6 +56,8 @@ void GameRoom::Update()
 		++it;
 		obj->Update();
 	}
+
+	ProcessRespawn();
 }
 
 void GameRoom::EnterRoom(GameSessionRef session)
@@ -249,6 +251,15 @@ void GameRoom::RemoveObject(uint64 id)
 	GameObjectRef gameObject = FindObject(id);
 	if (gameObject == nullptr)
 		return;
+
+	if (gameObject->info.objecttype() == Protocol::OBJECT_TYPE_MONSTER)
+	{
+		if (IsDungeonInstance())
+		{
+			MonsterRef monster = static_pointer_cast<Monster>(gameObject);
+			ReserveMonsterRespawn(monster->GetHomePos());
+		}
+	}
 
 	switch (gameObject->info.objecttype())
 	{
@@ -513,6 +524,73 @@ MonsterRef GameRoom::GetMonsterAt(Vec2Int cellPos)
 	}
 
 	return nullptr;
+}
+
+void GameRoom::SpawnDungeonMonsters()
+{
+	Vec2Int anchorUR = { 30, 5 };   // 우상
+	Vec2Int anchorDR = { 30, 25 };  // 우하
+	Vec2Int anchorDL = { 5, 25 };   // 좌하
+
+	Vec2Int offsets[3] = { {0,0}, {1,0}, {0,1} };
+
+	auto spawnGroup = [&](Vec2Int anchor)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				Vec2Int pos = anchor + offsets[i];
+
+				if (CanGo(pos) == false)
+					pos = GetRandomEmptyCellPos();
+
+				MonsterRef m = GameObject::CreateMonster();
+				m->SetHomePos(pos);
+				m->SetCellPos(pos);
+				AddObject(m);
+			}
+		};
+
+	spawnGroup(anchorUR);
+	spawnGroup(anchorDR);
+	spawnGroup(anchorDL);
+}
+
+
+void GameRoom::ReserveMonsterRespawn(Vec2Int homePos)
+{
+	RespawnRequest req;
+	req.when = GetTickCount64() + 10000; // 10초
+	req.homePos = homePos;
+	_respawnQueue.push_back(req);
+}
+
+void GameRoom::ProcessRespawn()
+{
+	if (!IsDungeonInstance())
+		return;
+
+	uint64 now = GetTickCount64();
+
+	for (auto it = _respawnQueue.begin(); it != _respawnQueue.end(); )
+	{
+		if (now < it->when)
+		{
+			++it;
+			continue;
+		}
+
+		Vec2Int pos = it->homePos;
+
+		if (CanGo(pos) == false)
+			pos = GetRandomEmptyCellPos();
+
+		MonsterRef m = GameObject::CreateMonster();
+		m->SetHomePos(pos);
+		m->SetCellPos(pos);
+		AddObject(m);
+
+		it = _respawnQueue.erase(it);
+	}
 }
 
 void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
