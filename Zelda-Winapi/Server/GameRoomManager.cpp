@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "GameRoomManager.h"
 #include "GameRoom.h"
+#include "IRoomLogic.h"
+#include "TownLogic.h"
+#include "DungeonLogic.h"
 
 GameRoomManager GRoomManager;
 
@@ -19,7 +22,7 @@ void GameRoomManager::Init()
         room->SetFieldId(FieldId::Town);
         room->SetChannel(1);
         room->SetInstanceId(0);
-
+        room->SetLogic(make_unique<TownLogic>());
         room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
         room->Init();
         _staticRooms[{FieldId::Town, 1}] = room;
@@ -30,7 +33,7 @@ void GameRoomManager::Init()
         room->SetFieldId(FieldId::Town);
         room->SetChannel(2);
         room->SetInstanceId(0);
-
+        room->SetLogic(make_unique<TownLogic>());
         room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
         room->Init();
         _staticRooms[{FieldId::Town, 2}] = room;
@@ -79,7 +82,7 @@ uint64 GameRoomManager::CreateDungeonInstance()
     room->SetFieldId(FieldId::Dungeon);
     room->SetChannel(0);
     room->SetInstanceId(instanceId);
-
+    room->SetLogic(make_unique<DungeonLogic>());
     room->LoadMap(L"../Resources/Tilemap/Tilemap_02.txt");
     room->Init();
 

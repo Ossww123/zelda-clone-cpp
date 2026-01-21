@@ -1,6 +1,8 @@
 #pragma once
 #include "Tilemap.h"
 
+class IRoomLogic;
+
 struct PQNode
 {
 	PQNode(int32 cost, Vec2Int pos) : cost(cost), pos(pos) { }
@@ -17,6 +19,8 @@ class GameRoom : public enable_shared_from_this<GameRoom>
 public:
 	GameRoom();
 	virtual ~GameRoom();
+
+	void SetLogic(unique_ptr<IRoomLogic> logic);
 
 	void Init();
 	void Update();
@@ -104,4 +108,6 @@ private:
 
 	Mutex _jobLock;
 	queue<function<void()>> _jobs;
+
+	unique_ptr<IRoomLogic> _logic;
 };
