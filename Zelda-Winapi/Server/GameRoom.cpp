@@ -7,6 +7,7 @@
 #include "Arrow.h"
 #include "GameSession.h"
 #include "GameRoomManager.h"
+#include "IRoomLogic.h"
 
 GameRoom::GameRoom()
 {
@@ -16,12 +17,15 @@ GameRoom::~GameRoom()
 {
 }
 
+void GameRoom::SetLogic(unique_ptr<IRoomLogic> logic)
+{
+	_logic = move(logic);
+}
+
 void GameRoom::Init()
 {
-	if (IsDungeonInstance())
-	{
-		SpawnDungeonMonsters();
-	}
+	if (_logic)
+		_logic->OnInit(*this);
 }
 
 void GameRoom::Update()
@@ -57,7 +61,8 @@ void GameRoom::Update()
 		obj->Update();
 	}
 
-	ProcessRespawn();
+	if (_logic)
+		_logic->OnUpdate(*this);
 }
 
 void GameRoom::EnterRoom(GameSessionRef session)
@@ -117,14 +122,8 @@ void GameRoom::LeaveRoom(GameSessionRef session)
 	uint64 id = session->player.lock()->info.objectid();
 	RemoveObject(id);
 
-	if (IsDungeonInstance() && GetPlayerCount() == 0)
-	{
-		uint64 instanceId = GetInstanceId();
-		if (instanceId != 0)
-		{
-			GRoomManager.RequestRemoveDungeonInstance(instanceId);
-		}
-	}
+	if (_logic)
+		_logic->OnLeaveRoom(*this, session);
 }
 
 GameObjectRef GameRoom::FindObject(uint64 id)
@@ -252,14 +251,8 @@ void GameRoom::RemoveObject(uint64 id)
 	if (gameObject == nullptr)
 		return;
 
-	if (gameObject->info.objecttype() == Protocol::OBJECT_TYPE_MONSTER)
-	{
-		if (IsDungeonInstance())
-		{
-			MonsterRef monster = static_pointer_cast<Monster>(gameObject);
-			ReserveMonsterRespawn(monster->GetHomePos());
-		}
-	}
+	if (_logic)
+		_logic->OnBeforeRemoveObject(*this, gameObject);
 
 	switch (gameObject->info.objecttype())
 	{
