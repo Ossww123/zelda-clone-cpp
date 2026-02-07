@@ -35,9 +35,6 @@
     <Filter Include="Source Files\Game\Room\Tilemap">
       <UniqueIdentifier>{6996acc6-17fc-44dd-9e21-ef5889ddbe85}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Game\Room\RoomLogic">
-      <UniqueIdentifier>{4f49d9de-0a36-4f17-9b9a-06eaa9e78f18}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -91,11 +88,8 @@
     <ClCompile Include="Tilemap.cpp">
       <Filter>Source Files\Game\Room\Tilemap</Filter>
     </ClCompile>
-    <ClCompile Include="DungeonLogic.cpp">
-      <Filter>Source Files\Game\Room\RoomLogic</Filter>
-    </ClCompile>
-    <ClCompile Include="TownLogic.cpp">
-      <Filter>Source Files\Game\Room\RoomLogic</Filter>
+    <ClCompile Include="RoomDataManager.cpp">
+      <Filter>Source Files\Game\Room</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -147,14 +141,11 @@
     <ClInclude Include="Tilemap.h">
       <Filter>Source Files\Game\Room\Tilemap</Filter>
     </ClInclude>
-    <ClInclude Include="IRoomLogic.h">
-      <Filter>Source Files\Game\Room\RoomLogic</Filter>
+    <ClInclude Include="RoomConfig.h">
+      <Filter>Source Files\Game\Room</Filter>
     </ClInclude>
-    <ClInclude Include="DungeonLogic.h">
-      <Filter>Source Files\Game\Room\RoomLogic</Filter>
-    </ClInclude>
-    <ClInclude Include="TownLogic.h">
-      <Filter>Source Files\Game\Room\RoomLogic</Filter>
+    <ClInclude Include="RoomDataManager.h">
+      <Filter>Source Files\Game\Room</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

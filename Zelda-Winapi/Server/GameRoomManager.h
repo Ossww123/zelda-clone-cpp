@@ -19,6 +19,7 @@ public:
 
     GameRoomRef GetStaticRoom(FieldId field, int32 channel);
     uint64 CreateDungeonInstance();
+    uint64 CreateDungeonInstance(const string& roomId);
     GameRoomRef GetDungeonInstance(uint64 instanceId);
     void RemoveDungeonInstance(uint64 instanceId);
     void RequestRemoveDungeonInstance(uint64 instanceId);

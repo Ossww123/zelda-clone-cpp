@@ -17,6 +17,11 @@ public:
 
 	void SetAggroRange(int32 r) { _aggroRange = r; }
 	void SetLeashRange(int32 r) { _leashRange = r; }
+	int32 GetAggroRange() const { return _aggroRange; }
+	int32 GetLeashRange() const { return _leashRange; }
+
+	void SetTemplateId(int32 id) { _templateId = id; }
+	int32 GetTemplateId() const { return _templateId; }
 
 private:
 	virtual void UpdateIdle();
@@ -29,7 +34,8 @@ private:
 
 	Vec2Int _homePos = { -1, -1 };
 
-	int32 _aggroRange = 8;  // °¨Áö ¹üÀ§
-	int32 _leashRange = 10; // ÃßÀû ¹üÀ§
+	int32 _aggroRange = 8;  // ì–´ê·¸ë¡œ ë²”ìœ„
+	int32 _leashRange = 10; // ë¦¬ì‹œ ë²”ìœ„
+	int32 _templateId = 1001; // ê¸°ë³¸ê°’: Snake
 };
 

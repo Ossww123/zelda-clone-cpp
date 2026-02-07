@@ -1,0 +1,48 @@
+{
+  "dungeon_snake": {
+    "spawns": [
+      {
+        "groupId": "entrance_right",
+        "anchor": [30, 5],
+        "offsets": [[0, 0], [1, 0], [0, 1]],
+        "monsters": [
+          {
+            "templateId": 1001,
+            "count": 3,
+            "level": 1,
+            "aggroRange": 8,
+            "leashRange": 10
+          }
+        ]
+      },
+      {
+        "groupId": "entrance_left",
+        "anchor": [30, 25],
+        "offsets": [[0, 0], [1, 0], [0, 1]],
+        "monsters": [
+          {
+            "templateId": 1001,
+            "count": 3,
+            "level": 1,
+            "aggroRange": 8,
+            "leashRange": 10
+          }
+        ]
+      },
+      {
+        "groupId": "corridor",
+        "anchor": [5, 25],
+        "offsets": [[0, 0], [1, 0], [0, 1]],
+        "monsters": [
+          {
+            "templateId": 1001,
+            "count": 3,
+            "level": 1,
+            "aggroRange": 8,
+            "leashRange": 10
+          }
+        ]
+      }
+    ]
+  }
+}
