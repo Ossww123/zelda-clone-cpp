@@ -1,7 +1,8 @@
 #pragma once
 #include "Tilemap.h"
 
-class IRoomLogic;
+struct RoomConfigData;
+struct RoomSpawnConfig;
 
 struct PQNode
 {
@@ -20,7 +21,8 @@ public:
 	GameRoom();
 	virtual ~GameRoom();
 
-	void SetLogic(unique_ptr<IRoomLogic> logic);
+	// 데이터 기반 초기화
+	void InitFromConfig(const string& roomId);
 
 	void Init();
 	void Update();
@@ -32,7 +34,7 @@ public:
 	void LoadMap(const wchar_t* path);
 
 public:
-	// ����/�ʵ�
+	// ����/�ʵ�
 	void SetFieldId(FieldId id) { _fieldId = id; }
 	FieldId GetFieldId() const { return _fieldId; }
 
@@ -44,6 +46,11 @@ public:
 
 	bool IsDungeonInstance() const { return _fieldId == FieldId::Dungeon; }
 	int32 GetPlayerCount() const { return static_cast<int32>(_players.size()); }
+
+	// 데이터 기반 룸 설정 조회
+	bool CanUseSkill() const;
+	bool ShouldSpawnMonsters() const;
+	uint32 GetRespawnTime() const;
 
 public:
 	// PacketHandler
@@ -69,18 +76,23 @@ public:
 	MonsterRef GetMonsterAt(Vec2Int cellPos);
 
 private:
-	void SpawnDungeonMonsters();
+	// 데이터 기반 스폰/리스폰
+	void SpawnMonstersFromData();
 
 	struct RespawnRequest
 	{
 		uint64 when;
 		Vec2Int homePos;
+		int32 templateId;
+		int32 level;
+		int32 aggroRange;
+		int32 leashRange;
 	};
 
 	vector<RespawnRequest> _respawnQueue;
-	
-	void ReserveMonsterRespawn(Vec2Int homePos);
-	void ProcessRespawn();
+
+	void ReserveMonsterRespawn(const RespawnRequest& req);
+	void ProcessRespawnFromData();
 
 private:
 	void Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
@@ -109,5 +121,8 @@ private:
 	Mutex _jobLock;
 	queue<function<void()>> _jobs;
 
-	unique_ptr<IRoomLogic> _logic;
+	// 데이터 기반 멤버
+	const RoomConfigData* _config = nullptr;
+	const RoomSpawnConfig* _spawnConfig = nullptr;
+	string _roomIdStr;
 };

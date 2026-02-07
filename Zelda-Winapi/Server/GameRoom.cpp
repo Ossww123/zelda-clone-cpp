@@ -7,7 +7,8 @@
 #include "Arrow.h"
 #include "GameSession.h"
 #include "GameRoomManager.h"
-#include "IRoomLogic.h"
+#include "RoomConfig.h"
+#include "RoomDataManager.h"
 
 GameRoom::GameRoom()
 {
@@ -17,15 +18,34 @@ GameRoom::~GameRoom()
 {
 }
 
-void GameRoom::SetLogic(unique_ptr<IRoomLogic> logic)
+void GameRoom::InitFromConfig(const string& roomId)
 {
-	_logic = move(logic);
+	_roomIdStr = roomId;
+	_config = GRoomDataManager.GetRoomConfig(roomId);
+	_spawnConfig = GRoomDataManager.GetSpawnConfig(roomId);
+
+	if (!_config)
+	{
+		cout << "[GameRoom] ERROR: Room config not found for: " << roomId << endl;
+		return;
+	}
+
+	// íƒ€ì¼ë§µ ë¡œë“œ
+	LoadMap(_config->tilemapPath.c_str());
+
+	// ëª¬ìŠ¤í„° ìŠ¤í° (ì„¤ì •ì— ë”°ë¼)
+	if (_config->monsterSpawnEnabled && _spawnConfig)
+	{
+		SpawnMonstersFromData();
+	}
+
+	cout << "[GameRoom] Initialized room: " << roomId << " (SkillEnabled=" << _config->skillEnabled
+		<< ", MonsterSpawn=" << _config->monsterSpawnEnabled << ")" << endl;
 }
 
 void GameRoom::Init()
 {
-	if (_logic)
-		_logic->OnInit(*this);
+	// ë ˆê±°ì‹œ ë¡œì§ ì œê±°ë¨
 }
 
 void GameRoom::Update()
@@ -61,15 +81,18 @@ void GameRoom::Update()
 		obj->Update();
 	}
 
-	if (_logic)
-		_logic->OnUpdate(*this);
+	// ë°ì´í„° ê¸°ë°˜ ë¦¬ìŠ¤í° ì²˜ë¦¬
+	if (ShouldSpawnMonsters())
+	{
+		ProcessRespawnFromData();
+	}
 }
 
 void GameRoom::EnterRoom(GameSessionRef session)
 {
 	PlayerRef player = GameObject::CreatePlayer();
 
-	// ¼­·ÎÀÇ Á¸Àç¸¦ ¿¬°á/
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ç¸¦ ï¿½ï¿½ï¿½ï¿½/
 	session->gameRoom = GetRoomRef();
 	session->player = player;
 	player->session = session;
@@ -78,12 +101,12 @@ void GameRoom::EnterRoom(GameSessionRef session)
 	player->info.set_posx(5);
 	player->info.set_posy(5);
 
-	// ÀÔÀåÇÑ Å¬¶ó¿¡°Ô Á¤º¸¸¦ º¸³»ÁÖ±â
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ó¿¡°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
 	{
 		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_MyPlayer(player->info);
 		session->Send(sendBuffer);
 	}
-	// ¸ğµç ¿ÀºêÁ§Æ® Á¤º¸ Àü¼Û
+	// ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	{
 		Protocol::S_AddObject pkt;
 
@@ -122,8 +145,16 @@ void GameRoom::LeaveRoom(GameSessionRef session)
 	uint64 id = session->player.lock()->info.objectid();
 	RemoveObject(id);
 
-	if (_logic)
-		_logic->OnLeaveRoom(*this, session);
+	// ë¹ˆ ë˜ì „ ì¸ìŠ¤í„´ìŠ¤ ìë™ ì œê±°
+	if (IsDungeonInstance() && GetPlayerCount() == 0)
+	{
+		uint64 instanceId = GetInstanceId();
+		if (instanceId != 0)
+		{
+			GRoomManager.RequestRemoveDungeonInstance(instanceId);
+			cout << "[GameRoom] Requested removal of empty dungeon instance: " << instanceId << endl;
+		}
+	}
 }
 
 GameObjectRef GameRoom::FindObject(uint64 id)
@@ -181,6 +212,13 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack&
 	if (!attacker)
 		return;
 
+	// ìŠ¤í‚¬ ì‚¬ìš© ê°€ëŠ¥ ì—¬ë¶€ ì²´í¬ (íƒ€ìš´ì—ì„œëŠ” ê¸ˆì§€)
+	if (!CanUseSkill())
+	{
+		cout << "[GameRoom] Attack blocked in room: " << _roomIdStr << " (SkillEnabled=false)" << endl;
+		return;
+	}
+
 	BroadcastAttack(attacker, pkt);
 
 	Protocol::WEAPON_TYPE weaponType = pkt.weapontype();
@@ -233,7 +271,7 @@ void GameRoom::AddObject(GameObjectRef gameObject)
 
 	gameObject->room = GetRoomRef();
 
-	// ½Å±Ô ¿ÀºêÁ§Æ® Á¤º¸ Àü¼Û
+	// ï¿½Å±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	{
 		Protocol::S_AddObject pkt;
 
@@ -251,8 +289,21 @@ void GameRoom::RemoveObject(uint64 id)
 	if (gameObject == nullptr)
 		return;
 
-	if (_logic)
-		_logic->OnBeforeRemoveObject(*this, gameObject);
+	// ë°ì´í„° ê¸°ë°˜ ëª¬ìŠ¤í„° ë¦¬ìŠ¤í° ì˜ˆì•½
+	if (gameObject->info.objecttype() == Protocol::OBJECT_TYPE_MONSTER && ShouldSpawnMonsters())
+	{
+		MonsterRef monster = static_pointer_cast<Monster>(gameObject);
+
+		RespawnRequest req;
+		req.when = GetTickCount64() + GetRespawnTime();
+		req.homePos = monster->GetHomePos();
+		req.templateId = monster->GetTemplateId();
+		req.level = 1; // TODO: ë ˆë²¨ ì‹œìŠ¤í…œ êµ¬í˜„ ì‹œ ë³€ê²½
+		req.aggroRange = monster->GetAggroRange();
+		req.leashRange = monster->GetLeashRange();
+
+		ReserveMonsterRespawn(req);
+	}
 
 	switch (gameObject->info.objecttype())
 	{
@@ -271,7 +322,7 @@ void GameRoom::RemoveObject(uint64 id)
 
 	gameObject->room = nullptr;
 
-	// ¿ÀºêÁ§Æ® »èÁ¦ Àü¼Û
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	{
 		Protocol::S_RemoveObject pkt;
 		pkt.add_ids(id);
@@ -322,7 +373,7 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 	map<Vec2Int, int32> best;
 	map<Vec2Int, Vec2Int> parent;
 
-	// ÃÊ±â°ª
+	// ï¿½Ê±â°ª
 	{
 		int32 cost = abs(dest.y - src.y) + abs(dest.x - src.x);
 
@@ -343,22 +394,22 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 
 	while (pq.empty() == false)
 	{
-		// Á¦ÀÏ ÁÁÀº ÈÄº¸¸¦ Ã£´Â´Ù
+		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Äºï¿½ï¿½ï¿½ Ã£ï¿½Â´ï¿½
 		PQNode node = pq.top();
 		pq.pop();
 
-		// ´õ ÂªÀº °æ·Î¸¦ µÚ´Ê°Ô Ã£¾Ò´Ù¸é ½ºÅµ
+		// ï¿½ï¿½ Âªï¿½ï¿½ ï¿½ï¿½Î¸ï¿½ ï¿½Ú´Ê°ï¿½ Ã£ï¿½Ò´Ù¸ï¿½ ï¿½ï¿½Åµ
 		if (best[node.pos] < node.cost)
 			continue;
 
-		// ¸ñÀûÁö¿¡ µµÂøÇßÀ¸¸é ¹Ù·Î Á¾·á
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù·ï¿½ ï¿½ï¿½ï¿½ï¿½
 		if (node.pos == dest)
 		{
 			found = true;
 			break;
 		}
 
-		// ¹æ¹®
+		// ï¿½æ¹®
 		for (int32 dir = 0; dir < 4; dir++)
 		{
 			Vec2Int nextPos = node.pos + front[dir];
@@ -374,12 +425,12 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 			int32 bestValue = best[nextPos];
 			if (bestValue != 0)
 			{
-				// ´Ù¸¥ °æ·Î¿¡¼­ ´õ ºü¸¥ ±æÀ» Ã£¾ÒÀ¸¸é ½ºÅµ
+				// ï¿½Ù¸ï¿½ ï¿½ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Åµ
 				if (bestValue <= cost)
 					continue;
 			}
 
-			// ¿¹¾à ÁøÇà
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 			best[nextPos] = cost;
 			pq.push(PQNode(cost, nextPos));
 			parent[nextPos] = node.pos;
@@ -395,7 +446,7 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 			Vec2Int pos = item.first;
 			int32 score = item.second;
 
-			// µ¿Á¡ÀÌ¶ó¸é, ÃÖÃÊ À§Ä¡¿¡¼­ °¡Àå ´ú ÀÌµ¿ÇÏ´Â ÂÊÀ¸·Î
+			// ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ìµï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (bestScore == score)
 			{
 				int32 dist1 = abs(dest.x - src.x) + abs(dest.y - src.y);
@@ -418,7 +469,7 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 	{
 		path.push_back(pos);
 
-		// ½ÃÀÛÁ¡
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (pos == parent[pos])
 			break;
 
@@ -447,7 +498,7 @@ Vec2Int GameRoom::GetRandomEmptyCellPos()
 
 	Vec2Int size = _tilemap.GetMapSize();
 
-	// ¸î ¹ø ½Ãµµ?
+	// ï¿½ï¿½ ï¿½ï¿½ ï¿½Ãµï¿½?
 	while (true)
 	{
 		int32 x = rand() % size.x;
@@ -517,73 +568,6 @@ MonsterRef GameRoom::GetMonsterAt(Vec2Int cellPos)
 	}
 
 	return nullptr;
-}
-
-void GameRoom::SpawnDungeonMonsters()
-{
-	Vec2Int anchorUR = { 30, 5 };   // ¿ì»ó
-	Vec2Int anchorDR = { 30, 25 };  // ¿ìÇÏ
-	Vec2Int anchorDL = { 5, 25 };   // ÁÂÇÏ
-
-	Vec2Int offsets[3] = { {0,0}, {1,0}, {0,1} };
-
-	auto spawnGroup = [&](Vec2Int anchor)
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				Vec2Int pos = anchor + offsets[i];
-
-				if (CanGo(pos) == false)
-					pos = GetRandomEmptyCellPos();
-
-				MonsterRef m = GameObject::CreateMonster();
-				m->SetHomePos(pos);
-				m->SetCellPos(pos);
-				AddObject(m);
-			}
-		};
-
-	spawnGroup(anchorUR);
-	spawnGroup(anchorDR);
-	spawnGroup(anchorDL);
-}
-
-
-void GameRoom::ReserveMonsterRespawn(Vec2Int homePos)
-{
-	RespawnRequest req;
-	req.when = GetTickCount64() + 10000; // 10ÃÊ
-	req.homePos = homePos;
-	_respawnQueue.push_back(req);
-}
-
-void GameRoom::ProcessRespawn()
-{
-	if (!IsDungeonInstance())
-		return;
-
-	uint64 now = GetTickCount64();
-
-	for (auto it = _respawnQueue.begin(); it != _respawnQueue.end(); )
-	{
-		if (now < it->when)
-		{
-			++it;
-			continue;
-		}
-
-		Vec2Int pos = it->homePos;
-
-		if (CanGo(pos) == false)
-			pos = GetRandomEmptyCellPos();
-
-		MonsterRef m = GameObject::CreateMonster();
-		m->SetHomePos(pos);
-		m->SetCellPos(pos);
-		AddObject(m);
-
-		it = _respawnQueue.erase(it);
-	}
 }
 
 void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
@@ -698,4 +682,145 @@ void GameRoom::BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 da
 
 	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
 	Broadcast(sendBuffer);
+}
+
+// ë°ì´í„° ê¸°ë°˜ ë£¸ ì„¤ì • ì¡°íšŒ
+bool GameRoom::CanUseSkill() const
+{
+	if (_config)
+		return _config->skillEnabled;
+	return true; // ê¸°ë³¸ê°’: í—ˆìš©
+}
+
+bool GameRoom::ShouldSpawnMonsters() const
+{
+	if (_config)
+		return _config->monsterSpawnEnabled;
+	return false; // ê¸°ë³¸ê°’: ìŠ¤í° ì•ˆí•¨
+}
+
+uint32 GameRoom::GetRespawnTime() const
+{
+	if (_config)
+		return _config->respawnTimeMs;
+	return 10000; // ê¸°ë³¸ê°’: 10ì´ˆ
+}
+
+// ë°ì´í„° ê¸°ë°˜ ëª¬ìŠ¤í„° ìŠ¤í°
+void GameRoom::SpawnMonstersFromData()
+{
+	if (!_spawnConfig)
+	{
+		cout << "[GameRoom] ERROR: _spawnConfig is null! Cannot spawn monsters." << endl;
+		return;
+	}
+
+	cout << "[GameRoom] Starting monster spawn. Spawn groups: " << _spawnConfig->spawns.size() << endl;
+
+	for (const auto& spawnGroup : _spawnConfig->spawns)
+	{
+		cout << "[GameRoom] Processing spawn group: " << spawnGroup.groupId
+			<< " at (" << spawnGroup.anchor.x << ", " << spawnGroup.anchor.y << ")" << endl;
+
+		Vec2Int anchor = spawnGroup.anchor;
+		int offsetIndex = 0;
+
+		cout << "[GameRoom] Monster types in this group: " << spawnGroup.monsters.size() << endl;
+
+		for (const auto& monsterInfo : spawnGroup.monsters)
+		{
+			cout << "[GameRoom] Monster templateId=" << monsterInfo.templateId
+				<< ", count=" << monsterInfo.count << endl;
+
+			// MonsterTemplateì—ì„œ ìŠ¤íƒ¯ ë¡œë“œ
+			const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(monsterInfo.templateId);
+			if (!templateData)
+			{
+				cout << "[GameRoom] ERROR: MonsterTemplate not found: " << monsterInfo.templateId << endl;
+				continue;
+			}
+
+			for (int i = 0; i < monsterInfo.count; ++i)
+			{
+				if (offsetIndex >= spawnGroup.offsets.size())
+				{
+					cout << "[GameRoom] WARNING: Not enough offsets for monster count in group: " << spawnGroup.groupId << endl;
+					break;
+				}
+
+				Vec2Int pos = anchor + spawnGroup.offsets[offsetIndex];
+				offsetIndex++;
+
+				if (!CanGo(pos))
+					pos = GetRandomEmptyCellPos();
+
+				MonsterRef m = GameObject::CreateMonster();
+				m->SetHomePos(pos);
+				m->SetCellPos(pos);
+				m->SetAggroRange(monsterInfo.aggroRange);
+				m->SetLeashRange(monsterInfo.leashRange);
+				m->SetTemplateId(monsterInfo.templateId);
+
+				// MonsterTemplate ìŠ¤íƒ¯ ì ìš©
+				m->info.set_name(templateData->name);
+				m->info.set_maxhp(templateData->maxHp);
+				m->info.set_hp(templateData->maxHp);
+				m->info.set_attack(templateData->attack);
+				m->info.set_defence(templateData->defence);
+
+				AddObject(m);
+			}
+		}
+	}
+
+	cout << "[GameRoom] Spawned " << _monsters.size() << " monsters from data" << endl;
+}
+
+// ë°ì´í„° ê¸°ë°˜ ë¦¬ìŠ¤í° ì²˜ë¦¬
+void GameRoom::ReserveMonsterRespawn(const RespawnRequest& req)
+{
+	_respawnQueue.push_back(req);
+}
+
+void GameRoom::ProcessRespawnFromData()
+{
+	uint64 now = GetTickCount64();
+
+	for (auto it = _respawnQueue.begin(); it != _respawnQueue.end(); )
+	{
+		if (now < it->when)
+		{
+			++it;
+			continue;
+		}
+
+		Vec2Int pos = it->homePos;
+
+		if (!CanGo(pos))
+			pos = GetRandomEmptyCellPos();
+
+		// MonsterTemplateì—ì„œ ìŠ¤íƒ¯ ë¡œë“œ
+		const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(it->templateId);
+
+		MonsterRef m = GameObject::CreateMonster();
+		m->SetHomePos(pos);
+		m->SetCellPos(pos);
+		m->SetAggroRange(it->aggroRange);
+		m->SetLeashRange(it->leashRange);
+		m->SetTemplateId(it->templateId);
+
+		// MonsterTemplate ìŠ¤íƒ¯ ì ìš©
+		if (templateData)
+		{
+			m->info.set_name(templateData->name);
+			m->info.set_maxhp(templateData->maxHp);
+			m->info.set_hp(templateData->maxHp);
+			m->info.set_attack(templateData->attack);
+			m->info.set_defence(templateData->defence);
+		}
+
+		AddObject(m);
+
+		it = _respawnQueue.erase(it);
+	}
 }

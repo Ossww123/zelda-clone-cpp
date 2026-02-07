@@ -1,9 +1,7 @@
 #include "pch.h"
 #include "GameRoomManager.h"
 #include "GameRoom.h"
-#include "IRoomLogic.h"
-#include "TownLogic.h"
-#include "DungeonLogic.h"
+#include "RoomDataManager.h"
 
 GameRoomManager GRoomManager;
 
@@ -17,13 +15,18 @@ GameRoomManager::~GameRoomManager()
 
 void GameRoomManager::Init()
 {
+    if (!GRoomDataManager.LoadAllData())
+    {
+        cout << "[GameRoomManager] ERROR: Failed to load room data!" << endl;
+        return;
+    }
+
     {
         GameRoomRef room = make_shared<GameRoom>();
         room->SetFieldId(FieldId::Town);
         room->SetChannel(1);
         room->SetInstanceId(0);
-        room->SetLogic(make_unique<TownLogic>());
-        room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
+        room->InitFromConfig("town_1");
         room->Init();
         _staticRooms[{FieldId::Town, 1}] = room;
     }
@@ -33,28 +36,26 @@ void GameRoomManager::Init()
         room->SetFieldId(FieldId::Town);
         room->SetChannel(2);
         room->SetInstanceId(0);
-        room->SetLogic(make_unique<TownLogic>());
-        room->LoadMap(L"../Resources/Tilemap/Tilemap_01.txt");
+        room->InitFromConfig("town_2");
         room->Init();
         _staticRooms[{FieldId::Town, 2}] = room;
     }
+
+    cout << "[GameRoomManager] Initialized " << _staticRooms.size() << " static rooms" << endl;
 }
 
 void GameRoomManager::Update()
 {
-    // 마을 룸 업데이트
     for (auto& kv : _staticRooms)
     {
         kv.second->Update();
     }
 
-    // 던전 룸 업데이트
     for (auto& kv : _dungeonInstances)
     {
         kv.second->Update();
     }
 
-    // 던전 삭제 (Update 마지막에)
     if (_pendingRemoveDungeon.empty() == false)
     {
         for (uint64 instanceId : _pendingRemoveDungeon)
@@ -76,17 +77,24 @@ GameRoomRef GameRoomManager::GetStaticRoom(FieldId field, int32 channel)
 
 uint64 GameRoomManager::CreateDungeonInstance()
 {
+    return CreateDungeonInstance("dungeon_snake");
+}
+
+uint64 GameRoomManager::CreateDungeonInstance(const string& roomId)
+{
     uint64 instanceId = _instanceIdGen++;
 
     GameRoomRef room = make_shared<GameRoom>();
     room->SetFieldId(FieldId::Dungeon);
     room->SetChannel(0);
     room->SetInstanceId(instanceId);
-    room->SetLogic(make_unique<DungeonLogic>());
-    room->LoadMap(L"../Resources/Tilemap/Tilemap_02.txt");
+    room->InitFromConfig(roomId);
     room->Init();
 
     _dungeonInstances[instanceId] = room;
+
+    cout << "[GameRoomManager] Created dungeon instance: " << roomId << " (ID=" << instanceId << ")" << endl;
+
     return instanceId;
 }
 
@@ -101,7 +109,16 @@ GameRoomRef GameRoomManager::GetDungeonInstance(uint64 instanceId)
 
 void GameRoomManager::RemoveDungeonInstance(uint64 instanceId)
 {
-    _dungeonInstances.erase(instanceId);
+    auto it = _dungeonInstances.find(instanceId);
+    if (it != _dungeonInstances.end())
+    {
+        _dungeonInstances.erase(instanceId);
+        cout << "[GameRoomManager] Dungeon instance removed: " << instanceId << endl;
+    }
+    else
+    {
+        cout << "[GameRoomManager] WARNING: Dungeon instance not found: " << instanceId << endl;
+    }
 }
 
 void GameRoomManager::RequestRemoveDungeonInstance(uint64 instanceId)
