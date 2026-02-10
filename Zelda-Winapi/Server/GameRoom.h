@@ -34,7 +34,7 @@ public:
 	void LoadMap(const wchar_t* path);
 
 public:
-	// ����/�ʵ�
+
 	void SetFieldId(FieldId id) { _fieldId = id; }
 	FieldId GetFieldId() const { return _fieldId; }
 

@@ -92,7 +92,6 @@ void GameRoom::EnterRoom(GameSessionRef session)
 {
 	PlayerRef player = GameObject::CreatePlayer();
 
-	// ������ ���縦 ����/
 	session->gameRoom = GetRoomRef();
 	session->player = player;
 	player->session = session;
@@ -101,12 +100,11 @@ void GameRoom::EnterRoom(GameSessionRef session)
 	player->info.set_posx(5);
 	player->info.set_posy(5);
 
-	// ������ Ŭ�󿡰� ������ �����ֱ�
 	{
 		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_MyPlayer(player->info);
 		session->Send(sendBuffer);
 	}
-	// ��� ������Ʈ ���� ����
+
 	{
 		Protocol::S_AddObject pkt;
 
