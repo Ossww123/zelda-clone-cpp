@@ -45,7 +45,6 @@ void Monster::UpdateIdle()
 
 	Vec2Int myPos = GetCellPos();
 
-	// homeø°º≠ ≥ π´ ∏÷æÓ¡≥¿∏∏È
 	{
 		Vec2Int dh = myPos - _homePos;
 		int32 distHome = abs(dh.x) + abs(dh.y);
@@ -78,7 +77,6 @@ void Monster::UpdateIdle()
 
 	PlayerRef target = _target.lock();
 
-	// target ¿Ã æ¯¿ª ∂ß µπæ∆∞°±‚
 	if (target == nullptr)
 	{
 		if (myPos != _homePos)
@@ -102,14 +100,12 @@ void Monster::UpdateIdle()
 		return;
 	}
 
-	// ≈∏∞Ÿ¿Ã √ﬂ¿˚ π¸¿ß π€¿œ ∂ß
 	Vec2Int dt = target->GetCellPos() - myPos;
 	int32 distTarget = abs(dt.x) + abs(dt.y);
 	if (distTarget > _aggroRange)
 	{
 		_target.reset();
 
-		// home¿∏∑Œ ∫π±Õ
 		if (myPos != _homePos)
 		{
 			vector<Vec2Int> path;
@@ -131,12 +127,31 @@ void Monster::UpdateIdle()
 		return;
 	}
 
-	// ±Ÿ¡¢ Ω√ ∞¯∞›
 	if (distTarget == 1)
 	{
 		SetDir(GetLookAtDir(target->GetCellPos()));
 		SetState(SKILL, true);
 		_waitUntil = GetTickCount64() + 1000;
+
+		// Îç∞ÎØ∏ÏßÄ Ï≤òÎ¶¨
+		GameObjectRef selfObj = room->FindObject(info.objectid());
+		CreatureRef self = std::dynamic_pointer_cast<Creature>(selfObj);
+		if (self)
+		{
+			int32 damage = 0;
+			if (target->OnDamaged(self, damage))
+			{
+				Protocol::S_Damaged dmgPkt;
+				dmgPkt.set_attackerid(info.objectid());
+				dmgPkt.set_targetid(target->info.objectid());
+				dmgPkt.set_damage(damage);
+				dmgPkt.set_newhp(target->info.hp());
+
+				SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
+				room->Broadcast(sendBuffer);
+			}
+		}
+
 		return;
 	}
 
