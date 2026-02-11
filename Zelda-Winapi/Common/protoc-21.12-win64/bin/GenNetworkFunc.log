@@ -1,7 +1,7 @@
 [OK] Updated enum/decls/switch blocks (merge). Implementations untouched.
 [INFO] Proto: C:\Users\User\Desktop\zelda\zelda-clone-cpp\Zelda-Winapi\Common\protoc-21.12-win64\bin\Protocol.proto
-[INFO] New messages: ['S_GainExp', 'S_LevelUp']
-  - S_GainExp = 210
-    params: uint64 playerId , int32 gainedExp , int32 currentExp , int32 maxExp
-  - S_LevelUp = 211
-    params: uint64 playerId , int32 newLevel , int32 maxHp , int32 attack , int32 defence , int32 maxExp
+[INFO] New messages: ['C_Turn', 'S_Turn']
+  - C_Turn = 104
+    params: const Protocol::DIR_TYPE& dir
+  - S_Turn = 212
+    params: const Protocol::ObjectInfo& info

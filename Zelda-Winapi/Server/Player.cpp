@@ -41,6 +41,7 @@ Player::~Player()
 
 void Player::Update()
 {
+	Super::Update();
 }
 
 int32 Player::GetMaxExp() const

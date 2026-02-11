@@ -33,8 +33,16 @@ public:
 	void BroadcastMove();
 
 public:
+	void StartMove(uint64 now, uint64 durationMs);
+	void StopMove();
+	bool IsMoving() const { return _moveEndTick != 0; }
+
+public:
 	Protocol::ObjectInfo info;
 	GameRoomRef room;
+
+protected:
+	uint64 _moveEndTick = 0;
 
 private:
 	static atomic<uint64> s_idGenerator;

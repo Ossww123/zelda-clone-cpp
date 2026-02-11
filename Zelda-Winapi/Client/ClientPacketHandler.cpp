@@ -48,13 +48,21 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	case S_LevelUp:
 		Handle_S_LevelUp ( session , buffer , len );
 		break;
+	case S_Turn:
+		Handle_S_Turn ( session , buffer , len );
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
+
+
+
 
 	// [AUTO-GEN SWITCH END]
 	default:
 		break;
 	}
 }
+
+// **** HANDLE ****
 
 void ClientPacketHandler::Handle_S_TEST( ServerSessionRef session, BYTE* buffer, int32 len)
 {
@@ -153,20 +161,30 @@ void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffe
 	const Protocol::ObjectInfo& info = pkt.info ( );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
-	if ( scene )
-	{
-		uint64 myPlayerId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
-		if ( myPlayerId == info.objectid ( ) )
-			return;
+	if ( scene == nullptr )
+		return;
 
-		GameObject* gameObject = scene->GetObjectW ( info.objectid ( ) );
-		if (gameObject )
+	GameObject* gameObject = scene->GetObjectW ( info.objectid ( ) );
+	if ( gameObject == nullptr )
+		return;
+
+	uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+	if ( myId == info.objectid ( ) )
+	{
+		if ( info.state ( ) == IDLE )
 		{
-			gameObject->SetDir ( info.dir ( ) );
-			gameObject->SetState ( info.state ( ) );
-			gameObject->SetCellPos ( Vec2Int{ info.posx ( ) , info.posy ( ) } );
+			if ( auto mp = dynamic_cast< MyPlayer* >( gameObject ) )
+			{
+				mp->OnServerAck ( );
+				mp->OnServerMoveEndAck ( );
+			}
+
 		}
 	}
+
+	gameObject->SetDir ( info.dir ( ) );
+	gameObject->SetState ( info.state ( ) );
+	gameObject->SetCellPos ( Vec2Int{ info.posx ( ) , info.posy ( ) } );
 }
 
 void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -225,10 +243,13 @@ void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* bu
 void ClientPacketHandler::Handle_S_ChangeMap ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
+	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_ChangeMap pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	//
 
 	if ( pkt.success ( ) == false )
 	{
@@ -244,42 +265,16 @@ void ClientPacketHandler::Handle_S_ChangeMap ( ServerSessionRef session , BYTE* 
 	GET_SINGLE ( SceneManager )->SetMyPlayer ( nullptr );
 }
 
-
-SendBufferRef ClientPacketHandler::Make_C_Move ( Protocol::DIR_TYPE dir , int32 x , int32 y  )
-{
-	Protocol::C_Move pkt;
-	pkt.set_dir ( dir );
-	pkt.set_targetx ( x );
-	pkt.set_targety ( y );
-
-	return MakeSendBuffer ( pkt , C_Move );
-}
-
-SendBufferRef ClientPacketHandler::Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon )
-{
-	Protocol::C_Attack pkt;
-	pkt.set_dir ( dir );
-	pkt.set_weapontype ( weapon );
-
-	return MakeSendBuffer ( pkt , C_Attack );
-}
-
-SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel )
-{
-	Protocol::C_ChangeMap pkt;
-	pkt.set_mapid ( mapId );
-	pkt.set_channel ( channel );
-
-	return MakeSendBuffer ( pkt , C_ChangeMap );
-}
-
 void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
+	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_GainExp pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	//
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -297,10 +292,13 @@ void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* bu
 void ClientPacketHandler::Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
+	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_LevelUp pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	//
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene == nullptr )
@@ -324,4 +322,74 @@ void ClientPacketHandler::Handle_S_LevelUp ( ServerSessionRef session , BYTE* bu
 	Protocol::PlayerExtra* extra = creature->info.mutable_player ( );
 	extra->set_level ( pkt.newlevel ( ) );
 	extra->set_maxexp ( pkt.maxexp ( ) );
+}
+
+void ClientPacketHandler::Handle_S_Turn ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_Turn pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	const Protocol::ObjectInfo& info = pkt.info ( );
+
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene == nullptr )
+		return;
+
+	GameObject* gameObject = scene->GetObjectW ( info.objectid ( ) );
+	if ( gameObject == nullptr )
+		return;
+
+	uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+	if ( myId == info.objectid ( ) )
+	{
+		if ( auto mp = dynamic_cast< MyPlayer* >( gameObject ) )
+		{
+			mp->OnServerAck ( );
+			mp->OnServerTurnAck ( );
+		}
+	}
+
+	gameObject->SetDir ( info.dir ( ) );
+	gameObject->SetState ( info.state ( ) );
+}
+
+
+
+// **** MAKE ****
+
+SendBufferRef ClientPacketHandler::Make_C_Move ( Protocol::DIR_TYPE dir )
+{
+	Protocol::C_Move pkt;
+	pkt.set_dir ( dir );
+
+	return MakeSendBuffer ( pkt , C_Move );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon )
+{
+	Protocol::C_Attack pkt;
+	pkt.set_dir ( dir );
+	pkt.set_weapontype ( weapon );
+
+	return MakeSendBuffer ( pkt , C_Attack );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel )
+{
+	Protocol::C_ChangeMap pkt;
+	pkt.set_mapid ( mapId );
+	pkt.set_channel ( channel );
+
+	return MakeSendBuffer ( pkt , C_ChangeMap );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Turn ( const Protocol::DIR_TYPE& dir )
+{
+	Protocol::C_Turn pkt;
+	pkt.set_dir ( dir );
+
+	return MakeSendBuffer ( pkt , C_Turn );
 }

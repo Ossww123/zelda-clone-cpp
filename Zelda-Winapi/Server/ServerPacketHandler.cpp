@@ -25,7 +25,17 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	case C_ChangeMap:
 		Handle_C_ChangeMap(session, buffer, len);
 		break;
+	case C_Turn:
+		Handle_C_Turn(session, buffer, len);
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
+
+
+
+
+		
+
+
 
 
 
@@ -37,6 +47,7 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	}
 }
 
+int a = 0;
 void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len)
 {
 	PacketHeader* header = (PacketHeader*)buffer;
@@ -55,6 +66,8 @@ void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, in
 		{
 			gameRoom->Handle_C_Move(session, pkt);
 		});
+
+	cout << "Handle_C_Move Count " << ++a << endl;
 }
 
 void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len)
@@ -137,6 +150,29 @@ void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffe
 					to->EnterRoom(session);
 				});
 		});
+}
+
+int b = 0;
+void ServerPacketHandler::Handle_C_Turn(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	PacketHeader* header = (PacketHeader*)buffer;
+	//uint16 id = header->id;
+	uint16 size = header->size;
+
+	Protocol::C_Turn pkt;
+	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+
+	//
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([gameRoom, session, pkt]()
+		{
+			gameRoom->Handle_C_Turn(session, pkt);
+		});
+
+	cout << "Handle_C_Turn Count " << ++b << endl;
 }
 
 
@@ -232,4 +268,9 @@ SendBufferRef ServerPacketHandler::Make_S_GainExp(const Protocol::S_GainExp& pkt
 SendBufferRef ServerPacketHandler::Make_S_LevelUp(const Protocol::S_LevelUp& pkt)
 {
 	return MakeSendBuffer(pkt, S_LevelUp);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_Turn(const Protocol::S_Turn& pkt)
+{
+	return MakeSendBuffer(pkt, S_Turn);
 }

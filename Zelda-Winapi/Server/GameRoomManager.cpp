@@ -44,16 +44,16 @@ void GameRoomManager::Init()
     cout << "[GameRoomManager] Initialized " << _staticRooms.size() << " static rooms" << endl;
 }
 
-void GameRoomManager::Update()
+void GameRoomManager::Update(uint64 now)
 {
     for (auto& kv : _staticRooms)
     {
-        kv.second->Update();
+        kv.second->Update(now);
     }
 
     for (auto& kv : _dungeonInstances)
     {
-        kv.second->Update();
+        kv.second->Update(now);
     }
 
     if (_pendingRemoveDungeon.empty() == false)
