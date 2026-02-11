@@ -25,8 +25,12 @@ public:
 	void InitFromConfig(const string& roomId);
 
 	void Init();
-	void Update();
+	void Update(uint64 now);
 
+private:
+	void Step(uint64 now);
+
+public:
 	void EnterRoom(GameSessionRef session);
 	void LeaveRoom(GameSessionRef session);
 	GameObjectRef FindObject(uint64 id);
@@ -55,6 +59,7 @@ public:
 public:
 	// PacketHandler
 	void Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt);
+	void Handle_C_Turn(GameSessionRef session, const Protocol::C_Turn& pkt);
 	void Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack& pkt);
 
 public:
@@ -128,4 +133,9 @@ private:
 	const RoomConfigData* _config = nullptr;
 	const RoomSpawnConfig* _spawnConfig = nullptr;
 	string _roomIdStr;
+
+	private:
+		static constexpr uint32 kTickMs = 50;     // 20Hz
+		static constexpr uint32 kMaxCatchUp = 5;
+		uint64 _nextTick = 0;
 };

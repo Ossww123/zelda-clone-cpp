@@ -5,6 +5,7 @@ enum
 	C_Move = 101 ,
 	C_Attack = 102 ,
 	C_ChangeMap = 103 ,
+	C_Turn = 104 ,
 
 	S_TEST = 201 ,
 	S_EnterGame = 202 ,
@@ -15,9 +16,12 @@ enum
 	S_Attack = 207 ,
 	S_Damaged = 208 ,
 	S_ChangeMap = 209 ,
-	// [AUTO-GEN ENUM BEGIN]
 	S_GainExp = 210 ,
 	S_LevelUp = 211 ,
+	S_Turn = 212 ,
+	// [AUTO-GEN ENUM BEGIN]
+
+
 
 
 
@@ -41,12 +45,18 @@ public:
 	static void Handle_S_ChangeMap ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_Turn ( ServerSessionRef session , BYTE* buffer , int32 len );
 
 	// 보내기
-	static SendBufferRef Make_C_Move ( Protocol::DIR_TYPE dir , int32 x , int32 y );
+	static SendBufferRef Make_C_Move ( Protocol::DIR_TYPE dir );
 	static SendBufferRef Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon );
 	static SendBufferRef Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel );
+	static SendBufferRef Make_C_Turn ( const Protocol::DIR_TYPE& dir );
 	// [AUTO-GEN DECLS BEGIN]
+
+
+	
+
 
 	// [AUTO-GEN DECLS END]
 

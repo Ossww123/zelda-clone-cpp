@@ -36,11 +36,19 @@ message S_RemoveObject
 message C_Move
 {
 	DIR_TYPE dir = 1;
-	int32 targetx = 2;
-	int32 targety = 3;
 }
 
 message S_Move
+{
+	ObjectInfo info = 1;
+}
+
+message C_Turn
+{
+	DIR_TYPE dir = 1;
+}
+
+message S_Turn
 {
 	ObjectInfo info = 1;
 }

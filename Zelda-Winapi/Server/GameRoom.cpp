@@ -48,7 +48,7 @@ void GameRoom::Init()
 	// 레거시 로직 제거됨
 }
 
-void GameRoom::Update()
+void GameRoom::Update(uint64 now)
 {
 	{
 		queue<function<void()>> jobs;
@@ -64,6 +64,24 @@ void GameRoom::Update()
 		}
 	}
 
+	if (_nextTick == 0)
+		_nextTick = now + kTickMs;
+
+	uint32 steps = 0;
+	while (now >= _nextTick && steps < kMaxCatchUp)
+	{
+		Step(_nextTick);
+		_nextTick += kTickMs;
+		steps++;
+	}
+
+	// 너무 밀렸으면 리셋
+	if (now >= _nextTick)
+		_nextTick = now + kTickMs;
+}
+
+void GameRoom::Step(uint64 now)
+{
 	for (auto& item : _players)
 	{
 		item.second->Update();
@@ -187,22 +205,71 @@ void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt
 	if (!player)
 		return;
 
-	GameObjectRef gameObject = player;
-	if (gameObject == nullptr)
+	if (player->info.state() == MOVE)
 		return;
 
-	// TODO : Validation
+	const auto dir = pkt.dir();
+	if (!Protocol::DIR_TYPE_IsValid(static_cast<int>(dir)))
+		return;
 
-	gameObject->info.set_state(MOVE);
-	gameObject->info.set_dir(pkt.dir());
-	gameObject->info.set_posx(pkt.targetx());
-	gameObject->info.set_posy(pkt.targety());
-
+	if (player->info.dir() != dir)
 	{
-		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(gameObject->info);
+		player->info.set_dir(dir);
+		player->info.set_state(IDLE);
+
+		Protocol::S_Turn turnPkt;
+		*turnPkt.mutable_info() = player->info;
+
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Turn(turnPkt);
 		Broadcast(sendBuffer);
+		return;
 	}
+
+	Vec2Int nextPos = player->GetFrontCellPos();
+	if (!CanGo(nextPos))
+	{
+		player->info.set_state(IDLE);
+		return;
+	}
+
+	player->info.set_state(MOVE);
+	player->info.set_posx(nextPos.x);
+	player->info.set_posy(nextPos.y);
+
+	// TEMP : 고정 이동 시간
+	constexpr uint64 kMoveDurationMs = 100;
+	uint64 now = GetTickCount64();
+	player->StartMove(now, kMoveDurationMs);
+
+	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(player->info);
+	Broadcast(sendBuffer);
 }
+
+
+void GameRoom::Handle_C_Turn(GameSessionRef session, const Protocol::C_Turn& pkt)
+{
+	PlayerRef player = session->player.lock();
+	if (!player)
+		return;
+
+	const auto dir = pkt.dir();
+	if (!Protocol::DIR_TYPE_IsValid(static_cast<int>(dir)))
+		return;
+
+	// 이미 같은 방향
+	if (player->info.dir() == dir)
+		return;
+
+	player->info.set_dir(dir);
+	player->info.set_state(IDLE);
+
+	Protocol::S_Turn turnPkt;
+	*turnPkt.mutable_info() = player->info;
+
+	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Turn(turnPkt);
+	Broadcast(sendBuffer);
+}
+
 
 void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack& pkt)
 {

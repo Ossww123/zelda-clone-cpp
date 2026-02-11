@@ -5,6 +5,7 @@ enum
 	C_Move = 101,
 	C_Attack = 102,
 	C_ChangeMap = 103,
+	C_Turn = 104,
 
 	S_TEST = 201,
 	S_EnterGame = 202,
@@ -15,9 +16,12 @@ enum
 	S_Attack = 207,
 	S_Damaged = 208,
 	S_ChangeMap = 209,
+	S_GainExp = 210,
+	S_LevelUp = 211,
+	S_Turn = 212,
 	// [AUTO-GEN ENUM BEGIN]
-	S_GainExp = 210 ,
-	S_LevelUp = 211 ,
+
+
 
 
 
@@ -39,6 +43,7 @@ public:
 	static void Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_ChangeMap(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_Turn(GameSessionRef session, BYTE* buffer, int32 len);
 
 	// 보내기
 	static SendBufferRef Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs);
@@ -52,7 +57,12 @@ public:
 	static SendBufferRef Make_S_ChangeMap(const Protocol::S_ChangeMap& pkt);
 	static SendBufferRef Make_S_GainExp(const Protocol::S_GainExp& pkt);
 	static SendBufferRef Make_S_LevelUp(const Protocol::S_LevelUp& pkt);
+	static SendBufferRef Make_S_Turn(const Protocol::S_Turn& pkt);
 	// [AUTO-GEN DECLS BEGIN]
+
+
+	
+
 
 	// [AUTO-GEN DECLS END]
 

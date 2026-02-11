@@ -32,7 +32,11 @@ void MyPlayer::Tick ( )
 {
 	Super::Tick ( );
 
-	// SyncToServer ( );
+	float dt = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
+	if ( dt > 0.05f ) dt = 0.05f;
+
+	if ( _turnGraceLeft > 0.f )
+		_turnGraceLeft -= dt;
 }
 
 void MyPlayer::Render ( HDC hdc )
@@ -42,44 +46,25 @@ void MyPlayer::Render ( HDC hdc )
 
 void MyPlayer::TickInput ( )
 {
-	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
-
 	_keyPressed = true;
-	Vec2Int deltaXY[ 4 ] = { {0, -1}, {0, 1}, {-1, 0}, {1, 0} };
 
 	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::W ) )
-	{
-		SetDir ( DIR_UP );
-	}
-	else  if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::S ) )
-	{
-		SetDir ( DIR_DOWN );
-	}
+		_wantedDir = DIR_UP;
+	else if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::S ) )
+		_wantedDir = DIR_DOWN;
 	else if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::A ) )
-	{
-		SetDir ( DIR_LEFT );
-	}
+		_wantedDir = DIR_LEFT;
 	else if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::D ) )
-	{
-		SetDir ( DIR_RIGHT );
-	}
+		_wantedDir = DIR_RIGHT;
 	else
-	{
 		_keyPressed = false;
-	}
 
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::KEY_1 ) )
-	{
 		SetWeaponType ( WeaponType::Sword );
-	}
 	else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::KEY_2 ) )
-	{
 		SetWeaponType ( WeaponType::Bow );
-	}
 	else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::KEY_3 ) )
-	{
 		SetWeaponType ( WeaponType::Staff );
-	}
 
 	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::SpaceBar ) )
 	{
@@ -88,23 +73,40 @@ void MyPlayer::TickInput ( )
 	}
 }
 
+
 void MyPlayer::TryMove ( )
 {
 	if ( _keyPressed == false )
 		return;
 
-	Vec2Int deltaXY[ 4 ] = { {0,-1}, {0,1}, {-1,0}, {1,0} };
-
-	Vec2Int nextPos = GetCellPos ( ) + deltaXY[ info.dir ( ) ];
-	if ( CanGo ( nextPos ) == false )
+	if ( _movePending )
 		return;
 
-	SetCellPos ( nextPos );
-	SetState ( MOVE );
+	const auto currentDir = info.dir ( );
+	const auto wantedDir = _wantedDir;
 
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Move ( info.dir ( ) , nextPos.x , nextPos.y );
-	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+	// 방향이 다르면 Turn
+	if ( currentDir != wantedDir )
+	{
+		SendBufferRef sb = ClientPacketHandler::Make_C_Turn ( wantedDir );
+		GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+
+		_keyPressed = false;
+		_movePending = true;
+		return;
+	}
+
+	if ( _turnGraceLeft > 0.f )
+		return;
+
+	// 방향이 같으면 Move
+	SendBufferRef sb = ClientPacketHandler::Make_C_Move ( currentDir );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+
+	_keyPressed = false;
+	_movePending = true;
 }
+
 
 void MyPlayer::TrySkill ( )
 {

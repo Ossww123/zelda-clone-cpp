@@ -9,8 +9,19 @@ atomic<uint64> GameObject::s_idGenerator = 1;
 
 void GameObject::Update()
 {
+	if (info.state() == MOVE && _moveEndTick != 0)
+	{
+		uint64 now = GetTickCount64();
+		if (now >= _moveEndTick)
+		{
+			_moveEndTick = 0;
+			info.set_state(IDLE);
 
+			BroadcastMove();
+		}
+	}
 }
+
 
 PlayerRef GameObject::CreatePlayer()
 {
@@ -117,3 +128,14 @@ void GameObject::BroadcastMove()
 		room->Broadcast(sendBuffer);
 	}
 }
+
+void GameObject::StartMove(uint64 now, uint64 durationMs)
+{
+	_moveEndTick = now + durationMs;
+}
+
+void GameObject::StopMove()
+{
+	_moveEndTick = 0;
+}
+

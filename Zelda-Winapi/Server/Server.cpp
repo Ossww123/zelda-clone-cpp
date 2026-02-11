@@ -34,7 +34,10 @@ int main()
 	while (true)
 	{
 		service->GetIocpCore()->Dispatch(0);
-		GRoomManager.Update();
+		uint64 now = GetTickCount64();
+		GRoomManager.Update(now);
+
+		Sleep(1);
 	}
 
 

@@ -15,7 +15,7 @@ public:
 
     void Init();
 
-    void Update();
+    void Update(uint64 now);
 
     GameRoomRef GetStaticRoom(FieldId field, int32 channel);
     uint64 CreateDungeonInstance();

@@ -25,7 +25,16 @@ private:
 
 	void SyncToServer ( );  // 미사용
 
+public:
+	void OnServerAck ( ) { _movePending = false; }
+	void OnServerTurnAck ( ) { _movePending = false; _turnGraceLeft = TURN_GRACE; }
+	void OnServerMoveEndAck ( ) { _movePending = false; }
+
 private:
 	bool _keyPressed = false;
+	Protocol::DIR_TYPE _wantedDir = DIR_DOWN;
+	bool _movePending = false;
+	float _turnGraceLeft = 0.f;
+	static constexpr float TURN_GRACE = 0.12f;
 };
 
