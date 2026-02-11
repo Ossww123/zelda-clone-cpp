@@ -41,9 +41,9 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage01" , L"Sprite\\Map\\Stage01.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage02" , L"Sprite\\Map\\Stage02.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Tile" , L"Sprite\\Map\\Tile.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Sword" , L"Sprite\\Item\\Sword.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Arrow" , L"Sprite\\Item\\Arrow.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Potion" , L"Sprite\\UI\\Mp.bmp" );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Items" , L"Sprite\\Item\\Items.bmp" , RGB ( 182 , 69 , 166 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Inventory" , L"Sprite\\UI\\Inventory.bmp" , RGB ( 118 , 134 , 255 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerDown" , L"Sprite\\Player\\PlayerDown.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerUp" , L"Sprite\\Player\\PlayerUp.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerLeft" , L"Sprite\\Player\\PlayerLeft.bmp" , RGB ( 128 , 128 , 128 ) );
@@ -79,6 +79,20 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 61 , 63 , 39 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Bow_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 106 , 63 , 39 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Staff_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 151 , 63 , 39 );
+
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 0 , 32 , 32 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_B" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 32 , 0 , 32 , 32 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_C" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 64 , 0 , 32 , 32 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 32 , 32 , 32 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_B" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 32 , 32 , 32 , 32 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_C" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 64 , 32 , 32 , 32 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Potion_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 64 , 32 , 32 );
+
+	// Inventory 슬롯과 Item 스프라이트 크기는 (32, 32)
+	// Inventory의 Sword 장착 슬롯 (98, 38) 위치
+	// Inventory의 Armor 장착 슬롯 (98, 80) 위치
+	// Inventory의 Potion 장착 슬롯 (258, 68) 위치
+	// Inventory의 아이템 보관 슬롯들 시작 위치 (16, 168). 36px간격으로 가로 9, 세로 3 배치
 
 	LoadMap ( );
 	LoadPlayer ( );
