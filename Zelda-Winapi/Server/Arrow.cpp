@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Arrow.h"
 #include "GameRoom.h"
-#include "Creature.h"
 #include "Monster.h"
 #include "Player.h"
 
@@ -76,15 +75,14 @@ void Arrow::UpdateIdle()
 	MonsterRef target = room->GetMonsterAt(nextPos);
 	if (target)
 	{
-		int32 damage = 0;
-
 		GameObjectRef ownerObj = room->FindObject(_ownerId);
-		CreatureRef attacker = std::dynamic_pointer_cast<Creature>(ownerObj);
-
-		if (attacker && target->OnDamaged(attacker, damage))
+		if (ownerObj)
 		{
+			int32 damage = max(1, ownerObj->info.attack() - target->info.defence());
+			target->OnDamaged(damage);
+
 			Protocol::S_Damaged dmgPkt;
-			dmgPkt.set_attackerid(attacker->info.objectid());
+			dmgPkt.set_attackerid(ownerObj->info.objectid());
 			dmgPkt.set_targetid(target->info.objectid());
 			dmgPkt.set_damage(damage);
 			dmgPkt.set_newhp(target->info.hp());
@@ -94,7 +92,7 @@ void Arrow::UpdateIdle()
 
 			if (target->info.hp() == 0)
 			{
-				PlayerRef killer = dynamic_pointer_cast<Player>(attacker);
+				PlayerRef killer = dynamic_pointer_cast<Player>(ownerObj);
 				if (killer)
 					room->DistributeExp(killer, target);
 				room->RemoveObject(target->info.objectid());

@@ -7,6 +7,6 @@ public:
 	Creature();
 	virtual ~Creature();
 
-	virtual bool OnDamaged(CreatureRef attacker, int32& outDamage, float damageMultiplier = 1.0f);
+	bool OnDamaged(int32 damage);
 };
 
