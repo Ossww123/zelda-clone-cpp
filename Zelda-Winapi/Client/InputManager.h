@@ -20,7 +20,8 @@ enum class KeyType
 	S = 'S',
 	D = 'D',
 	Q = 'Q',
-	E = 'E'
+	E = 'E',
+	I = 'I'
 };
 
 enum class KeyState

@@ -41,3 +41,10 @@ message MonsterExtra
 {
 	int32 templateId = 1;
 }
+
+message ItemInfo
+{
+	int32 itemId = 1;
+	int32 count = 2;
+	int32 slot = 3;
+}

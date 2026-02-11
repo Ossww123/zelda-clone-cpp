@@ -6,6 +6,9 @@ enum
 	C_Attack = 102,
 	C_ChangeMap = 103,
 	C_Turn = 104,
+	C_EquipItem = 105,
+	C_UnequipItem = 106,
+	C_UseItem = 107,
 
 	S_TEST = 201,
 	S_EnterGame = 202,
@@ -19,11 +22,12 @@ enum
 	S_GainExp = 210,
 	S_LevelUp = 211,
 	S_Turn = 212,
+	S_AddItem = 214,
+	S_EquipItem = 215,
+	S_InventoryData = 213,
+	S_UnequipItem = 216,
+	S_UseItem = 217,
 	// [AUTO-GEN ENUM BEGIN]
-
-
-
-
 
 	// [AUTO-GEN ENUM END]
 };
@@ -44,6 +48,9 @@ public:
 	static void Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_ChangeMap(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_Turn(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_EquipItem(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_UnequipItem(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_UseItem(GameSessionRef session, BYTE* buffer, int32 len);
 
 	// 보내기
 	static SendBufferRef Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs);
@@ -58,11 +65,12 @@ public:
 	static SendBufferRef Make_S_GainExp(const Protocol::S_GainExp& pkt);
 	static SendBufferRef Make_S_LevelUp(const Protocol::S_LevelUp& pkt);
 	static SendBufferRef Make_S_Turn(const Protocol::S_Turn& pkt);
+	static SendBufferRef Make_S_InventoryData(const vector<Protocol::ItemInfo>& items, const Protocol::ItemInfo& equippedWeapon, const Protocol::ItemInfo& equippedArmor, const Protocol::ItemInfo& equippedPotion);
+	static SendBufferRef Make_S_AddItem(int32 itemId, int32 slot, int32 count);
+	static SendBufferRef Make_S_EquipItem(int32 equipType, int32 storageSlot, int32 storageItemId, int32 storageItemCount, int32 equipItemId, int32 equipItemCount, int32 attack, int32 defence);
+	static SendBufferRef Make_S_UnequipItem(int32 equipType, int32 storageSlot, int32 attack, int32 defence);
+	static SendBufferRef Make_S_UseItem(int32 equipType, int32 remainCount, int32 newHp);
 	// [AUTO-GEN DECLS BEGIN]
-
-
-	
-
 
 	// [AUTO-GEN DECLS END]
 

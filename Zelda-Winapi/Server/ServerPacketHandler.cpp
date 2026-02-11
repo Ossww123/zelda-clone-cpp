@@ -5,6 +5,7 @@
 #include "GameSession.h"
 #include "GameRoom.h"
 #include "GameRoomManager.h"
+#include "Player.h"
 
 
 void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int32 len)
@@ -28,18 +29,16 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	case C_Turn:
 		Handle_C_Turn(session, buffer, len);
 		break;
+	case C_EquipItem:
+		Handle_C_EquipItem(session, buffer, len);
+		break;
+	case C_UnequipItem:
+		Handle_C_UnequipItem(session, buffer, len);
+		break;
+	case C_UseItem:
+		Handle_C_UseItem(session, buffer, len);
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
-
-
-
-
-		
-
-
-
-
-
-		
 
 	// [AUTO-GEN SWITCH END]
 	default:
@@ -273,4 +272,117 @@ SendBufferRef ServerPacketHandler::Make_S_LevelUp(const Protocol::S_LevelUp& pkt
 SendBufferRef ServerPacketHandler::Make_S_Turn(const Protocol::S_Turn& pkt)
 {
 	return MakeSendBuffer(pkt, S_Turn);
+}
+
+void ServerPacketHandler::Handle_C_EquipItem(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	PacketHeader* header = (PacketHeader*)buffer;
+	uint16 size = header->size;
+
+	Protocol::C_EquipItem pkt;
+	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([session, pkt]()
+		{
+			PlayerRef player = session->player.lock();
+			if (player)
+				player->EquipItem(pkt.slot());
+		});
+}
+
+void ServerPacketHandler::Handle_C_UnequipItem(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	PacketHeader* header = (PacketHeader*)buffer;
+	uint16 size = header->size;
+
+	Protocol::C_UnequipItem pkt;
+	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([session, pkt]()
+		{
+			PlayerRef player = session->player.lock();
+			if (player)
+				player->UnequipItem(pkt.equiptype());
+		});
+}
+
+void ServerPacketHandler::Handle_C_UseItem(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	PacketHeader* header = (PacketHeader*)buffer;
+	uint16 size = header->size;
+
+	Protocol::C_UseItem pkt;
+	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([session, pkt]()
+		{
+			PlayerRef player = session->player.lock();
+			if (player)
+				player->UseItem(pkt.slot());
+		});
+}
+
+SendBufferRef ServerPacketHandler::Make_S_InventoryData(const vector<Protocol::ItemInfo>& items, const Protocol::ItemInfo& equippedWeapon, const Protocol::ItemInfo& equippedArmor, const Protocol::ItemInfo& equippedPotion)
+{
+	Protocol::S_InventoryData pkt;
+	for (const auto& item : items)
+		*pkt.add_items() = item;
+	*pkt.mutable_equippedweapon() = equippedWeapon;
+	*pkt.mutable_equippedarmor() = equippedArmor;
+	*pkt.mutable_equippedpotion() = equippedPotion;
+	return MakeSendBuffer(pkt, S_InventoryData);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_AddItem(int32 itemId, int32 slot, int32 count)
+{
+	Protocol::S_AddItem pkt;
+	pkt.set_itemid(itemId);
+	pkt.set_slot(slot);
+	pkt.set_count(count);
+	return MakeSendBuffer(pkt, S_AddItem);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_EquipItem(int32 equipType, int32 storageSlot, int32 storageItemId, int32 storageItemCount, int32 equipItemId, int32 equipItemCount, int32 attack, int32 defence)
+{
+	Protocol::S_EquipItem pkt;
+	pkt.set_equiptype(equipType);
+	pkt.set_storageslot(storageSlot);
+	pkt.set_storageitemid(storageItemId);
+	pkt.set_storageitemcount(storageItemCount);
+	pkt.set_equipitemid(equipItemId);
+	pkt.set_equipitemcount(equipItemCount);
+	pkt.set_attack(attack);
+	pkt.set_defence(defence);
+	return MakeSendBuffer(pkt, S_EquipItem);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_UnequipItem(int32 equipType, int32 storageSlot, int32 attack, int32 defence)
+{
+	Protocol::S_UnequipItem pkt;
+	pkt.set_equiptype(equipType);
+	pkt.set_storageslot(storageSlot);
+	pkt.set_attack(attack);
+	pkt.set_defence(defence);
+	return MakeSendBuffer(pkt, S_UnequipItem);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_UseItem(int32 equipType, int32 remainCount, int32 newHp)
+{
+	Protocol::S_UseItem pkt;
+	pkt.set_equiptype(equipType);
+	pkt.set_remaincount(remainCount);
+	pkt.set_newhp(newHp);
+	return MakeSendBuffer(pkt, S_UseItem);
 }

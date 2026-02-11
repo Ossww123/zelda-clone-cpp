@@ -1,0 +1,8 @@
+itemId,name,type,value,maxStack
+2001,Potion_A,consumable,50,99
+3001,Sword_A,weapon,5,1
+3002,Sword_B,weapon,10,1
+3003,Sword_C,weapon,15,1
+4001,Armor_A,armor,3,1
+4002,Armor_B,armor,6,1
+4003,Armor_C,armor,10,1

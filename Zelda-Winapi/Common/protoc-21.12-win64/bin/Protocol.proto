@@ -105,3 +105,60 @@ message S_LevelUp
     int32 defence = 5;
     int32 maxExp = 6;
 }
+
+message S_InventoryData
+{
+    repeated ItemInfo items = 1;
+    ItemInfo equippedWeapon = 2;
+    ItemInfo equippedArmor = 3;
+    ItemInfo equippedPotion = 4;
+}
+
+message S_AddItem
+{
+    int32 itemId = 1;
+    int32 slot = 2;
+    int32 count = 3;
+}
+
+message S_EquipItem
+{
+    int32 equipType = 1;
+    int32 storageSlot = 2;
+    int32 storageItemId = 3;
+    int32 storageItemCount = 4;
+    int32 equipItemId = 5;
+    int32 equipItemCount = 6;
+    int32 attack = 7;
+    int32 defence = 8;
+}
+
+message S_UnequipItem
+{
+    int32 equipType = 1;
+    int32 storageSlot = 2;
+    int32 attack = 3;
+    int32 defence = 4;
+}
+
+message S_UseItem
+{
+    int32 equipType = 1;
+    int32 remainCount = 2;
+    int32 newHp = 3;
+}
+
+message C_EquipItem
+{
+    int32 slot = 1;
+}
+
+message C_UnequipItem
+{
+    int32 equipType = 1;
+}
+
+message C_UseItem
+{
+    int32 slot = 1;
+}

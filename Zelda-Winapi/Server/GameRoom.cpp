@@ -123,6 +123,8 @@ void GameRoom::EnterRoom(GameSessionRef session)
 		session->Send(sendBuffer);
 	}
 
+	player->SendInventoryData();
+
 	{
 		Protocol::S_AddObject pkt;
 
@@ -237,7 +239,7 @@ void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt
 	player->info.set_posy(nextPos.y);
 
 	// TEMP : 고정 이동 시간
-	constexpr uint64 kMoveDurationMs = 100;
+	constexpr uint64 kMoveDurationMs = 75;
 	uint64 now = GetTickCount64();
 	player->StartMove(now, kMoveDurationMs);
 
@@ -653,7 +655,10 @@ void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	{
 		MonsterRef monster = dynamic_pointer_cast<Monster>(target);
 		if (monster)
+		{
 			DistributeExp(attacker, monster);
+			ProcessMonsterDrop(attacker, monster);
+		}
 		RemoveObject(target->info.objectid());
 	}
 }
@@ -725,6 +730,7 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	for (auto& [id, monster] : deadTargets)
 	{
 		DistributeExp(attacker, monster);
+		ProcessMonsterDrop(attacker, monster);
 		RemoveObject(id);
 	}
 }
@@ -908,4 +914,22 @@ void GameRoom::DistributeExp(PlayerRef killer, MonsterRef monster)
 		return;
 
 	killer->GainExp(exp);
+}
+
+void GameRoom::ProcessMonsterDrop(PlayerRef killer, MonsterRef monster)
+{
+	if (!killer || !monster)
+		return;
+
+	const vector<MonsterDropData>* drops = GRoomDataManager.GetMonsterDrops(monster->GetTemplateId());
+	if (!drops)
+		return;
+
+	for (const auto& drop : *drops)
+	{
+		if (rand() % 100 < drop.dropRate)
+		{
+			killer->AddItem(drop.itemId, 1);
+		}
+	}
 }

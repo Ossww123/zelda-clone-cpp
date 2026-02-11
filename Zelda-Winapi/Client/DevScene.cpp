@@ -72,7 +72,7 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Dungeon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 142 , 0 , 64 , 40 );
 
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Status_Frame" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 8 , 8 , 240 , 48 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 110 , 61 , 129 , 9 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 109 , 61 , 129 , 9 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Exp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 101 , 110 , 219 , 6 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Enemy_Hp_Frame" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 261 , 8 , 102 , 12 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Enemy_Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 264 , 23 , 96 , 6 );
@@ -87,6 +87,7 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_B" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 32 , 32 , 32 , 32 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_C" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 64 , 32 , 32 , 32 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Potion_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 64 , 32 , 32 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Inventory" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Inventory" ) , 0 , 0 , 0 , 0 );
 
 	// Inventory 슬롯과 Item 스프라이트 크기는 (32, 32)
 	// Inventory의 Sword 장착 슬롯 (98, 38) 위치
@@ -117,6 +118,62 @@ void DevScene::Update ( )
 
 	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
 
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::I ) )
+	{
+		_showInventory = !_showInventory;
+		if ( !_showInventory )
+			_invDragging = false;
+	}
+
+	if ( _showInventory )
+	{
+		// 인벤토리 위치 초기화 (첫 열기 시 화면 중앙)
+		if ( _invPos.x < 0 )
+		{
+			Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
+			if ( invSprite )
+			{
+				_invPos.x = ( GWinSizeX - invSprite->GetSize ( ).x ) / 2;
+				_invPos.y = ( GWinSizeY - invSprite->GetSize ( ).y ) / 2;
+			}
+		}
+
+		// 드래그 처리
+		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
+		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse ) )
+		{
+			Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
+			if ( invSprite )
+			{
+				int32 invW = invSprite->GetSize ( ).x;
+				// 타이틀바 영역: 인벤토리 상단 30px
+				if ( mouse.x >= _invPos.x && mouse.x < _invPos.x + invW &&
+					mouse.y >= _invPos.y && mouse.y < _invPos.y + 30 )
+				{
+					_invDragging = true;
+					_invDragOffset = { mouse.x - _invPos.x, mouse.y - _invPos.y };
+				}
+			}
+		}
+
+		if ( _invDragging )
+		{
+			bool held = GET_SINGLE ( InputManager )->GetButton ( KeyType::LeftMouse )
+				|| GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse );
+			if ( held )
+			{
+				_invPos.x = mouse.x - _invDragOffset.x;
+				_invPos.y = mouse.y - _invDragOffset.y;
+			}
+			else
+			{
+				_invDragging = false;
+			}
+		}
+
+		HandleInventoryClick ( );
+	}
+
 	TickMonsterSpawn ( );
 }
 
@@ -124,6 +181,9 @@ void DevScene::Render ( HDC hdc )
 {
 	Super::Render ( hdc );
 	RenderHUD ( hdc );
+
+	if ( _showInventory )
+		RenderInventory ( hdc );
 }
 
 void DevScene::AddActor ( Actor* actor )
@@ -905,4 +965,166 @@ void DevScene::OnClickDungeon ( )
 {
 	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_DUNGEON , 0 );
 	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+}
+
+Sprite* DevScene::GetItemSprite ( int32 itemId )
+{
+	switch ( itemId )
+	{
+	case 2001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Potion_A" );
+	case 3001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_A" );
+	case 3002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_B" );
+	case 3003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_C" );
+	case 4001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_A" );
+	case 4002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_B" );
+	case 4003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_C" );
+	default: return nullptr;
+	}
+}
+
+void DevScene::RenderInventory ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
+	if ( invSprite == nullptr )
+		return;
+
+	int32 invW = invSprite->GetSize ( ).x;
+	int32 invH = invSprite->GetSize ( ).y;
+	int32 invX = _invPos.x;
+	int32 invY = _invPos.y;
+
+	::TransparentBlt ( hdc ,
+		invX , invY ,
+		invW , invH ,
+		invSprite->GetDC ( ) ,
+		invSprite->GetPos ( ).x , invSprite->GetPos ( ).y ,
+		invW , invH ,
+		invSprite->GetTransparent ( ) );
+
+	// 장착 슬롯 아이템 렌더링
+	auto renderItem = [&] ( int32 itemId , int32 count , int32 relX , int32 relY )
+	{
+		if ( itemId == 0 )
+			return;
+		Sprite* sp = GetItemSprite ( itemId );
+		if ( sp == nullptr )
+			return;
+		::TransparentBlt ( hdc ,
+			invX + relX , invY + relY ,
+			32 , 32 ,
+			sp->GetDC ( ) ,
+			sp->GetPos ( ).x , sp->GetPos ( ).y ,
+			sp->GetSize ( ).x , sp->GetSize ( ).y ,
+			sp->GetTransparent ( ) );
+
+		// 수량 표시 (2 이상일 때만)
+		if ( count > 1 )
+		{
+			wchar_t buf[ 8 ];
+			swprintf_s ( buf , L"%d" , count );
+			::SetBkMode ( hdc , TRANSPARENT );
+			::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+			::TextOut ( hdc , invX + relX + 18 , invY + relY + 18 , buf , ( int ) wcslen ( buf ) );
+		}
+	};
+
+	// 장착 슬롯: Sword(98,38), Armor(98,80), Potion(258,68)
+	renderItem ( myPlayer->_equipWeapon.itemId , myPlayer->_equipWeapon.count , 98 , 38 );
+	renderItem ( myPlayer->_equipArmor.itemId , myPlayer->_equipArmor.count , 98 , 80 );
+	renderItem ( myPlayer->_equipPotion.itemId , myPlayer->_equipPotion.count , 258 , 68 );
+
+	// 보관 슬롯: 시작(16,168), 36px 간격, 가로 9 x 세로 3
+	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
+	{
+		int32 col = i % 9;
+		int32 row = i / 9;
+		int32 slotX = 16 + col * 36;
+		int32 slotY = 168 + row * 36;
+
+		renderItem ( myPlayer->_storage[ i ].itemId , myPlayer->_storage[ i ].count , slotX , slotY );
+	}
+}
+
+void DevScene::HandleInventoryClick ( )
+{
+	if ( !GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::RightMouse ) )
+		return;
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
+	if ( invSprite == nullptr )
+		return;
+
+	int32 invW = invSprite->GetSize ( ).x;
+	int32 invH = invSprite->GetSize ( ).y;
+	int32 invX = _invPos.x;
+	int32 invY = _invPos.y;
+
+	POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
+	int32 mx = mouse.x - invX;
+	int32 my = mouse.y - invY;
+
+	// 인벤토리 영역 밖이면 무시
+	if ( mx < 0 || my < 0 || mx >= invW || my >= invH )
+		return;
+
+	// 장착 슬롯 클릭 확인 (장착 해제)
+	// Weapon: (98,38) 32x32
+	if ( mx >= 98 && mx < 130 && my >= 38 && my < 70 )
+	{
+		if ( myPlayer->_equipWeapon.itemId > 0 )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 0 );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+		return;
+	}
+	// Armor: (98,80) 32x32
+	if ( mx >= 98 && mx < 130 && my >= 80 && my < 112 )
+	{
+		if ( myPlayer->_equipArmor.itemId > 0 )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 1 );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+		return;
+	}
+	// Potion: (258,68) 32x32
+	if ( mx >= 258 && mx < 290 && my >= 68 && my < 100 )
+	{
+		if ( myPlayer->_equipPotion.itemId > 0 )
+		{
+			// 포션은 우클릭 시 사용
+			SendBufferRef sb = ClientPacketHandler::Make_C_UseItem ( -1 );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+		return;
+	}
+
+	// 보관 슬롯 클릭 확인
+	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
+	{
+		int32 col = i % 9;
+		int32 row = i / 9;
+		int32 slotX = 16 + col * 36;
+		int32 slotY = 168 + row * 36;
+
+		if ( mx >= slotX && mx < slotX + 32 && my >= slotY && my < slotY + 32 )
+		{
+			if ( myPlayer->_storage[ i ].itemId > 0 )
+			{
+				// 장비 아이템은 장착, 소비 아이템은 사용
+				SendBufferRef sb = ClientPacketHandler::Make_C_EquipItem ( i );
+				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+			}
+			return;
+		}
+	}
 }

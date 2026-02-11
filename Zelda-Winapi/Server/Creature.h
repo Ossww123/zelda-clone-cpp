@@ -8,5 +8,6 @@ public:
 	virtual ~Creature();
 
 	bool OnDamaged(int32 damage);
+
 };
 

@@ -51,10 +51,22 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	case S_Turn:
 		Handle_S_Turn ( session , buffer , len );
 		break;
+	case S_InventoryData:
+		Handle_S_InventoryData ( session , buffer , len );
+		break;
+	case S_AddItem:
+		Handle_S_AddItem ( session , buffer , len );
+		break;
+	case S_EquipItem:
+		Handle_S_EquipItem ( session , buffer , len );
+		break;
+	case S_UnequipItem:
+		Handle_S_UnequipItem ( session , buffer , len );
+		break;
+	case S_UseItem:
+		Handle_S_UseItem ( session , buffer , len );
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
-
-
-
 
 	// [AUTO-GEN SWITCH END]
 	default:
@@ -392,4 +404,185 @@ SendBufferRef ClientPacketHandler::Make_C_Turn ( const Protocol::DIR_TYPE& dir )
 	pkt.set_dir ( dir );
 
 	return MakeSendBuffer ( pkt , C_Turn );
+}
+
+void ClientPacketHandler::Handle_S_InventoryData ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_InventoryData pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	// 초기화
+	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
+	{
+		myPlayer->_storage[ i ].itemId = 0;
+		myPlayer->_storage[ i ].count = 0;
+	}
+
+	for ( int32 i = 0; i < pkt.items_size ( ); i++ )
+	{
+		const auto& item = pkt.items ( i );
+		int32 slot = item.slot ( );
+		if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
+		{
+			myPlayer->_storage[ slot ].itemId = item.itemid ( );
+			myPlayer->_storage[ slot ].count = item.count ( );
+		}
+	}
+
+	myPlayer->_equipWeapon.itemId = pkt.equippedweapon ( ).itemid ( );
+	myPlayer->_equipWeapon.count = pkt.equippedweapon ( ).count ( );
+	myPlayer->_equipArmor.itemId = pkt.equippedarmor ( ).itemid ( );
+	myPlayer->_equipArmor.count = pkt.equippedarmor ( ).count ( );
+	myPlayer->_equipPotion.itemId = pkt.equippedpotion ( ).itemid ( );
+	myPlayer->_equipPotion.count = pkt.equippedpotion ( ).count ( );
+}
+
+void ClientPacketHandler::Handle_S_AddItem ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_AddItem pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	int32 slot = pkt.slot ( );
+	if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
+	{
+		myPlayer->_storage[ slot ].itemId = pkt.itemid ( );
+		myPlayer->_storage[ slot ].count = pkt.count ( );
+	}
+}
+
+void ClientPacketHandler::Handle_S_EquipItem ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_EquipItem pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	int32 slot = pkt.storageslot ( );
+	if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
+	{
+		myPlayer->_storage[ slot ].itemId = pkt.storageitemid ( );
+		myPlayer->_storage[ slot ].count = pkt.storageitemcount ( );
+	}
+
+	int32 equipType = pkt.equiptype ( );
+	InventorySlot* equipSlot = nullptr;
+	if ( equipType == 0 )
+		equipSlot = &myPlayer->_equipWeapon;
+	else if ( equipType == 1 )
+		equipSlot = &myPlayer->_equipArmor;
+	else if ( equipType == 2 )
+		equipSlot = &myPlayer->_equipPotion;
+
+	if ( equipSlot )
+	{
+		equipSlot->itemId = pkt.equipitemid ( );
+		equipSlot->count = pkt.equipitemcount ( );
+	}
+
+	myPlayer->info.set_attack ( pkt.attack ( ) );
+	myPlayer->info.set_defence ( pkt.defence ( ) );
+}
+
+void ClientPacketHandler::Handle_S_UnequipItem ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_UnequipItem pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	int32 equipType = pkt.equiptype ( );
+	InventorySlot* equipSlot = nullptr;
+	if ( equipType == 0 )
+		equipSlot = &myPlayer->_equipWeapon;
+	else if ( equipType == 1 )
+		equipSlot = &myPlayer->_equipArmor;
+	else if ( equipType == 2 )
+		equipSlot = &myPlayer->_equipPotion;
+
+	if ( equipSlot )
+	{
+		// 기존 장비를 storage로 이동
+		int32 slot = pkt.storageslot ( );
+		if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
+		{
+			myPlayer->_storage[ slot ].itemId = equipSlot->itemId;
+			myPlayer->_storage[ slot ].count = equipSlot->count;
+		}
+		equipSlot->itemId = 0;
+		equipSlot->count = 0;
+	}
+
+	myPlayer->info.set_attack ( pkt.attack ( ) );
+	myPlayer->info.set_defence ( pkt.defence ( ) );
+}
+
+void ClientPacketHandler::Handle_S_UseItem ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_UseItem pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	int32 equipType = pkt.equiptype ( );
+	if ( equipType == 2 )
+	{
+		myPlayer->_equipPotion.count = pkt.remaincount ( );
+		if ( myPlayer->_equipPotion.count <= 0 )
+		{
+			myPlayer->_equipPotion.itemId = 0;
+			myPlayer->_equipPotion.count = 0;
+		}
+	}
+
+	myPlayer->info.set_hp ( pkt.newhp ( ) );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_EquipItem ( int32 slot )
+{
+	Protocol::C_EquipItem pkt;
+	pkt.set_slot ( slot );
+	return MakeSendBuffer ( pkt , C_EquipItem );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_UnequipItem ( int32 equipType )
+{
+	Protocol::C_UnequipItem pkt;
+	pkt.set_equiptype ( equipType );
+	return MakeSendBuffer ( pkt , C_UnequipItem );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_UseItem ( int32 slot )
+{
+	Protocol::C_UseItem pkt;
+	pkt.set_slot ( slot );
+	return MakeSendBuffer ( pkt , C_UseItem );
 }
