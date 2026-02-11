@@ -52,6 +52,14 @@ struct Vector
 		return ret;
 	}
 
+	Vector operator/( float value )
+	{
+		Vector ret;
+		ret.x = x / value;
+		ret.y = y / value;
+		return ret;
+	}
+
 	void operator+=( const Vector& other )
 	{
 		x += other.x;

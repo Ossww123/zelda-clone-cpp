@@ -187,7 +187,6 @@ void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffe
 		{
 			if ( auto mp = dynamic_cast< MyPlayer* >( gameObject ) )
 			{
-				mp->OnServerAck ( );
 				mp->OnServerMoveEndAck ( );
 			}
 
@@ -359,7 +358,6 @@ void ClientPacketHandler::Handle_S_Turn ( ServerSessionRef session , BYTE* buffe
 	{
 		if ( auto mp = dynamic_cast< MyPlayer* >( gameObject ) )
 		{
-			mp->OnServerAck ( );
 			mp->OnServerTurnAck ( );
 		}
 	}
