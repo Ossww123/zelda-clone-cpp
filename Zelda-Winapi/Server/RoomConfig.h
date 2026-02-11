@@ -44,4 +44,14 @@ struct MonsterTemplateData
 	int32 maxHp;
 	int32 attack;
 	int32 defence;
+	int32 exp;
+};
+
+struct LevelData
+{
+	int32 level;
+	int32 requiredExp;
+	int32 maxHp;
+	int32 attack;
+	int32 defence;
 };

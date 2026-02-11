@@ -49,13 +49,21 @@ namespace Protocol {
 class BuffData;
 struct BuffDataDefaultTypeInternal;
 extern BuffDataDefaultTypeInternal _BuffData_default_instance_;
+class MonsterExtra;
+struct MonsterExtraDefaultTypeInternal;
+extern MonsterExtraDefaultTypeInternal _MonsterExtra_default_instance_;
 class ObjectInfo;
 struct ObjectInfoDefaultTypeInternal;
 extern ObjectInfoDefaultTypeInternal _ObjectInfo_default_instance_;
+class PlayerExtra;
+struct PlayerExtraDefaultTypeInternal;
+extern PlayerExtraDefaultTypeInternal _PlayerExtra_default_instance_;
 }  // namespace Protocol
 PROTOBUF_NAMESPACE_OPEN
 template<> ::Protocol::BuffData* Arena::CreateMaybeMessage<::Protocol::BuffData>(Arena*);
+template<> ::Protocol::MonsterExtra* Arena::CreateMaybeMessage<::Protocol::MonsterExtra>(Arena*);
 template<> ::Protocol::ObjectInfo* Arena::CreateMaybeMessage<::Protocol::ObjectInfo>(Arena*);
+template<> ::Protocol::PlayerExtra* Arena::CreateMaybeMessage<::Protocol::PlayerExtra>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace Protocol {
 
@@ -288,6 +296,12 @@ class ObjectInfo final :
   static const ObjectInfo& default_instance() {
     return *internal_default_instance();
   }
+  enum ExtraCase {
+    kPlayer = 100,
+    kMonster = 101,
+    EXTRA_NOT_SET = 0,
+  };
+
   static inline const ObjectInfo* internal_default_instance() {
     return reinterpret_cast<const ObjectInfo*>(
                &_ObjectInfo_default_instance_);
@@ -377,6 +391,8 @@ class ObjectInfo final :
     kDefenceFieldNumber = 9,
     kPosXFieldNumber = 10,
     kPosYFieldNumber = 11,
+    kPlayerFieldNumber = 100,
+    kMonsterFieldNumber = 101,
   };
   // string name = 5;
   void clear_name();
@@ -482,9 +498,52 @@ class ObjectInfo final :
   void _internal_set_posy(int32_t value);
   public:
 
+  // .Protocol.PlayerExtra player = 100;
+  bool has_player() const;
+  private:
+  bool _internal_has_player() const;
+  public:
+  void clear_player();
+  const ::Protocol::PlayerExtra& player() const;
+  PROTOBUF_NODISCARD ::Protocol::PlayerExtra* release_player();
+  ::Protocol::PlayerExtra* mutable_player();
+  void set_allocated_player(::Protocol::PlayerExtra* player);
+  private:
+  const ::Protocol::PlayerExtra& _internal_player() const;
+  ::Protocol::PlayerExtra* _internal_mutable_player();
+  public:
+  void unsafe_arena_set_allocated_player(
+      ::Protocol::PlayerExtra* player);
+  ::Protocol::PlayerExtra* unsafe_arena_release_player();
+
+  // .Protocol.MonsterExtra monster = 101;
+  bool has_monster() const;
+  private:
+  bool _internal_has_monster() const;
+  public:
+  void clear_monster();
+  const ::Protocol::MonsterExtra& monster() const;
+  PROTOBUF_NODISCARD ::Protocol::MonsterExtra* release_monster();
+  ::Protocol::MonsterExtra* mutable_monster();
+  void set_allocated_monster(::Protocol::MonsterExtra* monster);
+  private:
+  const ::Protocol::MonsterExtra& _internal_monster() const;
+  ::Protocol::MonsterExtra* _internal_mutable_monster();
+  public:
+  void unsafe_arena_set_allocated_monster(
+      ::Protocol::MonsterExtra* monster);
+  ::Protocol::MonsterExtra* unsafe_arena_release_monster();
+
+  void clear_extra();
+  ExtraCase extra_case() const;
   // @@protoc_insertion_point(class_scope:Protocol.ObjectInfo)
  private:
   class _Internal;
+  void set_has_player();
+  void set_has_monster();
+
+  inline bool has_extra() const;
+  inline void clear_has_extra();
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
@@ -501,6 +560,332 @@ class ObjectInfo final :
     int32_t defence_;
     int32_t posx_;
     int32_t posy_;
+    union ExtraUnion {
+      constexpr ExtraUnion() : _constinit_{} {}
+        ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
+      ::Protocol::PlayerExtra* player_;
+      ::Protocol::MonsterExtra* monster_;
+    } extra_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+    uint32_t _oneof_case_[1];
+
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Struct_2eproto;
+};
+// -------------------------------------------------------------------
+
+class PlayerExtra final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.PlayerExtra) */ {
+ public:
+  inline PlayerExtra() : PlayerExtra(nullptr) {}
+  ~PlayerExtra() override;
+  explicit PROTOBUF_CONSTEXPR PlayerExtra(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  PlayerExtra(const PlayerExtra& from);
+  PlayerExtra(PlayerExtra&& from) noexcept
+    : PlayerExtra() {
+    *this = ::std::move(from);
+  }
+
+  inline PlayerExtra& operator=(const PlayerExtra& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PlayerExtra& operator=(PlayerExtra&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const PlayerExtra& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const PlayerExtra* internal_default_instance() {
+    return reinterpret_cast<const PlayerExtra*>(
+               &_PlayerExtra_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(PlayerExtra& a, PlayerExtra& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(PlayerExtra* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PlayerExtra* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  PlayerExtra* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<PlayerExtra>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const PlayerExtra& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const PlayerExtra& from) {
+    PlayerExtra::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(PlayerExtra* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.PlayerExtra";
+  }
+  protected:
+  explicit PlayerExtra(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kLevelFieldNumber = 1,
+    kExpFieldNumber = 2,
+    kMaxExpFieldNumber = 3,
+  };
+  // int32 level = 1;
+  void clear_level();
+  int32_t level() const;
+  void set_level(int32_t value);
+  private:
+  int32_t _internal_level() const;
+  void _internal_set_level(int32_t value);
+  public:
+
+  // int32 exp = 2;
+  void clear_exp();
+  int32_t exp() const;
+  void set_exp(int32_t value);
+  private:
+  int32_t _internal_exp() const;
+  void _internal_set_exp(int32_t value);
+  public:
+
+  // int32 maxExp = 3;
+  void clear_maxexp();
+  int32_t maxexp() const;
+  void set_maxexp(int32_t value);
+  private:
+  int32_t _internal_maxexp() const;
+  void _internal_set_maxexp(int32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.PlayerExtra)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    int32_t level_;
+    int32_t exp_;
+    int32_t maxexp_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Struct_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MonsterExtra final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.MonsterExtra) */ {
+ public:
+  inline MonsterExtra() : MonsterExtra(nullptr) {}
+  ~MonsterExtra() override;
+  explicit PROTOBUF_CONSTEXPR MonsterExtra(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MonsterExtra(const MonsterExtra& from);
+  MonsterExtra(MonsterExtra&& from) noexcept
+    : MonsterExtra() {
+    *this = ::std::move(from);
+  }
+
+  inline MonsterExtra& operator=(const MonsterExtra& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MonsterExtra& operator=(MonsterExtra&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MonsterExtra& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MonsterExtra* internal_default_instance() {
+    return reinterpret_cast<const MonsterExtra*>(
+               &_MonsterExtra_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    3;
+
+  friend void swap(MonsterExtra& a, MonsterExtra& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MonsterExtra* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MonsterExtra* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MonsterExtra* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<MonsterExtra>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const MonsterExtra& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const MonsterExtra& from) {
+    MonsterExtra::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MonsterExtra* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.MonsterExtra";
+  }
+  protected:
+  explicit MonsterExtra(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTemplateIdFieldNumber = 1,
+  };
+  // int32 templateId = 1;
+  void clear_templateid();
+  int32_t templateid() const;
+  void set_templateid(int32_t value);
+  private:
+  int32_t _internal_templateid() const;
+  void _internal_set_templateid(int32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.MonsterExtra)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    int32_t templateid_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
   union { Impl_ _impl_; };
@@ -858,9 +1243,258 @@ inline void ObjectInfo::set_posy(int32_t value) {
   // @@protoc_insertion_point(field_set:Protocol.ObjectInfo.posY)
 }
 
+// .Protocol.PlayerExtra player = 100;
+inline bool ObjectInfo::_internal_has_player() const {
+  return extra_case() == kPlayer;
+}
+inline bool ObjectInfo::has_player() const {
+  return _internal_has_player();
+}
+inline void ObjectInfo::set_has_player() {
+  _impl_._oneof_case_[0] = kPlayer;
+}
+inline void ObjectInfo::clear_player() {
+  if (_internal_has_player()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete _impl_.extra_.player_;
+    }
+    clear_has_extra();
+  }
+}
+inline ::Protocol::PlayerExtra* ObjectInfo::release_player() {
+  // @@protoc_insertion_point(field_release:Protocol.ObjectInfo.player)
+  if (_internal_has_player()) {
+    clear_has_extra();
+    ::Protocol::PlayerExtra* temp = _impl_.extra_.player_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.extra_.player_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::Protocol::PlayerExtra& ObjectInfo::_internal_player() const {
+  return _internal_has_player()
+      ? *_impl_.extra_.player_
+      : reinterpret_cast< ::Protocol::PlayerExtra&>(::Protocol::_PlayerExtra_default_instance_);
+}
+inline const ::Protocol::PlayerExtra& ObjectInfo::player() const {
+  // @@protoc_insertion_point(field_get:Protocol.ObjectInfo.player)
+  return _internal_player();
+}
+inline ::Protocol::PlayerExtra* ObjectInfo::unsafe_arena_release_player() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:Protocol.ObjectInfo.player)
+  if (_internal_has_player()) {
+    clear_has_extra();
+    ::Protocol::PlayerExtra* temp = _impl_.extra_.player_;
+    _impl_.extra_.player_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void ObjectInfo::unsafe_arena_set_allocated_player(::Protocol::PlayerExtra* player) {
+  clear_extra();
+  if (player) {
+    set_has_player();
+    _impl_.extra_.player_ = player;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Protocol.ObjectInfo.player)
+}
+inline ::Protocol::PlayerExtra* ObjectInfo::_internal_mutable_player() {
+  if (!_internal_has_player()) {
+    clear_extra();
+    set_has_player();
+    _impl_.extra_.player_ = CreateMaybeMessage< ::Protocol::PlayerExtra >(GetArenaForAllocation());
+  }
+  return _impl_.extra_.player_;
+}
+inline ::Protocol::PlayerExtra* ObjectInfo::mutable_player() {
+  ::Protocol::PlayerExtra* _msg = _internal_mutable_player();
+  // @@protoc_insertion_point(field_mutable:Protocol.ObjectInfo.player)
+  return _msg;
+}
+
+// .Protocol.MonsterExtra monster = 101;
+inline bool ObjectInfo::_internal_has_monster() const {
+  return extra_case() == kMonster;
+}
+inline bool ObjectInfo::has_monster() const {
+  return _internal_has_monster();
+}
+inline void ObjectInfo::set_has_monster() {
+  _impl_._oneof_case_[0] = kMonster;
+}
+inline void ObjectInfo::clear_monster() {
+  if (_internal_has_monster()) {
+    if (GetArenaForAllocation() == nullptr) {
+      delete _impl_.extra_.monster_;
+    }
+    clear_has_extra();
+  }
+}
+inline ::Protocol::MonsterExtra* ObjectInfo::release_monster() {
+  // @@protoc_insertion_point(field_release:Protocol.ObjectInfo.monster)
+  if (_internal_has_monster()) {
+    clear_has_extra();
+    ::Protocol::MonsterExtra* temp = _impl_.extra_.monster_;
+    if (GetArenaForAllocation() != nullptr) {
+      temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.extra_.monster_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::Protocol::MonsterExtra& ObjectInfo::_internal_monster() const {
+  return _internal_has_monster()
+      ? *_impl_.extra_.monster_
+      : reinterpret_cast< ::Protocol::MonsterExtra&>(::Protocol::_MonsterExtra_default_instance_);
+}
+inline const ::Protocol::MonsterExtra& ObjectInfo::monster() const {
+  // @@protoc_insertion_point(field_get:Protocol.ObjectInfo.monster)
+  return _internal_monster();
+}
+inline ::Protocol::MonsterExtra* ObjectInfo::unsafe_arena_release_monster() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:Protocol.ObjectInfo.monster)
+  if (_internal_has_monster()) {
+    clear_has_extra();
+    ::Protocol::MonsterExtra* temp = _impl_.extra_.monster_;
+    _impl_.extra_.monster_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void ObjectInfo::unsafe_arena_set_allocated_monster(::Protocol::MonsterExtra* monster) {
+  clear_extra();
+  if (monster) {
+    set_has_monster();
+    _impl_.extra_.monster_ = monster;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Protocol.ObjectInfo.monster)
+}
+inline ::Protocol::MonsterExtra* ObjectInfo::_internal_mutable_monster() {
+  if (!_internal_has_monster()) {
+    clear_extra();
+    set_has_monster();
+    _impl_.extra_.monster_ = CreateMaybeMessage< ::Protocol::MonsterExtra >(GetArenaForAllocation());
+  }
+  return _impl_.extra_.monster_;
+}
+inline ::Protocol::MonsterExtra* ObjectInfo::mutable_monster() {
+  ::Protocol::MonsterExtra* _msg = _internal_mutable_monster();
+  // @@protoc_insertion_point(field_mutable:Protocol.ObjectInfo.monster)
+  return _msg;
+}
+
+inline bool ObjectInfo::has_extra() const {
+  return extra_case() != EXTRA_NOT_SET;
+}
+inline void ObjectInfo::clear_has_extra() {
+  _impl_._oneof_case_[0] = EXTRA_NOT_SET;
+}
+inline ObjectInfo::ExtraCase ObjectInfo::extra_case() const {
+  return ObjectInfo::ExtraCase(_impl_._oneof_case_[0]);
+}
+// -------------------------------------------------------------------
+
+// PlayerExtra
+
+// int32 level = 1;
+inline void PlayerExtra::clear_level() {
+  _impl_.level_ = 0;
+}
+inline int32_t PlayerExtra::_internal_level() const {
+  return _impl_.level_;
+}
+inline int32_t PlayerExtra::level() const {
+  // @@protoc_insertion_point(field_get:Protocol.PlayerExtra.level)
+  return _internal_level();
+}
+inline void PlayerExtra::_internal_set_level(int32_t value) {
+  
+  _impl_.level_ = value;
+}
+inline void PlayerExtra::set_level(int32_t value) {
+  _internal_set_level(value);
+  // @@protoc_insertion_point(field_set:Protocol.PlayerExtra.level)
+}
+
+// int32 exp = 2;
+inline void PlayerExtra::clear_exp() {
+  _impl_.exp_ = 0;
+}
+inline int32_t PlayerExtra::_internal_exp() const {
+  return _impl_.exp_;
+}
+inline int32_t PlayerExtra::exp() const {
+  // @@protoc_insertion_point(field_get:Protocol.PlayerExtra.exp)
+  return _internal_exp();
+}
+inline void PlayerExtra::_internal_set_exp(int32_t value) {
+  
+  _impl_.exp_ = value;
+}
+inline void PlayerExtra::set_exp(int32_t value) {
+  _internal_set_exp(value);
+  // @@protoc_insertion_point(field_set:Protocol.PlayerExtra.exp)
+}
+
+// int32 maxExp = 3;
+inline void PlayerExtra::clear_maxexp() {
+  _impl_.maxexp_ = 0;
+}
+inline int32_t PlayerExtra::_internal_maxexp() const {
+  return _impl_.maxexp_;
+}
+inline int32_t PlayerExtra::maxexp() const {
+  // @@protoc_insertion_point(field_get:Protocol.PlayerExtra.maxExp)
+  return _internal_maxexp();
+}
+inline void PlayerExtra::_internal_set_maxexp(int32_t value) {
+  
+  _impl_.maxexp_ = value;
+}
+inline void PlayerExtra::set_maxexp(int32_t value) {
+  _internal_set_maxexp(value);
+  // @@protoc_insertion_point(field_set:Protocol.PlayerExtra.maxExp)
+}
+
+// -------------------------------------------------------------------
+
+// MonsterExtra
+
+// int32 templateId = 1;
+inline void MonsterExtra::clear_templateid() {
+  _impl_.templateid_ = 0;
+}
+inline int32_t MonsterExtra::_internal_templateid() const {
+  return _impl_.templateid_;
+}
+inline int32_t MonsterExtra::templateid() const {
+  // @@protoc_insertion_point(field_get:Protocol.MonsterExtra.templateId)
+  return _internal_templateid();
+}
+inline void MonsterExtra::_internal_set_templateid(int32_t value) {
+  
+  _impl_.templateid_ = value;
+}
+inline void MonsterExtra::set_templateid(int32_t value) {
+  _internal_set_templateid(value);
+  // @@protoc_insertion_point(field_set:Protocol.MonsterExtra.templateId)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 

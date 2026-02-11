@@ -23,4 +23,21 @@ message ObjectInfo
 	int32 defence = 9;
 	int32 posX = 10;
 	int32 posY = 11;
+
+	oneof extra {
+		PlayerExtra player = 100;
+		MonsterExtra monster = 101;
+	}
+}
+
+message PlayerExtra
+{
+	int32 level = 1;
+	int32 exp = 2;
+	int32 maxExp = 3;
+}
+
+message MonsterExtra
+{
+	int32 templateId = 1;
 }

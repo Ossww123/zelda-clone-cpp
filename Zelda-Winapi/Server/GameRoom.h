@@ -101,6 +101,9 @@ private:
 	void BroadcastAttack(PlayerRef attacker, const Protocol::C_Attack& pkt);
 	void BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 damage);
 
+public:
+	void DistributeExp(PlayerRef killer, MonsterRef monster);
+
 private:
 	map<uint64, PlayerRef> _players;
 	map<uint64, MonsterRef> _monsters;

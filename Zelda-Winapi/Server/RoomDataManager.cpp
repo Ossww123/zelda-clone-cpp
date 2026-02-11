@@ -10,6 +10,7 @@ bool RoomDataManager::LoadAllData()
 	success &= LoadRoomConfigs("../Datasheets/RoomConfig.csv");
 	success &= LoadMonsterTemplates("../Datasheets/MonsterTemplate.csv");
 	success &= LoadMonsterSpawns("../Datasheets/MonsterSpawn.json");
+	success &= LoadLevelData("../Datasheets/LevelData.csv");
 
 	if (success)
 	{
@@ -17,6 +18,7 @@ bool RoomDataManager::LoadAllData()
 		cout << "  - Room Configs: " << _roomConfigs.size() << endl;
 		cout << "  - Monster Templates: " << _monsterTemplates.size() << endl;
 		cout << "  - Spawn Configs: " << _spawnConfigs.size() << endl;
+		cout << "  - Level Data: " << _levelData.size() << endl;
 	}
 	else
 	{
@@ -121,6 +123,10 @@ bool RoomDataManager::LoadMonsterTemplates(const string& csvPath)
 		// defence
 		getline(ss, token, ',');
 		data.defence = stoi(token);
+
+		// exp
+		getline(ss, token, ',');
+		data.exp = stoi(token);
 
 		_monsterTemplates[data.templateId] = data;
 	}
@@ -557,6 +563,61 @@ const MonsterTemplateData* RoomDataManager::GetMonsterTemplate(int32 templateId)
 {
 	auto it = _monsterTemplates.find(templateId);
 	if (it == _monsterTemplates.end())
+		return nullptr;
+	return &it->second;
+}
+
+bool RoomDataManager::LoadLevelData(const string& csvPath)
+{
+	ifstream file(csvPath);
+	if (!file.is_open())
+	{
+		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		return false;
+	}
+
+	string line;
+	getline(file, line); // 헤더 스킵
+
+	while (getline(file, line))
+	{
+		if (line.empty()) continue;
+
+		stringstream ss(line);
+		string token;
+		LevelData data;
+
+		// level
+		getline(ss, token, ',');
+		data.level = stoi(token);
+
+		// requiredExp
+		getline(ss, token, ',');
+		data.requiredExp = stoi(token);
+
+		// maxHp
+		getline(ss, token, ',');
+		data.maxHp = stoi(token);
+
+		// attack
+		getline(ss, token, ',');
+		data.attack = stoi(token);
+
+		// defence
+		getline(ss, token, ',');
+		data.defence = stoi(token);
+
+		_levelData[data.level] = data;
+	}
+
+	cout << "[RoomDataManager] Loaded " << _levelData.size() << " level data entries" << endl;
+	return true;
+}
+
+const LevelData* RoomDataManager::GetLevelData(int32 level) const
+{
+	auto it = _levelData.find(level);
+	if (it == _levelData.end())
 		return nullptr;
 	return &it->second;
 }
