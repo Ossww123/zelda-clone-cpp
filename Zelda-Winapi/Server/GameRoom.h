@@ -108,6 +108,7 @@ private:
 
 public:
 	void DistributeExp(PlayerRef killer, MonsterRef monster);
+	void ProcessMonsterDrop(PlayerRef killer, MonsterRef monster);
 
 private:
 	map<uint64, PlayerRef> _players;

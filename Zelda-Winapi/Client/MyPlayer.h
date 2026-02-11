@@ -2,6 +2,12 @@
 
 #include "Player.h"
 
+struct InventorySlot
+{
+	int32 itemId = 0;
+	int32 count = 0;
+};
+
 class MyPlayer : public Player
 {
 	using Super = Player;
@@ -30,11 +36,18 @@ public:
 	void OnServerTurnAck ( ) { _movePending = false; _turnGraceLeft = TURN_GRACE; }
 	void OnServerMoveEndAck ( ) { _movePending = false; }
 
+	// 인벤토리
+	static const int32 INVENTORY_SIZE = 27;
+	InventorySlot _storage[INVENTORY_SIZE];
+	InventorySlot _equipWeapon;
+	InventorySlot _equipArmor;
+	InventorySlot _equipPotion;
+
 private:
 	bool _keyPressed = false;
 	Protocol::DIR_TYPE _wantedDir = DIR_DOWN;
 	bool _movePending = false;
 	float _turnGraceLeft = 0.f;
-	static constexpr float TURN_GRACE = 0.12f;
+	static constexpr float TURN_GRACE = 0.05f;
 };
 

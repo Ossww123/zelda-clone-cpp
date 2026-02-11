@@ -11,6 +11,8 @@ bool RoomDataManager::LoadAllData()
 	success &= LoadMonsterTemplates("../Datasheets/MonsterTemplate.csv");
 	success &= LoadMonsterSpawns("../Datasheets/MonsterSpawn.json");
 	success &= LoadLevelData("../Datasheets/LevelData.csv");
+	success &= LoadItemTemplates("../Datasheets/ItemTemplate.csv");
+	success &= LoadMonsterDrops("../Datasheets/MonsterDrop.csv");
 
 	if (success)
 	{
@@ -19,6 +21,8 @@ bool RoomDataManager::LoadAllData()
 		cout << "  - Monster Templates: " << _monsterTemplates.size() << endl;
 		cout << "  - Spawn Configs: " << _spawnConfigs.size() << endl;
 		cout << "  - Level Data: " << _levelData.size() << endl;
+		cout << "  - Item Templates: " << _itemTemplates.size() << endl;
+		cout << "  - Monster Drops: " << _monsterDrops.size() << " monster types" << endl;
 	}
 	else
 	{
@@ -658,4 +662,96 @@ wstring RoomDataManager::StringToWString(const string& str)
 	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &result[0], wideSize);
 
 	return result;
+}
+
+bool RoomDataManager::LoadItemTemplates(const string& csvPath)
+{
+	ifstream file(csvPath);
+	if (!file.is_open())
+	{
+		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		return false;
+	}
+
+	string line;
+	getline(file, line); // 헤더 스킵
+
+	while (getline(file, line))
+	{
+		if (line.empty()) continue;
+
+		stringstream ss(line);
+		string token;
+		ItemTemplateData data;
+
+		getline(ss, token, ',');
+		data.itemId = stoi(token);
+
+		getline(ss, data.name, ',');
+
+		getline(ss, data.type, ',');
+
+		getline(ss, token, ',');
+		data.value = stoi(token);
+
+		getline(ss, token, ',');
+		data.maxStack = stoi(token);
+
+		_itemTemplates[data.itemId] = data;
+	}
+
+	cout << "[RoomDataManager] Loaded " << _itemTemplates.size() << " item templates" << endl;
+	return true;
+}
+
+bool RoomDataManager::LoadMonsterDrops(const string& csvPath)
+{
+	ifstream file(csvPath);
+	if (!file.is_open())
+	{
+		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		return false;
+	}
+
+	string line;
+	getline(file, line); // 헤더 스킵
+
+	while (getline(file, line))
+	{
+		if (line.empty()) continue;
+
+		stringstream ss(line);
+		string token;
+		MonsterDropData data;
+
+		getline(ss, token, ',');
+		data.templateId = stoi(token);
+
+		getline(ss, token, ',');
+		data.itemId = stoi(token);
+
+		getline(ss, token, ',');
+		data.dropRate = stoi(token);
+
+		_monsterDrops[data.templateId].push_back(data);
+	}
+
+	cout << "[RoomDataManager] Loaded monster drops for " << _monsterDrops.size() << " monster types" << endl;
+	return true;
+}
+
+const ItemTemplateData* RoomDataManager::GetItemTemplate(int32 itemId) const
+{
+	auto it = _itemTemplates.find(itemId);
+	if (it == _itemTemplates.end())
+		return nullptr;
+	return &it->second;
+}
+
+const vector<MonsterDropData>* RoomDataManager::GetMonsterDrops(int32 templateId) const
+{
+	auto it = _monsterDrops.find(templateId);
+	if (it == _monsterDrops.end())
+		return nullptr;
+	return &it->second;
 }

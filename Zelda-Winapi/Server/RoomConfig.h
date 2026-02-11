@@ -55,3 +55,19 @@ struct LevelData
 	int32 attack;
 	int32 defence;
 };
+
+struct ItemTemplateData
+{
+	int32 itemId;
+	string name;
+	string type;       // "consumable", "weapon", "armor"
+	int32 value;
+	int32 maxStack;
+};
+
+struct MonsterDropData
+{
+	int32 templateId;
+	int32 itemId;
+	int32 dropRate;    // 0~100
+};

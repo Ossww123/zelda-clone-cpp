@@ -1,7 +1,19 @@
 [OK] Updated enum/decls/switch blocks (merge). Implementations untouched.
 [INFO] Proto: C:\Users\User\Desktop\zelda\zelda-clone-cpp\Zelda-Winapi\Common\protoc-21.12-win64\bin\Protocol.proto
-[INFO] New messages: ['C_Turn', 'S_Turn']
-  - C_Turn = 104
-    params: const Protocol::DIR_TYPE& dir
-  - S_Turn = 212
-    params: const Protocol::ObjectInfo& info
+[INFO] New messages: ['S_InventoryData', 'S_AddItem', 'S_EquipItem', 'S_UnequipItem', 'S_UseItem', 'C_EquipItem', 'C_UnequipItem', 'C_UseItem']
+  - S_InventoryData = 213
+    params: const vector<Protocol::ItemInfo>& items , const Protocol::ItemInfo& equippedWeapon , const Protocol::ItemInfo& equippedArmor , const Protocol::ItemInfo& equippedPotion
+  - S_AddItem = 214
+    params: int32 itemId , int32 slot , int32 count
+  - S_EquipItem = 215
+    params: int32 equipType , int32 storageSlot , int32 storageItemId , int32 storageItemCount , int32 equipItemId , int32 equipItemCount , int32 attack , int32 defence
+  - S_UnequipItem = 216
+    params: int32 equipType , int32 storageSlot , int32 attack , int32 defence
+  - S_UseItem = 217
+    params: int32 equipType , int32 remainCount , int32 newHp
+  - C_EquipItem = 105
+    params: int32 slot
+  - C_UnequipItem = 106
+    params: int32 equipType
+  - C_UseItem = 107
+    params: int32 slot

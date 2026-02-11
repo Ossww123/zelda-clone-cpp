@@ -94,7 +94,10 @@ void Arrow::UpdateIdle()
 			{
 				PlayerRef killer = dynamic_pointer_cast<Player>(ownerObj);
 				if (killer)
+				{
 					room->DistributeExp(killer, target);
+					room->ProcessMonsterDrop(killer, target);
+				}
 				room->RemoveObject(target->info.objectid());
 			}
 		}

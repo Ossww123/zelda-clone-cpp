@@ -6,6 +6,7 @@ class Player;
 class GameObject;
 class UI;
 class SpriteActor;
+class Sprite;
 
 struct PQNode
 {
@@ -87,6 +88,9 @@ public:
 private:
 	void TickMonsterSpawn ( );
 	void RenderHUD ( HDC hdc );
+	void RenderInventory ( HDC hdc );
+	void HandleInventoryClick ( );
+	Sprite* GetItemSprite ( int32 itemId );
 
 private:
 	void CreateMapButtons ( );
@@ -97,6 +101,12 @@ private:
 private:
 	const int32 DESIRED_MONSTER_COUNT = 20;
 	int32 _monsterCount = 0;
+	bool _showInventory = false;
+
+	// 인벤토리 드래그
+	Vec2Int _invPos = { -1, -1 };  // 초기값 -1 → 첫 표시 시 화면 중앙으로
+	bool _invDragging = false;
+	Vec2Int _invDragOffset = { 0, 0 };
 
 	class TilemapActor* _tilemapActor = nullptr;
 	SpriteActor* _background = nullptr;

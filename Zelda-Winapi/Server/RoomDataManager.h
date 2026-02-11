@@ -16,11 +16,15 @@ public:
 	bool LoadMonsterTemplates(const string& csvPath);
 	bool LoadMonsterSpawns(const string& jsonPath);
 	bool LoadLevelData(const string& csvPath);
+	bool LoadItemTemplates(const string& csvPath);
+	bool LoadMonsterDrops(const string& csvPath);
 
 	const RoomConfigData* GetRoomConfig(const string& roomId) const;
 	const RoomSpawnConfig* GetSpawnConfig(const string& roomId) const;
 	const MonsterTemplateData* GetMonsterTemplate(int32 templateId) const;
 	const LevelData* GetLevelData(int32 level) const;
+	const ItemTemplateData* GetItemTemplate(int32 itemId) const;
+	const vector<MonsterDropData>* GetMonsterDrops(int32 templateId) const;
 
 	vector<string> GetStaticRoomIds() const;
 	vector<string> GetInstanceRoomIds() const;
@@ -35,6 +39,8 @@ private:
 	unordered_map<string, RoomSpawnConfig> _spawnConfigs;
 	unordered_map<int32, MonsterTemplateData> _monsterTemplates;
 	unordered_map<int32, LevelData> _levelData;
+	unordered_map<int32, ItemTemplateData> _itemTemplates;
+	unordered_map<int32, vector<MonsterDropData>> _monsterDrops;
 
 	// JSON 파싱 헬퍼
 	bool ParseMonsterSpawnJson(const string& jsonContent);
