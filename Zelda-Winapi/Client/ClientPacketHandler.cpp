@@ -66,7 +66,20 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	case S_UseItem:
 		Handle_S_UseItem ( session , buffer , len );
 		break;
+	case S_PartyInvite:
+		Handle_S_PartyInvite ( session , buffer , len );
+		break;
+	case S_PartyUpdate:
+		Handle_S_PartyUpdate ( session , buffer , len );
+		break;
+	case S_PartyLeave:
+		Handle_S_PartyLeave ( session , buffer , len );
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
+
+
+		
+
 
 	// [AUTO-GEN SWITCH END]
 	default:
@@ -583,4 +596,100 @@ SendBufferRef ClientPacketHandler::Make_C_UseItem ( int32 slot )
 	Protocol::C_UseItem pkt;
 	pkt.set_slot ( slot );
 	return MakeSendBuffer ( pkt , C_UseItem );
+}
+
+// ---- Party ----
+
+void ClientPacketHandler::Handle_S_PartyInvite ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_PartyInvite pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	myPlayer->_pendingInviteFrom = pkt.inviterid ( );
+
+	// string → wstring 변환
+	string name = pkt.invitername ( );
+	myPlayer->_pendingInviterName = wstring ( name.begin ( ) , name.end ( ) );
+}
+
+void ClientPacketHandler::Handle_S_PartyUpdate ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_PartyUpdate pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	myPlayer->_partyMembers.clear ( );
+
+	for ( int32 i = 0; i < pkt.members_size ( ); i++ )
+	{
+		const auto& m = pkt.members ( i );
+		PartyMemberData data;
+		data.playerId = m.playerid ( );
+		string name = m.name ( );
+		data.name = wstring ( name.begin ( ) , name.end ( ) );
+		data.level = m.level ( );
+		data.hp = m.hp ( );
+		data.maxHp = m.maxhp ( );
+		data.isLeader = m.isleader ( );
+
+		// 같은 방에 있는 플레이어에서 이름/레벨/HP 보완
+		DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+		if ( scene )
+		{
+			GameObject* obj = scene->GetObjectW ( data.playerId );
+			if ( obj )
+			{
+				string objName = obj->info.name ( );
+				data.name = wstring ( objName.begin ( ) , objName.end ( ) );
+				data.hp = obj->info.hp ( );
+				data.maxHp = obj->info.maxhp ( );
+				data.level = obj->info.player ( ).level ( );
+			}
+		}
+
+		myPlayer->_partyMembers.push_back ( data );
+	}
+}
+
+void ClientPacketHandler::Handle_S_PartyLeave ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	myPlayer->_partyMembers.clear ( );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( uint64 targetId )
+{
+	Protocol::C_PartyInvite pkt;
+	pkt.set_targetid ( targetId );
+	return MakeSendBuffer ( pkt , C_PartyInvite );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_PartyAnswer ( uint64 inviterId , bool accept )
+{
+	Protocol::C_PartyAnswer pkt;
+	pkt.set_inviterid ( inviterId );
+	pkt.set_accept ( accept );
+	return MakeSendBuffer ( pkt , C_PartyAnswer );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_PartyLeave ( )
+{
+	Protocol::C_PartyLeave pkt;
+	return MakeSendBuffer ( pkt , C_PartyLeave );
 }

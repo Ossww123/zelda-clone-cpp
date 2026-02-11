@@ -9,6 +9,7 @@
 #include "GameRoomManager.h"
 #include "RoomConfig.h"
 #include "RoomDataManager.h"
+#include "PartyManager.h"
 
 GameRoom::GameRoom()
 {
@@ -109,14 +110,20 @@ void GameRoom::Step(uint64 now)
 void GameRoom::EnterRoom(GameSessionRef session)
 {
 	PlayerRef player = GameObject::CreatePlayer();
+	EnterRoom(session, player);
+}
 
+void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
+{
 	session->gameRoom = GetRoomRef();
 	session->player = player;
 	player->session = session;
 
-	// TEMP
+	// 스폰 위치로 리셋
 	player->info.set_posx(5);
 	player->info.set_posy(5);
+	player->info.set_state(IDLE);
+	player->StopMove();
 
 	{
 		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_MyPlayer(player->info);
@@ -151,6 +158,50 @@ void GameRoom::EnterRoom(GameSessionRef session)
 	}
 
 	AddObject(player);
+
+	// 파티 소속이면 같은 방의 모든 파티원에게 파티 정보 갱신
+	uint64 playerId = player->info.objectid();
+	uint64 partyId = GPartyManager.GetPartyIdByPlayer(playerId);
+	if (partyId != 0)
+	{
+		Party* party = GPartyManager.GetParty(partyId);
+		if (party)
+		{
+			Protocol::S_PartyUpdate partyPkt;
+			for (uint64 memberId : party->memberIds)
+			{
+				Protocol::PartyMemberInfo* m = partyPkt.add_members();
+				m->set_playerid(memberId);
+				m->set_isleader(memberId == party->leaderId);
+
+				GameObjectRef obj = FindObject(memberId);
+				if (obj)
+				{
+					PlayerRef p = static_pointer_cast<Player>(obj);
+					m->set_name(p->info.name());
+					m->set_level(p->GetLevel());
+					m->set_hp(p->info.hp());
+					m->set_maxhp(p->info.maxhp());
+				}
+				else
+				{
+					// 이름 + (Away) 형태
+					auto nameIt = party->memberNames.find(memberId);
+					string name = (nameIt != party->memberNames.end()) ? nameIt->second : "Unknown";
+					m->set_name(name + "(Away)");
+				}
+			}
+			SendBufferRef sendBuffer = ServerPacketHandler::MakeSendBuffer(partyPkt, S_PartyUpdate);
+
+			// 이 방에 있는 모든 파티원에게 전송
+			for (uint64 memberId : party->memberIds)
+			{
+				auto it = _players.find(memberId);
+				if (it != _players.end() && it->second->session)
+					it->second->session->Send(sendBuffer);
+			}
+		}
+	}
 }
 
 void GameRoom::LeaveRoom(GameSessionRef session)
@@ -240,7 +291,7 @@ void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt
 	player->info.set_posx(nextPos.x);
 	player->info.set_posy(nextPos.y);
 
-	// TEMP : 고정 이동 시간
+	// TEMP : 고정 이동 시간 
 	constexpr uint64 kMoveDurationMs = 75;
 	uint64 now = GetTickCount64();
 	player->StartMove(now, kMoveDurationMs);
@@ -915,7 +966,37 @@ void GameRoom::DistributeExp(PlayerRef killer, MonsterRef monster)
 	if (exp <= 0)
 		return;
 
-	killer->GainExp(exp);
+	uint64 killerId = killer->info.objectid();
+	uint64 partyId = GPartyManager.GetPartyIdByPlayer(killerId);
+
+	if (partyId == 0)
+	{
+		killer->GainExp(exp);
+		return;
+	}
+
+	// 파티: 같은 방에 있는 파티원에게 균등 분배
+	Party* party = GPartyManager.GetParty(partyId);
+	if (!party)
+	{
+		killer->GainExp(exp);
+		return;
+	}
+
+	vector<PlayerRef> nearbyMembers;
+	for (uint64 memberId : party->memberIds)
+	{
+		auto it = _players.find(memberId);
+		if (it != _players.end())
+			nearbyMembers.push_back(it->second);
+	}
+
+	if (nearbyMembers.empty())
+		return;
+
+	int32 share = max(1, exp / (int32)nearbyMembers.size());
+	for (auto& member : nearbyMembers)
+		member->GainExp(share);
 }
 
 void GameRoom::ProcessMonsterDrop(PlayerRef killer, MonsterRef monster)

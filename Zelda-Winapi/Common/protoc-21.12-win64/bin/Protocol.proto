@@ -162,3 +162,33 @@ message C_UseItem
 {
     int32 slot = 1;
 }
+
+message C_PartyInvite
+{
+    uint64 targetId = 1;
+}
+
+message C_PartyAnswer
+{
+    uint64 inviterId = 1;
+    bool accept = 2;
+}
+
+message C_PartyLeave
+{
+}
+
+message S_PartyInvite
+{
+    uint64 inviterId = 1;
+    string inviterName = 2;
+}
+
+message S_PartyUpdate
+{
+    repeated PartyMemberInfo members = 1;
+}
+
+message S_PartyLeave
+{
+}

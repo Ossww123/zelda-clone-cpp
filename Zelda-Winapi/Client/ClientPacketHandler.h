@@ -9,6 +9,9 @@ enum
 	C_EquipItem = 105 ,
 	C_UnequipItem = 106 ,
 	C_UseItem = 107 ,
+	C_PartyAnswer = 109 ,
+	C_PartyInvite = 108 ,
+	C_PartyLeave = 110 ,
 
 	S_TEST = 201 ,
 	S_EnterGame = 202 ,
@@ -27,7 +30,12 @@ enum
 	S_InventoryData = 213 ,
 	S_UnequipItem = 216 ,
 	S_UseItem = 217 ,
+	S_PartyInvite = 218 ,
+	S_PartyLeave = 220 ,
+	S_PartyUpdate = 219 ,
 	// [AUTO-GEN ENUM BEGIN]
+
+
 
 	// [AUTO-GEN ENUM END]
 };
@@ -55,6 +63,9 @@ public:
 	static void Handle_S_EquipItem ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_UnequipItem ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_UseItem ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_PartyInvite ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_PartyUpdate ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_PartyLeave ( ServerSessionRef session , BYTE* buffer , int32 len );
 
 	// 보내기
 	static SendBufferRef Make_C_Move ( Protocol::DIR_TYPE dir );
@@ -64,7 +75,15 @@ public:
 	static SendBufferRef Make_C_EquipItem ( int32 slot );
 	static SendBufferRef Make_C_UnequipItem ( int32 equipType );
 	static SendBufferRef Make_C_UseItem ( int32 slot );
+	static SendBufferRef Make_C_PartyInvite ( uint64 targetId );
+	static SendBufferRef Make_C_PartyAnswer ( uint64 inviterId , bool accept );
+	static SendBufferRef Make_C_PartyLeave ( );
+
 	// [AUTO-GEN DECLS BEGIN]
+
+
+	
+	
 
 	// [AUTO-GEN DECLS END]
 

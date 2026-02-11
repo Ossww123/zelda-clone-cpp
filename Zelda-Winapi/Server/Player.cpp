@@ -5,9 +5,12 @@
 #include "GameSession.h"
 #include "ServerPacketHandler.h"
 
+static atomic<int32> sPlayerNameCounter = 0;
+
 Player::Player()
 {
-	info.set_name("PlayerName");
+	int32 num = ++sPlayerNameCounter;
+	info.set_name("Player_" + to_string(num));
 
 	_level = 1;
 	_exp = 0;

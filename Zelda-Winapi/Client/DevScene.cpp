@@ -174,6 +174,7 @@ void DevScene::Update ( )
 		HandleInventoryClick ( );
 	}
 
+	HandlePartyInput ( );
 	TickMonsterSpawn ( );
 }
 
@@ -181,6 +182,8 @@ void DevScene::Render ( HDC hdc )
 {
 	Super::Render ( hdc );
 	RenderHUD ( hdc );
+	RenderPartyHUD ( hdc );
+	RenderPartyInvite ( hdc );
 
 	if ( _showInventory )
 		RenderInventory ( hdc );
@@ -1127,4 +1130,194 @@ void DevScene::HandleInventoryClick ( )
 			return;
 		}
 	}
+}
+
+void DevScene::HandlePartyInput ( )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	// 초대 수락/거절 (Y/N)
+	if ( myPlayer->_pendingInviteFrom != 0 )
+	{
+		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::Y ) )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , true );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+			myPlayer->_pendingInviteFrom = 0;
+			myPlayer->_pendingInviterName.clear ( );
+		}
+		else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::N ) )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , false );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+			myPlayer->_pendingInviteFrom = 0;
+			myPlayer->_pendingInviterName.clear ( );
+		}
+		return;  // 초대 팝업 중에는 다른 입력 무시
+	}
+
+	// P키 파티 탈퇴
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::P ) )
+	{
+		if ( !myPlayer->_partyMembers.empty ( ) )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyLeave ( );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+	}
+
+	// 좌클릭으로 다른 플레이어 클릭 → 파티 초대
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse ) )
+	{
+		// 인벤토리 드래그 중이면 무시
+		if ( _showInventory && _invDragging )
+			return;
+
+		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
+		Vec2 cameraPos = GET_SINGLE ( SceneManager )->GetCameraPos ( );
+
+		// 마우스 스크린 좌표 → 월드 좌표
+		float worldX = mouse.x + cameraPos.x - GWinSizeX / 2.f;
+		float worldY = mouse.y + cameraPos.y - GWinSizeY / 2.f;
+
+		uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+
+		// LAYER_OBJECT의 Player 순회
+		for ( Actor* actor : _actors[ LAYER_OBJECT ] )
+		{
+			Player* player = dynamic_cast< Player* >( actor );
+			if ( player == nullptr )
+				continue;
+			if ( player->info.objectid ( ) == myId )
+				continue;  // 자기 자신 제외
+			if ( player->info.objecttype ( ) != Protocol::OBJECT_TYPE_PLAYER )
+				continue;
+
+			Vec2 pos = player->GetPos ( );
+			float dx = worldX - pos.x;
+			float dy = worldY - pos.y;
+
+			// 클릭 범위: 플레이어 중심에서 50px 이내
+			if ( dx * dx + dy * dy < 50.f * 50.f )
+			{
+				SendBufferRef sb = ClientPacketHandler::Make_C_PartyInvite ( player->info.objectid ( ) );
+				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+				break;
+			}
+		}
+	}
+}
+
+void DevScene::RenderPartyHUD ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	if ( myPlayer->_partyMembers.empty ( ) )
+		return;
+
+	const int32 startX = 36;
+	const int32 startY = 100;
+	const int32 rowH = 24;
+	const int32 barW = 80;
+	const int32 barH = 8;
+
+	// 반투명 배경
+	int32 bgH = 20 + ( int32 ) myPlayer->_partyMembers.size ( ) * rowH;
+	HBRUSH bgBrush = CreateSolidBrush ( RGB ( 0 , 0 , 0 ) );
+	RECT bgRect = { startX - 4 , startY - 4 , startX + 180 , startY + bgH };
+	FillRect ( hdc , &bgRect , bgBrush );
+	DeleteObject ( bgBrush );
+
+	SetBkMode ( hdc , TRANSPARENT );
+	SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+
+	// 타이틀
+	TextOut ( hdc , startX , startY , L"Party" , 5 );
+
+	for ( int32 i = 0; i < ( int32 ) myPlayer->_partyMembers.size ( ); i++ )
+	{
+		const auto& member = myPlayer->_partyMembers[ i ];
+		int32 y = startY + 18 + i * rowH;
+
+		// 리더 표시 + 이름
+		wstring display;
+		if ( member.isLeader )
+			display = L"* " + member.name;
+		else
+			display = L"  " + member.name;
+
+		TextOut ( hdc , startX , y , display.c_str ( ) , ( int32 ) display.length ( ) );
+
+		// HP 바
+		int32 barX = startX + 100;
+		int32 barY = y + 2;
+
+		// 배경 (어두운 빨강)
+		HBRUSH darkBrush = CreateSolidBrush ( RGB ( 80 , 0 , 0 ) );
+		RECT barBg = { barX , barY , barX + barW , barY + barH };
+		FillRect ( hdc , &barBg , darkBrush );
+		DeleteObject ( darkBrush );
+
+		// HP 바 (초록)
+		if ( member.maxHp > 0 && member.hp > 0 )
+		{
+			int32 fillW = barW * member.hp / member.maxHp;
+			if ( fillW > 0 )
+			{
+				HBRUSH hpBrush = CreateSolidBrush ( RGB ( 0 , 200 , 0 ) );
+				RECT hpRect = { barX , barY , barX + fillW , barY + barH };
+				FillRect ( hdc , &hpRect , hpBrush );
+				DeleteObject ( hpBrush );
+			}
+		}
+	}
+}
+
+void DevScene::RenderPartyInvite ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	if ( myPlayer->_pendingInviteFrom == 0 )
+		return;
+
+	// 화면 중앙에 초대 팝업
+	int32 popW = 300;
+	int32 popH = 80;
+	int32 popX = ( GWinSizeX - popW ) / 2;
+	int32 popY = ( GWinSizeY - popH ) / 2 - 50;
+
+	// 배경
+	HBRUSH bgBrush = CreateSolidBrush ( RGB ( 30 , 30 , 60 ) );
+	RECT bgRect = { popX , popY , popX + popW , popY + popH };
+	FillRect ( hdc , &bgRect , bgBrush );
+	DeleteObject ( bgBrush );
+
+	// 테두리
+	HPEN pen = CreatePen ( PS_SOLID , 2 , RGB ( 200 , 200 , 255 ) );
+	HPEN oldPen = ( HPEN ) SelectObject ( hdc , pen );
+	HBRUSH oldBrush = ( HBRUSH ) SelectObject ( hdc , GetStockObject ( NULL_BRUSH ) );
+	Rectangle ( hdc , popX , popY , popX + popW , popY + popH );
+	SelectObject ( hdc , oldPen );
+	SelectObject ( hdc , oldBrush );
+	DeleteObject ( pen );
+
+	SetBkMode ( hdc , TRANSPARENT );
+	SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+
+	// 메시지
+	wstring msg = myPlayer->_pendingInviterName + L" invited you to party";
+	RECT textRect = { popX + 10 , popY + 15 , popX + popW - 10 , popY + 40 };
+	DrawText ( hdc , msg.c_str ( ) , ( int32 ) msg.length ( ) , &textRect , DT_CENTER );
+
+	// Y/N 안내
+	wstring hint = L"[Y] Accept    [N] Decline";
+	RECT hintRect = { popX + 10 , popY + 45 , popX + popW - 10 , popY + 70 };
+	SetTextColor ( hdc , RGB ( 180 , 180 , 180 ) );
+	DrawText ( hdc , hint.c_str ( ) , ( int32 ) hint.length ( ) , &hintRect , DT_CENTER );
 }

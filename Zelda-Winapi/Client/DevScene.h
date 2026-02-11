@@ -91,6 +91,9 @@ private:
 	void RenderInventory ( HDC hdc );
 	void HandleInventoryClick ( );
 	Sprite* GetItemSprite ( int32 itemId );
+	void HandlePartyInput ( );
+	void RenderPartyHUD ( HDC hdc );
+	void RenderPartyInvite ( HDC hdc );
 
 private:
 	void CreateMapButtons ( );
