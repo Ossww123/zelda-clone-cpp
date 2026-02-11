@@ -6,6 +6,7 @@
 #include "TimeManager.h"
 
 #include "Flipbook.h"
+#include "Sprite.h"
 #include "SceneManager.h"
 #include "DevScene.h"
 #include "Player.h"
@@ -42,7 +43,49 @@ void Monster::Render(HDC hdc)
 {
 	Super::Render(hdc);
 
-	// TODO
+	// Enemy HP Bar
+	Sprite* hpFrame = GET_SINGLE ( ResourceManager )->GetSprite ( L"Enemy_Hp_Frame" );
+	Sprite* hpBar = GET_SINGLE ( ResourceManager )->GetSprite ( L"Enemy_Hp_Bar" );
+	if ( hpFrame == nullptr || hpBar == nullptr )
+		return;
+
+	Vec2 cameraPos = GET_SINGLE ( SceneManager )->GetCameraPos ( );
+	int32 cameraOffsetX = ( int32 ) cameraPos.x - GWinSizeX / 2;
+	int32 cameraOffsetY = ( int32 ) cameraPos.y - GWinSizeY / 2;
+
+	int32 screenX = ( int32 ) _pos.x - cameraOffsetX;
+	int32 screenY = ( int32 ) _pos.y - cameraOffsetY;
+
+	// Frame 위치: 몬스터 스프라이트(100x100) 위에 배치
+	int32 frameW = hpFrame->GetSize ( ).x;  // 102
+	int32 frameH = hpFrame->GetSize ( ).y;  // 12
+	int32 frameX = screenX - frameW / 2;
+	int32 frameY = screenY - 50 - frameH - 2;
+
+	::TransparentBlt ( hdc ,
+		frameX , frameY ,
+		frameW , frameH ,
+		hpFrame->GetDC ( ) ,
+		hpFrame->GetPos ( ).x , hpFrame->GetPos ( ).y ,
+		frameW , frameH ,
+		hpFrame->GetTransparent ( ) );
+
+	// HP Bar: Frame 기준 (3, 3) 오프셋
+	int32 hp = info.hp ( );
+	int32 maxHp = info.maxhp ( );
+	int32 fullBarWidth = hpBar->GetSize ( ).x;  // 96
+	int32 barWidth = ( maxHp > 0 ) ? ( fullBarWidth * hp / maxHp ) : 0;
+
+	if ( barWidth > 0 )
+	{
+		::TransparentBlt ( hdc ,
+			frameX + 3 , frameY + 3 ,
+			barWidth , hpBar->GetSize ( ).y ,
+			hpBar->GetDC ( ) ,
+			hpBar->GetPos ( ).x , hpBar->GetPos ( ).y ,
+			barWidth , hpBar->GetSize ( ).y ,
+			hpBar->GetTransparent ( ) );
+	}
 }
 
 void Monster::TickIdle()

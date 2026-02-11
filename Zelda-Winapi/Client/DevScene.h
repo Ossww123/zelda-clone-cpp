@@ -86,6 +86,7 @@ public:
 
 private:
 	void TickMonsterSpawn ( );
+	void RenderHUD ( HDC hdc );
 
 private:
 	void CreateMapButtons ( );
