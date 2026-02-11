@@ -32,6 +32,7 @@ private:
 
 public:
 	void EnterRoom(GameSessionRef session);
+	void EnterRoom(GameSessionRef session, PlayerRef existingPlayer);
 	void LeaveRoom(GameSessionRef session);
 	GameObjectRef FindObject(uint64 id);
 	GameRoomRef GetRoomRef() { return shared_from_this(); }

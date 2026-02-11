@@ -9,6 +9,9 @@ enum
 	C_EquipItem = 105,
 	C_UnequipItem = 106,
 	C_UseItem = 107,
+	C_PartyAnswer = 109,
+	C_PartyInvite = 108,
+	C_PartyLeave = 110,
 
 	S_TEST = 201,
 	S_EnterGame = 202,
@@ -27,7 +30,14 @@ enum
 	S_InventoryData = 213,
 	S_UnequipItem = 216,
 	S_UseItem = 217,
+	S_PartyInvite = 218,
+	S_PartyLeave = 220,
+	S_PartyUpdate = 219,
+
 	// [AUTO-GEN ENUM BEGIN]
+	
+
+	
 
 	// [AUTO-GEN ENUM END]
 };
@@ -51,6 +61,9 @@ public:
 	static void Handle_C_EquipItem(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_UnequipItem(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_UseItem(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_PartyInvite(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_PartyAnswer(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_PartyLeave(GameSessionRef session, BYTE* buffer, int32 len);
 
 	// 보내기
 	static SendBufferRef Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs);
@@ -70,7 +83,14 @@ public:
 	static SendBufferRef Make_S_EquipItem(int32 equipType, int32 storageSlot, int32 storageItemId, int32 storageItemCount, int32 equipItemId, int32 equipItemCount, int32 attack, int32 defence);
 	static SendBufferRef Make_S_UnequipItem(int32 equipType, int32 storageSlot, int32 attack, int32 defence);
 	static SendBufferRef Make_S_UseItem(int32 equipType, int32 remainCount, int32 newHp);
+	static SendBufferRef Make_S_PartyInvite(uint64 inviterId, const string& inviterName);
+	static SendBufferRef Make_S_PartyUpdate(const vector<Protocol::PartyMemberInfo>& members);
+	static SendBufferRef Make_S_PartyLeave();
 	// [AUTO-GEN DECLS BEGIN]
+
+
+	
+	
 
 	// [AUTO-GEN DECLS END]
 

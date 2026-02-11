@@ -48,3 +48,13 @@ message ItemInfo
 	int32 count = 2;
 	int32 slot = 3;
 }
+
+message PartyMemberInfo
+{
+	uint64 playerId = 1;
+	string name = 2;
+	int32 level = 3;
+	int32 hp = 4;
+	int32 maxHp = 5;
+	bool isLeader = 6;
+}

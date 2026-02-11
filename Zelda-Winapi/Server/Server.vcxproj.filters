@@ -91,6 +91,9 @@
     <ClCompile Include="RoomDataManager.cpp">
       <Filter>Source Files\Game\Room</Filter>
     </ClCompile>
+    <ClCompile Include="PartyManager.cpp">
+      <Filter>Source Files\Game\Room</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -145,6 +148,9 @@
       <Filter>Source Files\Game\Room</Filter>
     </ClInclude>
     <ClInclude Include="RoomDataManager.h">
+      <Filter>Source Files\Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="PartyManager.h">
       <Filter>Source Files\Game\Room</Filter>
     </ClInclude>
   </ItemGroup>
