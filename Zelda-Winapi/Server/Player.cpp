@@ -45,7 +45,7 @@ void Player::Update()
 
 int32 Player::GetMaxExp() const
 {
-	const LevelData* data = GRoomDataManager.GetLevelData(_level);
+	const LevelData* data = GRoomDataManager.GetLevelData(_level + 1);
 	if (data)
 		return data->requiredExp;
 	return 0;
