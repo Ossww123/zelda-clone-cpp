@@ -79,37 +79,58 @@ void Player::Render ( HDC hdc )
 
 void Player::TickIdle ( )
 {
-	
+	if ( ( _destPos - _pos ).Length ( ) >= 1.f )
+		TickMove ( );
 }
 
 void Player::TickMove ( )
 {
 	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
 
-	Vec2 dir = ( _destPos - _pos );
-	if ( dir.Length ( ) < 1.f )
+	const float speed = 240.f; // 기존 값
+	Vec2 toDest = _destPos - _pos;
+	float dist = toDest.Length ( );
+
+	if ( dist <= 0.5f )
 	{
-		SetState ( IDLE );
 		_pos = _destPos;
+		return;
 	}
-	else
+
+	float step = speed * deltaTime;
+	if ( step >= dist )
 	{
-		switch (info.dir())
-		{
-		case DIR_UP:
-			_pos.y -= 200 * deltaTime;
-			break;
-		case DIR_DOWN:
-			_pos.y += 200 * deltaTime;
-			break;
-		case DIR_LEFT:
-			_pos.x -= 200 * deltaTime;
-			break;
-		case DIR_RIGHT:
-			_pos.x += 200 * deltaTime;
-			break;
-		}
+		_pos = _destPos;
+		return;
 	}
+
+	Vec2 dir = toDest / dist;
+	_pos += dir * step;
+
+	//Vec2 dir = ( _destPos - _pos );
+	//if ( dir.Length ( ) < 1.f )
+	//{
+	//	SetState ( IDLE );
+	//	_pos = _destPos;
+	//}
+	//else
+	//{
+	//	switch (info.dir())
+	//	{
+	//	case DIR_UP:
+	//		_pos.y -= 100 * deltaTime;
+	//		break;
+	//	case DIR_DOWN:
+	//		_pos.y += 100 * deltaTime;
+	//		break;
+	//	case DIR_LEFT:
+	//		_pos.x -= 100 * deltaTime;
+	//		break;
+	//	case DIR_RIGHT:
+	//		_pos.x += 100 * deltaTime;
+	//		break;
+	//	}
+	//}
 }
 
 void Player::TickSkill ( )

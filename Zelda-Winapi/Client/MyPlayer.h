@@ -32,7 +32,6 @@ private:
 	void SyncToServer ( );  // 미사용
 
 public:
-	void OnServerAck ( ) { _movePending = false; }
 	void OnServerTurnAck ( ) { _movePending = false; _turnGraceLeft = TURN_GRACE; }
 	void OnServerMoveEndAck ( ) { _movePending = false; }
 

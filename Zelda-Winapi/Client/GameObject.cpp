@@ -32,6 +32,12 @@ void GameObject::Tick ( )
 {
 	Super::Tick ( );
 
+	if ( ( _destPos - _pos ).Length ( ) > 0.5f )
+	{
+		TickMove ( );
+		return;
+	}
+
 	switch ( info.state() )
 	{
 	case IDLE:

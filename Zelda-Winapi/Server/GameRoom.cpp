@@ -231,6 +231,8 @@ void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt
 	if (!CanGo(nextPos))
 	{
 		player->info.set_state(IDLE);
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(player->info);
+		Broadcast(sendBuffer);
 		return;
 	}
 
