@@ -45,6 +45,17 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	// [AUTO-GEN SWITCH BEGIN]
 
 
+
+		case S_GainExp:
+		Handle_S_GainExp ( session , buffer , len );
+		break;
+
+	case S_LevelUp:
+		Handle_S_LevelUp ( session , buffer , len );
+		break;
+
+
+
 	// [AUTO-GEN SWITCH END]
 	default:
 		break;
@@ -266,4 +277,57 @@ SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::MAP_ID& ma
 	pkt.set_channel ( channel );
 
 	return MakeSendBuffer ( pkt , C_ChangeMap );
+}
+
+void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_GainExp pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	if ( myPlayer->info.objectid ( ) != pkt.playerid ( ) )
+		return;
+
+	// PlayerExtra 갱신
+	Protocol::PlayerExtra* extra = myPlayer->info.mutable_player ( );
+	extra->set_exp ( pkt.currentexp ( ) );
+	extra->set_maxexp ( pkt.maxexp ( ) );
+}
+
+void ClientPacketHandler::Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	uint16 size = header->size;
+
+	Protocol::S_LevelUp pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene == nullptr )
+		return;
+
+	GameObject* gameObject = scene->GetObjectW ( pkt.playerid ( ) );
+	if ( gameObject == nullptr )
+		return;
+
+	Creature* creature = dynamic_cast< Creature* >( gameObject );
+	if ( creature == nullptr )
+		return;
+
+	// 스탯 업데이트
+	creature->info.set_maxhp ( pkt.maxhp ( ) );
+	creature->info.set_hp ( pkt.maxhp ( ) );  // 레벨업 시 HP 전체 회복
+	creature->info.set_attack ( pkt.attack ( ) );
+	creature->info.set_defence ( pkt.defence ( ) );
+
+	// PlayerExtra 갱신
+	Protocol::PlayerExtra* extra = creature->info.mutable_player ( );
+	extra->set_level ( pkt.newlevel ( ) );
+	extra->set_maxexp ( pkt.maxexp ( ) );
 }

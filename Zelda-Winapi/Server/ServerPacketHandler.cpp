@@ -27,6 +27,8 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 		break;
 	// [AUTO-GEN SWITCH BEGIN]
 
+
+
 		
 
 	// [AUTO-GEN SWITCH END]
@@ -105,8 +107,7 @@ void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffe
 				instanceId = GRoomManager.CreateDungeonInstance();
 				to = GRoomManager.GetDungeonInstance(instanceId);
 			}
-
-			// 실패
+ 
 			if (!to)
 			{
 				Protocol::S_ChangeMap sendPkt;
@@ -119,7 +120,6 @@ void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffe
 				return;
 			}
 
-			// 성공
 			{
 				Protocol::S_ChangeMap sendPkt;
 				sendPkt.set_success(true);
@@ -222,4 +222,14 @@ SendBufferRef ServerPacketHandler::Make_S_Damaged(const Protocol::S_Damaged& pkt
 SendBufferRef ServerPacketHandler::Make_S_ChangeMap(const Protocol::S_ChangeMap& pkt)
 {
 	return MakeSendBuffer(pkt, S_ChangeMap);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_GainExp(const Protocol::S_GainExp& pkt)
+{
+	return MakeSendBuffer(pkt, S_GainExp);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_LevelUp(const Protocol::S_LevelUp& pkt)
+{
+	return MakeSendBuffer(pkt, S_LevelUp);
 }

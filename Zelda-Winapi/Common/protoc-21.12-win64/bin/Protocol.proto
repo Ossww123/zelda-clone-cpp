@@ -79,3 +79,21 @@ message S_ChangeMap
     int32 channel = 3;
     uint64 instanceId = 4;
 }
+
+message S_GainExp
+{
+    uint64 playerId = 1;
+    int32 gainedExp = 2;
+    int32 currentExp = 3;
+    int32 maxExp = 4;
+}
+
+message S_LevelUp
+{
+    uint64 playerId = 1;
+    int32 newLevel = 2;
+    int32 maxHp = 3;
+    int32 attack = 4;
+    int32 defence = 5;
+    int32 maxExp = 6;
+}

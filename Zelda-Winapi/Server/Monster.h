@@ -20,7 +20,7 @@ public:
 	int32 GetAggroRange() const { return _aggroRange; }
 	int32 GetLeashRange() const { return _leashRange; }
 
-	void SetTemplateId(int32 id) { _templateId = id; }
+	void SetTemplateId(int32 id) { _templateId = id; info.mutable_monster()->set_templateid(id); }
 	int32 GetTemplateId() const { return _templateId; }
 
 private:

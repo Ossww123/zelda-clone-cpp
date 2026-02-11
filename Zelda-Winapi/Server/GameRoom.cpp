@@ -584,7 +584,12 @@ void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	BroadcastDamaged(attacker, target, damage);
 
 	if (target->info.hp() == 0)
+	{
+		MonsterRef monster = dynamic_pointer_cast<Monster>(target);
+		if (monster)
+			DistributeExp(attacker, monster);
 		RemoveObject(target->info.objectid());
+	}
 }
 
 void GameRoom::Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
@@ -629,7 +634,7 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 
 	Vec2Int center = pos + forward;
 
-	std::vector<uint64> deadTargets;
+	std::vector<std::pair<uint64, MonsterRef>> deadTargets;
 
 	for (int32 dy = -1; dy <= 1; dy++)
 	{
@@ -648,12 +653,13 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 			BroadcastDamaged(attacker, target, damage);
 
 			if (target->info.hp() == 0)
-				deadTargets.push_back(target->info.objectid());
+				deadTargets.push_back({ target->info.objectid(), target });
 		}
 	}
 
-	for (uint64 id : deadTargets)
+	for (auto& [id, monster] : deadTargets)
 	{
+		DistributeExp(attacker, monster);
 		RemoveObject(id);
 	}
 }
@@ -821,4 +827,20 @@ void GameRoom::ProcessRespawnFromData()
 
 		it = _respawnQueue.erase(it);
 	}
+}
+
+void GameRoom::DistributeExp(PlayerRef killer, MonsterRef monster)
+{
+	if (!killer || !monster)
+		return;
+
+	const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(monster->GetTemplateId());
+	if (!templateData)
+		return;
+
+	int32 exp = templateData->exp;
+	if (exp <= 0)
+		return;
+
+	killer->GainExp(exp);
 }

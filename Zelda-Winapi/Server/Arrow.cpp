@@ -3,6 +3,7 @@
 #include "GameRoom.h"
 #include "Creature.h"
 #include "Monster.h"
+#include "Player.h"
 
 Arrow::Arrow()
 {
@@ -66,14 +67,12 @@ void Arrow::UpdateIdle()
 	Vec2Int deltaXY[4] = { {0,-1}, {0,1}, {-1,0}, {1,0} };
 	Vec2Int nextPos = GetCellPos() + deltaXY[info.dir()];
 
-	// 타일 막힘 체크
 	if (room->IsBlockedByWall(nextPos))
 	{
 		room->RemoveObject(info.objectid());
 		return;
 	}
 
-	// 충돌 체크(몬스터)
 	MonsterRef target = room->GetMonsterAt(nextPos);
 	if (target)
 	{
@@ -94,14 +93,18 @@ void Arrow::UpdateIdle()
 			room->Broadcast(sendBuffer);
 
 			if (target->info.hp() == 0)
+			{
+				PlayerRef killer = dynamic_pointer_cast<Player>(attacker);
+				if (killer)
+					room->DistributeExp(killer, target);
 				room->RemoveObject(target->info.objectid());
+			}
 		}
 
 		room->RemoveObject(info.objectid());
 		return;
 	}
 
-	// 이동
 	SetCellPos(nextPos, true);
 	SetState(MOVE, true);
 	BroadcastMove();

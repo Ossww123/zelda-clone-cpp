@@ -16,6 +16,9 @@ enum
 	S_Damaged = 208,
 	S_ChangeMap = 209,
 	// [AUTO-GEN ENUM BEGIN]
+	S_GainExp = 210 ,
+	S_LevelUp = 211 ,
+
 
 
 	// [AUTO-GEN ENUM END]
@@ -47,6 +50,8 @@ public:
 	static SendBufferRef Make_S_Attack(const Protocol::S_Attack& pkt);
 	static SendBufferRef Make_S_Damaged(const Protocol::S_Damaged& pkt);
 	static SendBufferRef Make_S_ChangeMap(const Protocol::S_ChangeMap& pkt);
+	static SendBufferRef Make_S_GainExp(const Protocol::S_GainExp& pkt);
+	static SendBufferRef Make_S_LevelUp(const Protocol::S_LevelUp& pkt);
 	// [AUTO-GEN DECLS BEGIN]
 
 	// [AUTO-GEN DECLS END]

@@ -16,6 +16,9 @@ enum
 	S_Damaged = 208 ,
 	S_ChangeMap = 209 ,
 	// [AUTO-GEN ENUM BEGIN]
+	S_GainExp = 210 ,
+	S_LevelUp = 211 ,
+
 
 
 	// [AUTO-GEN ENUM END]
@@ -42,6 +45,14 @@ public:
 	static SendBufferRef Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon );
 	static SendBufferRef Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel );
 	// [AUTO-GEN DECLS BEGIN]
+
+
+	
+
+	
+	static void Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len );
+
 
 	
 

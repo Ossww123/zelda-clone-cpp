@@ -1,5 +1,5 @@
-templateId,name,maxHp,attack,defence
-1001,Snake,30,5,1
-1002,Slime,50,6,1
-1003,Goblin,70,9,2
-1004,Wolf,60,8,1
+templateId,name,maxHp,attack,defence,exp
+1001,Snake,30,5,1,15
+1002,Slime,50,6,1,25
+1003,Goblin,70,9,2,40
+1004,Wolf,60,8,1,35
