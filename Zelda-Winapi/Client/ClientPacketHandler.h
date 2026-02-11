@@ -39,22 +39,14 @@ public:
 	static void Handle_S_Attack ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_Damaged ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_ChangeMap ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len );
 
 	// 보내기
 	static SendBufferRef Make_C_Move ( Protocol::DIR_TYPE dir , int32 x , int32 y );
 	static SendBufferRef Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon );
 	static SendBufferRef Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel );
 	// [AUTO-GEN DECLS BEGIN]
-
-
-	
-
-	
-	static void Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len );
-	static void Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len );
-
-
-	
 
 	// [AUTO-GEN DECLS END]
 

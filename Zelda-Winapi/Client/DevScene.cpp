@@ -55,6 +55,7 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Edit" , L"Sprite\\UI\\Edit.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Exit" , L"Sprite\\UI\\Exit.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"MapButton" , L"Sprite\\UI\\MapButton.bmp" , RGB ( 211 , 249 , 188 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"HUD" , L"Sprite\\UI\\Health_Energy_EXP_Bars.bmp" , RGB ( 188 , 255 , 235 ) );
 
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage01" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage01" ) , 0 , 0 , 0 , 0 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage02" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage02" ) , 0 , 0 , 0 , 0 );
@@ -70,6 +71,14 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town2" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 71 , 0 , 64 , 40 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Dungeon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 142 , 0 , 64 , 40 );
 
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Status_Frame" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 8 , 8 , 240 , 48 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 110 , 61 , 129 , 9 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Exp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 101 , 110 , 219 , 6 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Enemy_Hp_Frame" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 261 , 8 , 102 , 12 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Enemy_Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 264 , 23 , 96 , 6 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 61 , 63 , 39 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Bow_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 106 , 63 , 39 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Staff_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 151 , 63 , 39 );
 
 	LoadMap ( );
 	LoadPlayer ( );
@@ -100,6 +109,7 @@ void DevScene::Update ( )
 void DevScene::Render ( HDC hdc )
 {
 	Super::Render ( hdc );
+	RenderHUD ( hdc );
 }
 
 void DevScene::AddActor ( Actor* actor )
@@ -702,6 +712,104 @@ Vec2Int DevScene::GetWorldPixelSize ( ) const
 	return { mapSize.x * tileSize, mapSize.y * tileSize };
 }
 
+
+void DevScene::RenderHUD ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	const int32 baseX = 36;
+	const int32 baseY = 36;
+
+	// Status Frame
+	Sprite* frame = GET_SINGLE ( ResourceManager )->GetSprite ( L"Status_Frame" );
+	if ( frame )
+	{
+		::TransparentBlt ( hdc ,
+			baseX , baseY ,
+			frame->GetSize ( ).x , frame->GetSize ( ).y ,
+			frame->GetDC ( ) ,
+			frame->GetPos ( ).x , frame->GetPos ( ).y ,
+			frame->GetSize ( ).x , frame->GetSize ( ).y ,
+			frame->GetTransparent ( ) );
+	}
+
+	// Weapon Icon (선택된 무기만 표시)
+	{
+		Sprite* weaponSprite = nullptr;
+		switch ( myPlayer->GetWeaponType ( ) )
+		{
+		case WeaponType::Sword:
+			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_Icon" );
+			break;
+		case WeaponType::Bow:
+			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Bow_Icon" );
+			break;
+		case WeaponType::Staff:
+			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Staff_Icon" );
+			break;
+		}
+
+		if ( weaponSprite )
+		{
+			::TransparentBlt ( hdc ,
+				baseX + 0 , baseY + 0 ,
+				weaponSprite->GetSize ( ).x , weaponSprite->GetSize ( ).y ,
+				weaponSprite->GetDC ( ) ,
+				weaponSprite->GetPos ( ).x , weaponSprite->GetPos ( ).y ,
+				weaponSprite->GetSize ( ).x , weaponSprite->GetSize ( ).y ,
+				weaponSprite->GetTransparent ( ) );
+		}
+	}
+
+	// HP Bar
+	{
+		Sprite* hpBar = GET_SINGLE ( ResourceManager )->GetSprite ( L"Hp_Bar" );
+		if ( hpBar )
+		{
+			int32 hp = myPlayer->info.hp ( );
+			int32 maxHp = myPlayer->info.maxhp ( );
+			int32 fullWidth = hpBar->GetSize ( ).x;
+			int32 barWidth = ( maxHp > 0 ) ? ( fullWidth * hp / maxHp ) : 0;
+
+			if ( barWidth > 0 )
+			{
+				::TransparentBlt ( hdc ,
+					baseX + 99 , baseY + 9 ,
+					barWidth , hpBar->GetSize ( ).y ,
+					hpBar->GetDC ( ) ,
+					hpBar->GetPos ( ).x , hpBar->GetPos ( ).y ,
+					barWidth , hpBar->GetSize ( ).y ,
+					hpBar->GetTransparent ( ) );
+			}
+		}
+	}
+
+	// EXP Bar
+	{
+		Sprite* expBar = GET_SINGLE ( ResourceManager )->GetSprite ( L"Exp_Bar" );
+		if ( expBar )
+		{
+			const Protocol::PlayerExtra& extra = myPlayer->info.player ( );
+			int32 exp = extra.exp ( );
+			int32 maxExp = extra.maxexp ( );
+			int32 fullWidth = expBar->GetSize ( ).x;
+			int32 barWidth = ( maxExp > 0 ) ? ( fullWidth * exp / maxExp ) : 0;
+
+			if ( barWidth > 0 )
+			{
+				::TransparentBlt ( hdc ,
+					baseX + 9 , baseY + 36 ,
+					barWidth , expBar->GetSize ( ).y ,
+					expBar->GetDC ( ) ,
+					expBar->GetPos ( ).x , expBar->GetPos ( ).y ,
+					barWidth , expBar->GetSize ( ).y ,
+					expBar->GetTransparent ( ) );
+			}
+		}
+	}
+}
 
 void DevScene::TickMonsterSpawn ( )
 {

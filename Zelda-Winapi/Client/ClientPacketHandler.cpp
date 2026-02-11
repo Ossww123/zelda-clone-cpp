@@ -42,19 +42,13 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	case S_ChangeMap:
 		Handle_S_ChangeMap ( session , buffer , len );
 		break;
-	// [AUTO-GEN SWITCH BEGIN]
-
-
-
-		case S_GainExp:
+	case S_GainExp:
 		Handle_S_GainExp ( session , buffer , len );
 		break;
-
 	case S_LevelUp:
 		Handle_S_LevelUp ( session , buffer , len );
 		break;
-
-
+	// [AUTO-GEN SWITCH BEGIN]
 
 	// [AUTO-GEN SWITCH END]
 	default:
