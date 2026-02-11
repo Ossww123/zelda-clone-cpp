@@ -134,22 +134,18 @@ void Monster::UpdateIdle()
 		_waitUntil = GetTickCount64() + 1000;
 
 		// 데미지 처리
-		GameObjectRef selfObj = room->FindObject(info.objectid());
-		CreatureRef self = std::dynamic_pointer_cast<Creature>(selfObj);
-		if (self)
-		{
-			int32 damage = 0;
-			if (target->OnDamaged(self, damage))
-			{
-				Protocol::S_Damaged dmgPkt;
-				dmgPkt.set_attackerid(info.objectid());
-				dmgPkt.set_targetid(target->info.objectid());
-				dmgPkt.set_damage(damage);
-				dmgPkt.set_newhp(target->info.hp());
+		int32 damage = max(1, info.attack() - target->info.defence());
+		target->OnDamaged(damage);
 
-				SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
-				room->Broadcast(sendBuffer);
-			}
+		{
+			Protocol::S_Damaged dmgPkt;
+			dmgPkt.set_attackerid(info.objectid());
+			dmgPkt.set_targetid(target->info.objectid());
+			dmgPkt.set_damage(damage);
+			dmgPkt.set_newhp(target->info.hp());
+
+			SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
+			room->Broadcast(sendBuffer);
 		}
 
 		return;

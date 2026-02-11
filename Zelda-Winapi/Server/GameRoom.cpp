@@ -577,9 +577,8 @@ void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	if (!target)
 		return;
 
-	int32 damage = 0;
-	if (!target->OnDamaged(attacker, damage))
-		return;
+	int32 damage = max(1, attacker->info.attack() - target->info.defence());
+	target->OnDamaged(damage);
 
 	BroadcastDamaged(attacker, target, damage);
 
@@ -646,9 +645,8 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 			if (!target)
 				continue;
 
-			int32 damage = 0;
-			if (!target->OnDamaged(attacker, damage, 0.5f))
-				continue;
+			int32 damage = max(1, static_cast<int32>((attacker->info.attack() - target->info.defence()) * 0.5f));
+			target->OnDamaged(damage);
 
 			BroadcastDamaged(attacker, target, damage);
 

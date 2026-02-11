@@ -10,24 +10,13 @@ Creature::~Creature()
 {
 }
 
-bool Creature::OnDamaged(CreatureRef attacker, int32& outDamage, float damageMultiplier)
+bool Creature::OnDamaged(int32 damage)
 {
-	outDamage = 0;
-	if (attacker == nullptr)
+	if (damage <= 0)
 		return false;
-
-	Protocol::ObjectInfo& attackerInfo = attacker->info;
-	Protocol::ObjectInfo& info = this->info;
-
-	int32 baseDamage = attackerInfo.attack() - info.defence();
-
-	int32 damage = static_cast<int32>(baseDamage * damageMultiplier);
-
-	damage = max(1, damage);
 
 	int32 newHp = max(0, info.hp() - damage);
 	info.set_hp(newHp);
 
-	outDamage = damage;
 	return true;
 }
