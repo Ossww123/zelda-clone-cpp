@@ -14,10 +14,7 @@
 
 Monster::Monster()
 {
-	_flipbookMove[DIR_UP] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeUp");
-	_flipbookMove[DIR_DOWN] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeDown");
-	_flipbookMove[DIR_LEFT] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeLeft");
-	_flipbookMove[DIR_RIGHT] = GET_SINGLE(ResourceManager)->GetFlipbook(L"FB_SnakeRight");
+	for ( int i = 0; i < 4; ++i ) _flipbookMove[ i ] = nullptr;
 }
 
 Monster::~Monster()
@@ -139,5 +136,31 @@ void Monster::TickSkill()
 
 void Monster::UpdateAnimation()
 {
-	SetFlipbook(_flipbookMove[info.dir() ] );
+	const int tid = info.monster ( ).templateid ( ); // Snake=1001, Octoroc=1002
+
+	const wchar_t* prefix = nullptr;
+	switch ( tid )
+	{
+	case 1001: prefix = L"FB_Snake"; break;
+	case 1002: prefix = L"FB_Octoroc"; break;
+	default:
+		return;
+	}
+
+	const wchar_t* suffix = L"";
+	switch ( info.dir ( ) )
+	{
+	case DIR_UP:    suffix = L"Up"; break;
+	case DIR_DOWN:  suffix = L"Down"; break;
+	case DIR_LEFT:  suffix = L"Left"; break;
+	case DIR_RIGHT: suffix = L"Right"; break;
+	}
+
+	wstring key = wstring ( prefix ) + suffix;
+	Flipbook* fb = GET_SINGLE ( ResourceManager )->GetFlipbook ( key );
+
+	if ( fb == nullptr )
+		return;
+
+	SetFlipbook ( fb );
 }

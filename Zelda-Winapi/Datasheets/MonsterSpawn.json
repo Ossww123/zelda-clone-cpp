@@ -1,9 +1,9 @@
 {
-  "dungeon_snake": {
+  "dungeon_forest": {
     "spawns": [
       {
-        "groupId": "entrance_right",
-        "anchor": [30, 5],
+        "groupId": "Snake_1",
+        "anchor": [35, 4],
         "offsets": [[0, 0], [1, 0], [0, 1]],
         "monsters": [
           {
@@ -16,12 +16,12 @@
         ]
       },
       {
-        "groupId": "entrance_left",
-        "anchor": [30, 25],
+        "groupId": "Octoroc_1",
+        "anchor": [25, 12],
         "offsets": [[0, 0], [1, 0], [0, 1]],
         "monsters": [
           {
-            "templateId": 1001,
+            "templateId": 1002,
             "count": 3,
             "level": 1,
             "aggroRange": 8,
@@ -30,7 +30,7 @@
         ]
       },
       {
-        "groupId": "corridor",
+        "groupId": "Snake_2",
         "anchor": [5, 25],
         "offsets": [[0, 0], [1, 0], [0, 1]],
         "monsters": [

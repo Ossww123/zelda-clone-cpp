@@ -77,7 +77,7 @@ GameRoomRef GameRoomManager::GetStaticRoom(FieldId field, int32 channel)
 
 uint64 GameRoomManager::CreateDungeonInstance()
 {
-    return CreateDungeonInstance("dungeon_snake");
+    return CreateDungeonInstance("dungeon_forest");
 }
 
 uint64 GameRoomManager::CreateDungeonInstance(const string& roomId)

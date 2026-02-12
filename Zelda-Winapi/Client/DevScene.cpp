@@ -49,6 +49,7 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerLeft" , L"Sprite\\Player\\PlayerLeft.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerRight" , L"Sprite\\Player\\PlayerRight.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Snake" , L"Sprite\\Monster\\Snake.bmp" , RGB ( 128 , 128 , 128 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Octoroc" , L"Sprite\\Monster\\Octoroc.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Hit" , L"Sprite\\Effect\\Hit.bmp" , RGB ( 0 , 0 , 0 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Explode" , L"Sprite\\Effect\\Explode.bmp" , RGB ( 123 , 173 , 148 ) );
 
@@ -367,6 +368,28 @@ void DevScene::LoadMonster ( )
 		Texture* texture = GET_SINGLE ( ResourceManager )->GetTexture ( L"Snake" );
 		Flipbook* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_SnakeRight" );
 		fb->SetInfo ( { texture, L"FB_SnakeRight", {100, 100}, 0, 3, 1, 0.5f } );
+	}
+
+	// MOVE
+	{
+		Texture* texture = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" );
+		Flipbook* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocUp" );
+		fb->SetInfo ( { texture, L"FB_OctorocUp", {100, 100}, 0, 3, 3, 0.5f } );
+	}
+	{
+		Texture* texture = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" );
+		Flipbook* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocDown" );
+		fb->SetInfo ( { texture, L"FB_OctorocDown", {100, 100}, 0, 3, 0, 0.5f } );
+	}
+	{
+		Texture* texture = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" );
+		Flipbook* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocLeft" );
+		fb->SetInfo ( { texture, L"FB_OctorocLeft", {100, 100}, 0, 3, 2, 0.5f } );
+	}
+	{
+		Texture* texture = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" );
+		Flipbook* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocRight" );
+		fb->SetInfo ( { texture, L"FB_OctorocRight", {100, 100}, 0, 3, 1, 0.5f } );
 	}
 }
 
