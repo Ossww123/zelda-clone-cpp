@@ -9,6 +9,18 @@
 #include "PartyManager.h"
 #include "DBManager.h"
 
+static atomic<uint64> GRecvMovePerSec = 0;
+static atomic<uint64> GRecvAttackPerSec = 0;
+static atomic<uint64> GRecvTurnPerSec = 0;
+
+PacketPerfSnapshot ServerPacketHandler::ConsumePerfSnapshot()
+{
+	PacketPerfSnapshot snapshot;
+	snapshot.recvMove = GRecvMovePerSec.exchange(0);
+	snapshot.recvAttack = GRecvAttackPerSec.exchange(0);
+	snapshot.recvTurn = GRecvTurnPerSec.exchange(0);
+	return snapshot;
+}
 
 void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int32 len)
 {
@@ -63,6 +75,8 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 
 void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len)
 {
+	GRecvMovePerSec.fetch_add(1);
+
 	PacketHeader* header = (PacketHeader*)buffer;
 	//uint16 id = header->id;
 	uint16 size = header->size;
@@ -83,6 +97,8 @@ void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, in
 
 void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len)
 {
+	GRecvAttackPerSec.fetch_add(1);
+
 	PacketHeader* header = (PacketHeader*)buffer;
 	//uint16 id = header->id;
 	uint16 size = header->size;
@@ -223,6 +239,8 @@ void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffe
 
 void ServerPacketHandler::Handle_C_Turn(GameSessionRef session, BYTE* buffer, int32 len)
 {
+	GRecvTurnPerSec.fetch_add(1);
+
 	PacketHeader* header = (PacketHeader*)buffer;
 	//uint16 id = header->id;
 	uint16 size = header->size;

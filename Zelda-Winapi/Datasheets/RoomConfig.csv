@@ -1,4 +1,4 @@
 RoomId,RoomName,SkillEnabled,MonsterSpawnEnabled,RespawnTimeMs,TilemapPath,MaxPlayers,IsInstance
-town_1,Town Square,FALSE,FALSE,0,../Resources/Tilemap/Tilemap_01.txt,50,FALSE
+town_1,Town Square,TRUE,FALSE,0,../Resources/Tilemap/Tilemap_01.txt,50,FALSE
 town_2,Town Market,FALSE,FALSE,0,../Resources/Tilemap/Tilemap_01.txt,50,FALSE
 dungeon_forest,Forest Dungeon,TRUE,TRUE,10000,../Resources/Tilemap/Tilemap_02.txt,4,TRUE

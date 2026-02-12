@@ -50,10 +50,18 @@ struct BuffData
 	float remainTime;
 };
 
+struct PacketPerfSnapshot
+{
+	uint64 recvMove = 0;
+	uint64 recvAttack = 0;
+	uint64 recvTurn = 0;
+};
+
 class ServerPacketHandler
 {
 public:
 	static void HandlePacket(GameSessionRef session, BYTE* buffer, int32 len);
+	static PacketPerfSnapshot ConsumePerfSnapshot();
 
 	// 받기
 	static void Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len);
