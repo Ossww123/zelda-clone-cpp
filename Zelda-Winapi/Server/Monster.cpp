@@ -71,11 +71,32 @@ void Monster::UpdateIdle()
 		}
 	}
 
-	// Find Player
-	if (_target.lock() == nullptr)
-		_target = room->FindClosestPlayer(myPos);
-
+	// Find/Refresh target
 	PlayerRef target = _target.lock();
+	PlayerRef nearest = room->FindClosestPlayer(myPos);
+
+	if (nearest)
+	{
+		if (target == nullptr)
+		{
+			target = nearest;
+			_target = nearest;
+		}
+		else
+		{
+			Vec2Int dtCur = target->GetCellPos() - myPos;
+			Vec2Int dtNew = nearest->GetCellPos() - myPos;
+			int32 distCur = abs(dtCur.x) + abs(dtCur.y);
+			int32 distNew = abs(dtNew.x) + abs(dtNew.y);
+
+			// retarget
+			if (distNew + 1 < distCur)
+			{
+				target = nearest;
+				_target = nearest;
+			}
+		}
+	}
 
 	if (target == nullptr)
 	{
