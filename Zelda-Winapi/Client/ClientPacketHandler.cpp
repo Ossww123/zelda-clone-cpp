@@ -79,10 +79,6 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 		break;
 	// [AUTO-GEN SWITCH BEGIN]
 
-
-		
-
-
 	// [AUTO-GEN SWITCH END]
 	default:
 		break;
@@ -120,9 +116,12 @@ void ClientPacketHandler::Handle_S_EnterGame ( ServerSessionRef session, BYTE* b
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
 
 	bool success = pkt.success ( );
-	uint64 accountId = pkt.accountid ( );
-
-	// TODO
+	if ( success )
+	{
+		DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+		if ( scene )
+			scene->SetLoggedIn ( true );
+	}
 }
 
 void ClientPacketHandler::Handle_S_MyPlayer ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -731,4 +730,11 @@ SendBufferRef ClientPacketHandler::Make_C_PartyLeave ( )
 {
 	Protocol::C_PartyLeave pkt;
 	return MakeSendBuffer ( pkt , C_PartyLeave );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Login ( const string& username )
+{
+	Protocol::C_Login pkt;
+	pkt.set_username ( username );
+	return MakeSendBuffer ( pkt , C_Login );
 }

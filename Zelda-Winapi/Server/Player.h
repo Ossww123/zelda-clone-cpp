@@ -2,6 +2,7 @@
 #include "Creature.h"
 
 struct LevelData;
+struct PlayerSaveData;
 
 struct InventorySlot
 {
@@ -33,6 +34,8 @@ public:
 	void UseItem(int32 slot);
 	void RecalcStats();
 	void SendInventoryData();
+	void ApplyFromSaveData(const PlayerSaveData& data);
+	PlayerSaveData ToSaveData() const;
 
 public:
 	GameSessionRef session;

@@ -6,33 +6,27 @@
 #include "GameRoomManager.h"
 #include "PartyManager.h"
 #include "Player.h"
+#include "DBManager.h"
 
 void GameSession::OnConnected()
 {
 	GSessionManager.Add(GetSessionRef());
-
-	// �α��� ��Ŷ
-
-	Send(ServerPacketHandler::Make_S_EnterGame());
-
-	// ���� ����
-	GameRoomRef room = GRoomManager.GetStaticRoom(FieldId::Town, 1);
-	if (room)
-	{
-		GameSessionRef self = GetSessionRef();
-		room->PushJob([room, self]()
-			{
-				room->EnterRoom(self);
-			});
-	}
+	// C_Login 대기 (아무것도 하지 않음)
 }
 
 void GameSession::OnDisconnected()
 {
 	GSessionManager.Remove(GetSessionRef());
 
-	// 파티 정리
+	// DB 저장
 	PlayerRef p = dynamic_pointer_cast<Player>(player.lock());
+	if (p && _accountId > 0)
+	{
+		PlayerSaveData saveData = p->ToSaveData();
+		GDBManager.SavePlayerData(_accountId, saveData);
+	}
+
+	// 파티 정리 (p 재사용)
 	if (p)
 	{
 		uint64 playerId = p->info.objectid();

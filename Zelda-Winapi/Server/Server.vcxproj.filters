@@ -35,6 +35,9 @@
     <Filter Include="Source Files\Game\Room\Tilemap">
       <UniqueIdentifier>{6996acc6-17fc-44dd-9e21-ef5889ddbe85}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\DB">
+      <UniqueIdentifier>{1d81ac93-69a0-4b46-a7b6-bedf782d34b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -94,6 +97,12 @@
     <ClCompile Include="PartyManager.cpp">
       <Filter>Source Files\Game\Room</Filter>
     </ClCompile>
+    <ClCompile Include="sqlite3.c">
+      <Filter>Source Files\DB</Filter>
+    </ClCompile>
+    <ClCompile Include="DBManager.cpp">
+      <Filter>Source Files\DB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -152,6 +161,12 @@
     </ClInclude>
     <ClInclude Include="PartyManager.h">
       <Filter>Source Files\Game\Room</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite3.h">
+      <Filter>Source Files\DB</Filter>
+    </ClInclude>
+    <ClInclude Include="DBManager.h">
+      <Filter>Source Files\DB</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

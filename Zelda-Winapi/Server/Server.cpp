@@ -17,10 +17,12 @@ using namespace std;
 #include "GameSessionManager.h"
 #include "ServerPacketHandler.h"
 #include "GameRoomManager.h"
+#include "DBManager.h"
 
 int main()
 {
 	SocketUtils::Init();
+	GDBManager.Init("game.db");
 	GRoomManager.Init();
 
 	ServerServiceRef service = make_shared<ServerService>(
@@ -42,7 +44,7 @@ int main()
 
 
 
-	// ¸ÖÆ¼½º·¹µå
+	// ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	//for (int32 i = 0; i < 5; i++)
 	//{
@@ -57,7 +59,7 @@ int main()
 
 	GThreadManager->Join();
 
-	// À©¼Ó Á¾·á
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	SocketUtils::Clear();
 
 }

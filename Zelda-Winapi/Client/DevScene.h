@@ -67,7 +67,11 @@ public:
 	bool HasMapId ( ) const { return _hasMapId; }
 	bool IsTown ( ) const { return ( _hasMapId && _currentMapId == Protocol::MAP_ID_TOWN ); }
 
+	void SetLoggedIn ( bool value ) { _loggedIn = value; }
+
 private:
+	void UpdateLogin ( );
+	void RenderLogin ( HDC hdc );
 	void RenderHUD ( HDC hdc );
 	void RenderInventory ( HDC hdc );
 	void HandleInventoryClick ( );
@@ -83,6 +87,10 @@ private:
 	void OnClickDungeon ( );
 
 private:
+	bool _loggedIn = false;
+	wstring _loginText;
+	static const int32 MAX_USERNAME_LEN = 12;
+
 	bool _showInventory = false;
 
 	// 인벤토리 드래그

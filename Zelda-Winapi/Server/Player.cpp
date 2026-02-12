@@ -4,14 +4,10 @@
 #include "GameRoom.h"
 #include "GameSession.h"
 #include "ServerPacketHandler.h"
-
-static atomic<int32> sPlayerNameCounter = 0;
+#include "DBManager.h"
 
 Player::Player()
 {
-	int32 num = ++sPlayerNameCounter;
-	info.set_name("Player_" + to_string(num));
-
 	_level = 1;
 	_exp = 0;
 
@@ -394,4 +390,60 @@ void Player::SendInventoryData()
 	}
 
 	session->Send(ServerPacketHandler::MakeSendBuffer(pkt, S_InventoryData));
+}
+
+void Player::ApplyFromSaveData(const PlayerSaveData& data)
+{
+	info.set_name(data.name);
+	_level = data.level;
+	_exp = data.exp;
+
+	// 레벨 기반 스탯 적용
+	const LevelData* levelData = GRoomDataManager.GetLevelData(_level);
+	if (levelData)
+	{
+		info.set_maxhp(levelData->maxHp);
+		info.set_attack(levelData->attack);
+		info.set_defence(levelData->defence);
+	}
+
+	// HP 복원 (maxHp 초과 방지)
+	info.set_hp(min(data.hp, info.maxhp()));
+
+	// 인벤토리 복원
+	for (int32 i = 0; i < INVENTORY_SIZE; i++)
+		_storage[i] = data.storage[i];
+
+	_equipWeapon = data.equipWeapon;
+	_equipArmor = data.equipArmor;
+	_equipPotion = data.equipPotion;
+
+	// 장비 보정 반영
+	RecalcStats();
+
+	// PlayerExtra 갱신
+	Protocol::PlayerExtra* extra = info.mutable_player();
+	extra->set_level(_level);
+	extra->set_exp(_exp);
+	extra->set_maxexp(GetMaxExp());
+
+	cout << "[Player] Applied save data: " << data.name << " Lv." << _level << endl;
+}
+
+PlayerSaveData Player::ToSaveData() const
+{
+	PlayerSaveData data;
+	data.name = info.name();
+	data.level = _level;
+	data.exp = _exp;
+	data.hp = info.hp();
+
+	for (int32 i = 0; i < INVENTORY_SIZE; i++)
+		data.storage[i] = _storage[i];
+
+	data.equipWeapon = _equipWeapon;
+	data.equipArmor = _equipArmor;
+	data.equipPotion = _equipPotion;
+
+	return data;
 }
