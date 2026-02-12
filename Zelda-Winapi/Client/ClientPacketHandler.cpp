@@ -299,6 +299,20 @@ void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* bu
 				scene->SpawnObject<HitEffect> ( targetGameObject->GetCellPos ( ) );
 			}
 		}
+
+		// 파티 HUD HP 실시간 갱신
+		MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+		if ( myPlayer )
+		{
+			for ( auto& member : myPlayer->_partyMembers )
+			{
+				if ( member.playerId == pkt.targetid ( ) )
+				{
+					member.hp = pkt.newhp ( );
+					break;
+				}
+			}
+		}
 	}
 }
 
