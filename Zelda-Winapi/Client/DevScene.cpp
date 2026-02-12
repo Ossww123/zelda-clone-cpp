@@ -699,65 +699,48 @@ void DevScene::UpdateLogin ( )
 
 void DevScene::RenderLogin ( HDC hdc )
 {
-	// 배경 채우기 (어두운 색)
-	HBRUSH bgBrush = CreateSolidBrush ( RGB ( 20 , 20 , 40 ) );
-	RECT fullRect = { 0 , 0 , GWinSizeX , GWinSizeY };
-	FillRect ( hdc , &fullRect , bgBrush );
-	DeleteObject ( bgBrush );
+	Sprite* panel = GET_SINGLE ( ResourceManager )->GetSprite ( L"LoginPanel" );
+	if ( panel )
+	{
+		// 창 크기에 맞춰 스케일링
+		::TransparentBlt (
+			hdc ,
+			0 , 0 ,
+			GWinSizeX , GWinSizeY ,
+			panel->GetDC ( ) ,
+			panel->GetPos ( ).x , panel->GetPos ( ).y ,
+			panel->GetSize ( ).x , panel->GetSize ( ).y ,
+			RGB ( 0 , 0 , 0 ) // colorkey
+		);
+	}
 
-	// 로그인 박스
+	SetBkMode ( hdc , TRANSPARENT );
+
 	int32 boxW = 300;
 	int32 boxH = 150;
 	int32 boxX = ( GWinSizeX - boxW ) / 2;
 	int32 boxY = ( GWinSizeY - boxH ) / 2;
 
-	// 박스 배경
-	HBRUSH boxBrush = CreateSolidBrush ( RGB ( 40 , 40 , 80 ) );
-	RECT boxRect = { boxX , boxY , boxX + boxW , boxY + boxH };
-	FillRect ( hdc , &boxRect , boxBrush );
-	DeleteObject ( boxBrush );
-
-	// 테두리
-	HPEN pen = CreatePen ( PS_SOLID , 2 , RGB ( 200 , 200 , 255 ) );
-	HPEN oldPen = ( HPEN ) SelectObject ( hdc , pen );
-	HBRUSH oldBrush = ( HBRUSH ) SelectObject ( hdc , GetStockObject ( NULL_BRUSH ) );
-	Rectangle ( hdc , boxX , boxY , boxX + boxW , boxY + boxH );
-	SelectObject ( hdc , oldPen );
-	SelectObject ( hdc , oldBrush );
-	DeleteObject ( pen );
-
-	SetBkMode ( hdc , TRANSPARENT );
-
-	// 타이틀
-	SetTextColor ( hdc , RGB ( 255 , 215 , 0 ) );
-	HFONT titleFont = CreateFont ( 32 , 0 , 0 , 0 , FW_BOLD , FALSE , FALSE , FALSE ,
-		DEFAULT_CHARSET , 0 , 0 , 0 , 0 , L"Arial" );
-	HFONT oldFont = ( HFONT ) SelectObject ( hdc , titleFont );
-	RECT titleRect = { boxX , boxY + 15 , boxX + boxW , boxY + 50 };
-	DrawText ( hdc , L"ZELDA" , 5 , &titleRect , DT_CENTER );
-	SelectObject ( hdc , oldFont );
-	DeleteObject ( titleFont );
-
-	// 텍스트 입력 필드
+	// 입력 텍스트 + 커서
+	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
 	int32 fieldX = boxX + 30;
 	int32 fieldY = boxY + 65;
 	int32 fieldW = boxW - 60;
 	int32 fieldH = 28;
 
-	HBRUSH fieldBrush = CreateSolidBrush ( RGB ( 255 , 255 , 255 ) );
-	RECT fieldRect = { fieldX , fieldY , fieldX + fieldW , fieldY + fieldH };
-	FillRect ( hdc , &fieldRect , fieldBrush );
-	DeleteObject ( fieldBrush );
-
-	// 입력 텍스트 + 커서
-	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
-	wstring displayText = _loginText + L"|";
-	RECT textRect = { fieldX + 6 , fieldY + 4 , fieldX + fieldW - 6 , fieldY + fieldH - 4 };
-	DrawText ( hdc , displayText.c_str ( ) , ( int32 ) displayText.length ( ) , &textRect , DT_LEFT | DT_VCENTER | DT_SINGLELINE );
+	std::wstring displayText = _loginText + L"|";
+	RECT textRect = { fieldX + 6, fieldY + 4, fieldX + fieldW - 6, fieldY + fieldH - 4 };
+	DrawText (
+		hdc ,
+		displayText.c_str ( ) ,
+		( int32 ) displayText.length ( ) ,
+		&textRect ,
+		DT_LEFT | DT_VCENTER | DT_SINGLELINE
+	);
 
 	// 안내 문구
 	SetTextColor ( hdc , RGB ( 180 , 180 , 180 ) );
-	RECT hintRect = { boxX , boxY + 105 , boxX + boxW , boxY + 130 };
+	RECT hintRect = { boxX, boxY + 105, boxX + boxW, boxY + 130 };
 	DrawText ( hdc , L"Enter your name and press Enter" , 31 , &hintRect , DT_CENTER );
 }
 
