@@ -979,6 +979,51 @@ void DevScene::RenderInventory ( HDC hdc )
 		invW , invH ,
 		invSprite->GetTransparent ( ) );
 
+	// =========================
+	// (임시) 인벤토리 스탯 텍스트 표시
+	// =========================
+	{
+		const Protocol::PlayerExtra& extra = myPlayer->info.player ( );
+
+		int32 level = extra.level ( );
+		int32 hp = myPlayer->info.hp ( );
+		int32 maxHp = myPlayer->info.maxhp ( );
+		int32 attack = myPlayer->info.attack ( );
+		int32 defence = myPlayer->info.defence ( );
+
+		wchar_t buf[ 256 ];
+		swprintf_s ( buf ,
+			L"Level: %d\nMax HP: %d\nHP: %d\nATK: %d\nDEF: %d" ,
+			level , maxHp , hp , attack , defence );
+
+		::SetBkMode ( hdc , TRANSPARENT );
+		::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+
+		// 폰트(임시)
+		static HFONT sFont = nullptr;
+		if ( sFont == nullptr )
+		{
+			sFont = ::CreateFontW (
+				18 , 0 , 0 , 0 , FW_BOLD , FALSE , FALSE , FALSE ,
+				DEFAULT_CHARSET , OUT_DEFAULT_PRECIS , CLIP_DEFAULT_PRECIS ,
+				DEFAULT_QUALITY , DEFAULT_PITCH | FF_DONTCARE ,
+				L"Consolas" );
+		}
+
+		HGDIOBJ oldFont = nullptr;
+		if ( sFont ) oldFont = ::SelectObject ( hdc , sFont );
+
+		RECT rc;
+		rc.left = invX + 184;
+		rc.top = invY + 32;
+		rc.right = invX + invW - 16;
+		rc.bottom = invY + 150;
+
+		::DrawTextW ( hdc , buf , -1 , &rc , DT_LEFT | DT_TOP | DT_WORDBREAK );
+
+		if ( oldFont ) ::SelectObject ( hdc , oldFont );
+	}
+
 	// 장착 슬롯 아이템 렌더링
 	auto renderItem = [&] ( int32 itemId , int32 count , int32 relX , int32 relY )
 	{
@@ -1006,10 +1051,10 @@ void DevScene::RenderInventory ( HDC hdc )
 		}
 	};
 
-	// 장착 슬롯: Sword(98,38), Armor(98,80), Potion(258,68)
+	// 장착 슬롯: Sword(98,38), Armor(98,80), Potion(290,68)
 	renderItem ( myPlayer->_equipWeapon.itemId , myPlayer->_equipWeapon.count , 98 , 38 );
 	renderItem ( myPlayer->_equipArmor.itemId , myPlayer->_equipArmor.count , 98 , 80 );
-	renderItem ( myPlayer->_equipPotion.itemId , myPlayer->_equipPotion.count , 258 , 68 );
+	renderItem ( myPlayer->_equipPotion.itemId , myPlayer->_equipPotion.count , 290 , 68 );
 
 	// 보관 슬롯: 시작(16,168), 36px 간격, 가로 9 x 세로 3
 	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
@@ -1070,8 +1115,8 @@ void DevScene::HandleInventoryClick ( )
 		}
 		return;
 	}
-	// Potion: (258,68) 32x32
-	if ( mx >= 258 && mx < 290 && my >= 68 && my < 100 )
+	// Potion: (290,68) 32x32
+	if ( mx >= 290 && mx < 290 && my >= 68 && my < 100 )
 	{
 		if ( myPlayer->_equipPotion.itemId > 0 )
 		{
