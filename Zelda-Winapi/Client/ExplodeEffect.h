@@ -1,13 +1,13 @@
 ﻿#pragma once
 #include "Effect.h"
 
-class HitEffect : public Effect
+class ExplodeEffect : public Effect
 {
 	using Super = Effect;
 
 public:
-	HitEffect ( );
-	virtual ~HitEffect ( ) override;
+	ExplodeEffect ( );
+	virtual ~ExplodeEffect ( ) override;
 
 	virtual void BeginPlay ( ) override;
 	virtual void Tick ( ) override;

@@ -5,6 +5,7 @@
 #include "MyPlayer.h"
 #include "SceneManager.h"
 #include "HitEffect.h"
+#include "ExplodeEffect.h"
 
 void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer, int32 len)
 {
@@ -233,6 +234,23 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 				player->SetWeaponType ( Player::FromProtoWeaponType ( pkt.weapontype ( ) ) );
 
 			gameObject->SetState ( SKILL );
+
+			if ( pkt.weapontype ( ) == Protocol::WEAPON_TYPE_STAFF )
+			{
+				Vec2Int pos = gameObject->GetCellPos ( );
+				Vec2Int forward{ 0,0 };
+
+				switch ( pkt.dir ( ) )
+				{
+				case Protocol::DIR_TYPE_UP:    forward = { 0,-1 }; break;
+				case Protocol::DIR_TYPE_DOWN:  forward = { 0, 1 }; break;
+				case Protocol::DIR_TYPE_LEFT:  forward = { -1,0 }; break;
+				case Protocol::DIR_TYPE_RIGHT: forward = { 1, 0 }; break;
+				}
+
+				Vec2Int center = pos + forward;
+				scene->SpawnObject<ExplodeEffect> ( center );
+			}
 		}
 	}
 }
