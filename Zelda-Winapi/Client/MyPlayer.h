@@ -39,8 +39,6 @@ private:
 	virtual void TickMove ( ) override;
 	virtual void TickSkill ( ) override;
 
-	void SyncToServer ( );  // 미사용
-
 public:
 	void OnServerTurnAck ( ) { _movePending = false; _turnGraceLeft = TURN_GRACE; }
 	void OnServerMoveEndAck ( ) { _movePending = false; }

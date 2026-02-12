@@ -175,7 +175,6 @@ void DevScene::Update ( )
 	}
 
 	HandlePartyInput ( );
-	TickMonsterSpawn ( );
 }
 
 void DevScene::Render ( HDC hdc )
@@ -593,124 +592,6 @@ Player* DevScene::FindClosestPlayer ( Vec2Int cellPos )
 	return ret;
 }
 
-bool DevScene::FindPath ( Vec2Int src , Vec2Int dest , vector<Vec2Int>& path , int32 maxDepth )
-{
-	int32 depth = abs ( dest.y - src.y ) + abs ( dest.x - src.x );
-	if ( depth >= maxDepth )
-		return false;
-
-	priority_queue<PQNode , vector<PQNode> , greater<PQNode>> pq;
-	map<Vec2Int , int32> best;
-	map<Vec2Int , Vec2Int> parent;
-
-	// 초기값
-	{
-		int32 cost = abs ( dest.y - src.y ) + abs ( dest.x - src.x );
-
-		pq.push ( PQNode ( cost , src ) );
-		best[ src ] = cost;
-		parent[ src ] = src;
-	}
-
-	Vec2Int front[ 4 ] =
-	{
-		{0, -1},
-		{0, 1},
-		{-1, 0},
-		{1, 0},
-	};
-
-	bool found = false;
-
-	while ( pq.empty ( ) == false )
-	{
-		// 제일 좋은 후보를 찾는다
-		PQNode node = pq.top ( );
-		pq.pop ( );
-
-		// 더 짧은 경로를 뒤늦게 찾았다면 스킵
-		if ( best[ node.pos ] < node.cost )
-			continue;
-
-		// 목적지에 도착했으면 바로 종료
-		if ( node.pos == dest )
-		{
-			found = true;
-			break;
-		}
-
-		// 방문
-		for ( int32 dir = 0; dir < 4; dir++ )
-		{
-			Vec2Int nextPos = node.pos + front[ dir ];
-
-			if ( CanGo ( nextPos ) == false )
-				continue;
-
-			int32 depth = abs ( nextPos.y - src.y ) + abs ( nextPos.x - src.x );
-			if ( depth >= maxDepth )
-				continue;
-
-			int32 cost = abs ( dest.y - nextPos.y ) + abs ( dest.x - nextPos.x );
-			int32 bestCost = best[ nextPos ];
-			if ( bestCost != 0 )
-			{
-				// 다른 경로에서 더 빠른 길을 찾았으면 스킵
-				if ( bestCost <= cost )
-					continue;
-			}
-
-			// 예약 진행
-			best[ nextPos ] = cost;
-			pq.push ( PQNode ( cost , nextPos ) );
-			parent[ nextPos ] = node.pos;
-		}
-	}
-
-	if ( found == false )
-	{
-		// TODO
-		float bestScore = FLT_MAX;
-
-		for ( auto& item : best )
-		{
-			Vec2Int pos = item.first;
-			int32 score = item.second;
-
-			// 동점이라면, 최초 위치에서 가장 덜 이동하는 쪽으로
-			if ( bestScore == score )
-			{
-				int32 dist1 = abs ( dest.x - src.x ) + abs ( dest.y - src.y );
-				int32 dist2 = abs ( pos.x - src.x ) + abs ( pos.y - src.y );
-				if ( dist1 > dist2 )
-					dest = pos;
-			}
-			else if ( bestScore > score )
-			{
-				dest = pos;
-				bestScore = score;
-			}
-		}
-	}
-
-	path.clear ( );
-	Vec2Int pos = dest;
-
-	while ( true )
-	{
-		path.push_back ( pos );
-
-		// 시작점
-		if ( pos == parent[ pos ] )
-			break;
-
-		pos = parent[ pos ];
-	}
-
-	std::reverse ( path.begin ( ) , path.end ( ) );
-	return true;
-}
-
 bool DevScene::CanGo ( Vec2Int cellPos )
 {
 	if ( _tilemapActor == nullptr )
@@ -748,30 +629,6 @@ Vec2 DevScene::ConvertPos ( Vec2Int cellPos )
 	ret.y = pos.y + cellPos.y * size + ( size / 2 );
 
 	return ret;
-}
-
-Vec2Int DevScene::GetRandomEmptyCellPos ( )
-{
-	Vec2Int ret = { -1, -1 };
-
-	if ( _tilemapActor == nullptr )
-		return ret;
-
-	Tilemap* tm = _tilemapActor->GetTilemap ( );
-	if ( tm == nullptr )
-		return ret;
-
-	Vec2Int size = tm->GetMapSize ( );
-
-	while ( true )
-	{
-		int32 x = rand ( ) % size.x;
-		int32 y = rand ( ) % size.y;
-		Vec2Int cellPos ( x , y );
-
-		if ( CanGo ( cellPos ) )
-			return cellPos;
-	}
 }
 
 Vec2Int DevScene::GetWorldPixelSize ( ) const
@@ -886,16 +743,6 @@ void DevScene::RenderHUD ( HDC hdc )
 			}
 		}
 	}
-}
-
-void DevScene::TickMonsterSpawn ( )
-{
-	return;
-
-
-	// 레거시 코드 //
-	if ( _monsterCount < DESIRED_MONSTER_COUNT )
-		SpawnObjectAtRandomPos<Monster> ( );
 }
 
 void DevScene::CreateMapButtons ( )
