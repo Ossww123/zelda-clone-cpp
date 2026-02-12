@@ -242,10 +242,10 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 
 				switch ( pkt.dir ( ) )
 				{
-				case Protocol::DIR_TYPE_UP:    forward = { 0,-1 }; break;
-				case Protocol::DIR_TYPE_DOWN:  forward = { 0, 1 }; break;
-				case Protocol::DIR_TYPE_LEFT:  forward = { -1,0 }; break;
-				case Protocol::DIR_TYPE_RIGHT: forward = { 1, 0 }; break;
+				case Protocol::DIR_TYPE_UP:    forward = { 0,-2 }; break;
+				case Protocol::DIR_TYPE_DOWN:  forward = { 0, 2 }; break;
+				case Protocol::DIR_TYPE_LEFT:  forward = { -2,0 }; break;
+				case Protocol::DIR_TYPE_RIGHT: forward = { 2, 0 }; break;
 				}
 
 				Vec2Int center = pos + forward;
