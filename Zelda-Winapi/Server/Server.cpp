@@ -44,8 +44,6 @@ int main()
 
 
 
-	// ��Ƽ������
-
 	//for (int32 i = 0; i < 5; i++)
 	//{
 	//	GThreadManager->Launch([=]()
@@ -59,7 +57,6 @@ int main()
 
 	GThreadManager->Join();
 
-	// ���� ����
 	SocketUtils::Clear();
 
 }
