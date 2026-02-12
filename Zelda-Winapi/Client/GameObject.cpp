@@ -26,15 +26,23 @@ void GameObject::BeginPlay ( )
 
 	SetState ( MOVE );
 	SetState ( IDLE );
+	SetAnimState ( IDLE );
+	UpdateAnimation ( );
 }
 
 void GameObject::Tick ( )
 {
 	Super::Tick ( );
 
+	float now = GET_SINGLE ( TimeManager )->GetTime ( );
+
 	if ( ( _destPos - _pos ).Length ( ) > 0.5f )
 	{
 		TickMove ( );
+
+		// 이동 중인데 S_Move에서 IDLE가 와도 MOVE 애니 유지
+		if ( IsSkillPlaying ( now ) ) SetAnimState ( SKILL );
+		else SetAnimState ( MOVE );
 		return;
 	}
 
@@ -50,6 +58,10 @@ void GameObject::Tick ( )
 		TickSkill ( );
 		break;
 	}
+
+	// 이동 끝났을 때 or 스킬 끝났을 때 IDLE로 복귀
+	if ( IsSkillPlaying ( now ) ) SetAnimState ( SKILL );
+	else SetAnimState ( IDLE );
 }
 
 void GameObject::Render ( HDC hdc )
@@ -63,13 +75,27 @@ void GameObject::SetState ( ObjectState state )
 		return;
 
 	info.set_state(state);
-	UpdateAnimation ( );
 }
 
 void GameObject::SetDir ( Dir dir )
 {
 	info.set_dir ( dir );
 	UpdateAnimation ( );
+}
+
+void GameObject::SetAnimState ( ObjectState state )
+{
+	if ( _animState == state )
+		return;
+
+	_animState = state;
+	UpdateAnimation ( );
+}
+
+void GameObject::StartSkillAnim ( float duration )
+{
+	float now = GET_SINGLE ( TimeManager )->GetTime ( );
+	_skillAnimEndTime = now + duration;
 }
 
 bool GameObject::HasReachedDest ( )

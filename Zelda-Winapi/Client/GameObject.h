@@ -25,7 +25,10 @@ protected:
 public:
 	void SetState ( ObjectState state );
 	void SetDir ( Dir dir );
-
+	void SetAnimState ( ObjectState state );
+	ObjectState GetAnimState ( ) const { return _animState; }
+	void StartSkillAnim ( float duration );
+	bool IsSkillPlaying ( float now ) const { return now < _skillAnimEndTime; }
 
 	bool HasReachedDest ( );
 	bool CanGo ( Vec2Int cellPos );
@@ -40,5 +43,9 @@ public:
 
 public:
 	Protocol::ObjectInfo info;
+
+protected:
+	ObjectState _animState = IDLE;
+	float _skillAnimEndTime = 0.f;
 };
 

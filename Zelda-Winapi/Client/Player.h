@@ -45,6 +45,8 @@ public:
 		}
 	}
 
+	Flipbook* GetSkillFlipbook ( WeaponType weapon , Dir dir ) const;
+
 private:
 	Flipbook* _flipbookIdle[ 4 ] = {};
 	Flipbook* _flipbookMove[ 4 ] = {};

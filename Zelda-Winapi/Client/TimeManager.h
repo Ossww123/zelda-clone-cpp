@@ -9,11 +9,13 @@ public:
 
 	uint32 GetFPS ( ) { return _fps; }
 	float GetDeltaTime ( ) { return _deltaTime; }
+	float GetTime ( ) { return _time; }
 
 private:
 	uint64 _frequency = 0;
 	uint64 _prevCount = 0;
 	float _deltaTime = 0.f;
+	float _time = 0.f;
 
 private:
 	uint32 _frameCount = 0;

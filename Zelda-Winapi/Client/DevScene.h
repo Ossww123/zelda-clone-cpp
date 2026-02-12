@@ -64,6 +64,8 @@ public:
 
 public:
 	Vec2Int GetWorldPixelSize ( ) const;
+	bool HasMapId ( ) const { return _hasMapId; }
+	bool IsTown ( ) const { return ( _hasMapId && _currentMapId == Protocol::MAP_ID_TOWN ); }
 
 private:
 	void RenderHUD ( HDC hdc );
@@ -90,5 +92,7 @@ private:
 
 	class TilemapActor* _tilemapActor = nullptr;
 	SpriteActor* _background = nullptr;
+	Protocol::MAP_ID _currentMapId = Protocol::MAP_ID_NONE;
+	bool _hasMapId = false;
 };
 

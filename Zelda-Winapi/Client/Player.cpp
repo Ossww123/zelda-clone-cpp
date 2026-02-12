@@ -57,19 +57,6 @@ void Player::BeginPlay ( )
 void Player::Tick ( )
 {
 	Super::Tick ( );
-
-	switch ( info.state() )
-	{
-	case IDLE:
-		TickIdle ( );
-		break;
-	case MOVE:
-		TickMove ( );
-		break;
-	case SKILL:
-		TickSkill ( );
-		break;
-	}
 }
 
 void Player::Render ( HDC hdc )
@@ -146,7 +133,7 @@ void Player::TickSkill ( )
 
 void Player::UpdateAnimation ( )
 {
-	switch ( info.state() )
+	switch ( GetAnimState ( ) )
 	{
 	case IDLE:
 		SetFlipbook ( _flipbookIdle[info.dir()] );
@@ -164,3 +151,15 @@ void Player::UpdateAnimation ( )
 		break;
 	}
 }
+
+Flipbook* Player::GetSkillFlipbook ( WeaponType weapon , Dir dir ) const
+{
+	switch ( weapon )
+	{
+	case WeaponType::Sword: return _flipbookAttack[ dir ];
+	case WeaponType::Bow:   return _flipbookBow[ dir ];
+	case WeaponType::Staff: return _flipbookStaff[ dir ];
+	}
+	return nullptr;
+}
+

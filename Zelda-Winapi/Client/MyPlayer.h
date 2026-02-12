@@ -42,7 +42,9 @@ private:
 public:
 	void OnServerTurnAck ( ) { _movePending = false; _turnGraceLeft = TURN_GRACE; }
 	void OnServerMoveEndAck ( ) { _movePending = false; }
+	void OnServerAttackAck ( ) { _attackPending = false; }
 
+public:
 	// 인벤토리
 	static const int32 INVENTORY_SIZE = 27;
 	InventorySlot _storage[INVENTORY_SIZE];
@@ -61,5 +63,8 @@ private:
 	bool _movePending = false;
 	float _turnGraceLeft = 0.f;
 	static constexpr float TURN_GRACE = 0.05f;
+	bool  _attackPending = false;
+	float _attackPendingStart = 0.f;
+	float _attackCooldownUntil = 0.f;
 };
 
