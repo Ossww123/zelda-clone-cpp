@@ -61,7 +61,6 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	}
 }
 
-int a = 0;
 void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len)
 {
 	PacketHeader* header = (PacketHeader*)buffer;
@@ -80,8 +79,6 @@ void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, in
 		{
 			gameRoom->Handle_C_Move(session, pkt);
 		});
-
-	cout << "Handle_C_Move Count " << ++a << endl;
 }
 
 void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len)
@@ -224,7 +221,6 @@ void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffe
 		});
 }
 
-int b = 0;
 void ServerPacketHandler::Handle_C_Turn(GameSessionRef session, BYTE* buffer, int32 len)
 {
 	PacketHeader* header = (PacketHeader*)buffer;
@@ -243,8 +239,6 @@ void ServerPacketHandler::Handle_C_Turn(GameSessionRef session, BYTE* buffer, in
 		{
 			gameRoom->Handle_C_Turn(session, pkt);
 		});
-
-	cout << "Handle_C_Turn Count " << ++b << endl;
 }
 
 
