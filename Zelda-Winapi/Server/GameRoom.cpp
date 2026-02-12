@@ -741,16 +741,16 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	switch (pkt.dir())
 	{
 	case Protocol::DIR_TYPE_UP:
-		forward = { 0, -1 };
+		forward = { 0, -2 };
 		break;
 	case Protocol::DIR_TYPE_DOWN:
-		forward = { 0,  1 };
+		forward = { 0,  2 };
 		break;
 	case Protocol::DIR_TYPE_LEFT:
-		forward = { -1, 0 };
+		forward = { -2, 0 };
 		break;
 	case Protocol::DIR_TYPE_RIGHT:
-		forward = { 1,  0 };
+		forward = { 2,  0 };
 		break;
 	default:
 		break;

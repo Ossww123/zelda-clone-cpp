@@ -103,6 +103,9 @@ void DevScene::Init ( )
 	LoadEffect ( );
 	LoadTilemap ( );
 
+	_currentMapId = Protocol::MAP_ID_TOWN;
+	_hasMapId = true;
+
 	if (false)
 	{
 		GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
@@ -462,6 +465,9 @@ void DevScene::LoadTilemap ( const wchar_t* tilemapFile )
 
 void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
 {
+	_currentMapId = mapId;
+	_hasMapId = true;
+
 	ClearWorldActors ( );
 	ChangeBackground ( mapId );
 

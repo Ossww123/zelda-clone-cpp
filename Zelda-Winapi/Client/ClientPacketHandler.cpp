@@ -6,6 +6,7 @@
 #include "SceneManager.h"
 #include "HitEffect.h"
 #include "ExplodeEffect.h"
+#include "Flipbook.h"
 
 void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer, int32 len)
 {
@@ -231,9 +232,22 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 			gameObject->SetDir ( pkt.dir ( ) );
 
 			if ( Player* player = dynamic_cast< Player* >( gameObject ) )
-				player->SetWeaponType ( Player::FromProtoWeaponType ( pkt.weapontype ( ) ) );
+			{
+				auto weapon = Player::FromProtoWeaponType ( pkt.weapontype ( ) );
+				player->SetWeaponType ( weapon );
 
-			gameObject->SetState ( SKILL );
+				float duration = 0.35f; // fallback
+
+				if ( Flipbook* fb = player->GetSkillFlipbook ( weapon , pkt.dir ( ) ) )
+					duration = fb->GetInfo ( ).duration;
+
+				gameObject->StartSkillAnim ( duration );
+			}
+			else
+			{
+				// fallback
+				gameObject->StartSkillAnim ( 0.35f );
+			}
 
 			if ( pkt.weapontype ( ) == Protocol::WEAPON_TYPE_STAFF )
 			{
@@ -252,6 +266,13 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 				scene->SpawnObject<ExplodeEffect> ( center );
 			}
 		}
+	}
+
+	uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+	if ( pkt.attackerid ( ) == myId )
+	{
+		if ( MyPlayer* mp = GET_SINGLE ( SceneManager )->GetMyPlayer ( ) )
+			mp->OnServerAttackAck ( );
 	}
 }
 

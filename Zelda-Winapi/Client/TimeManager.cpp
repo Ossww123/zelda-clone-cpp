@@ -25,4 +25,6 @@ void TimeManager::Update ( )
 		_frameTime = 0.f;
 		_frameCount = 0;
 	}
+
+	_time += _deltaTime;
 }

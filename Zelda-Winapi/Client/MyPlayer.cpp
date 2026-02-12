@@ -37,6 +37,10 @@ void MyPlayer::Tick ( )
 
 	if ( _turnGraceLeft > 0.f )
 		_turnGraceLeft -= dt;
+
+	float now = GET_SINGLE ( TimeManager )->GetTime ( );
+	if ( _attackPending && ( now - _attackPendingStart ) > 0.25f )
+		_attackPending = false;
 }
 
 void MyPlayer::Render ( HDC hdc )
@@ -66,11 +70,31 @@ void MyPlayer::TickInput ( )
 	else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::KEY_3 ) )
 		SetWeaponType ( WeaponType::Staff );
 
-	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::SpaceBar ) )
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::SpaceBar ) )
 	{
-		SetState ( SKILL );
+		float now = GET_SINGLE ( TimeManager )->GetTime ( );
+
+		if ( now < _attackCooldownUntil ) return;
+		if ( _attackPending ) return;
+
+		// 마을에서는 공격 불가
+		Scene* cur = GET_SINGLE ( SceneManager )->GetCurrentScene ( );
+		DevScene* scene = dynamic_cast< DevScene* >( cur );
+		if ( scene == nullptr )
+			return;
+
+		if ( scene->HasMapId ( ) == false )
+			return;
+
+		if ( scene->IsTown ( ) )
+			return;
+		
 		TrySkill ( );
+		_attackPending = true;
+		_attackPendingStart = now;
+		_attackCooldownUntil = now + 0.15f;
 	}
+
 }
 
 
