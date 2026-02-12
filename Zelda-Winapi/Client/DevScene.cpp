@@ -58,6 +58,8 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"MapButton" , L"Sprite\\UI\\MapButton.bmp" , RGB ( 211 , 249 , 188 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"HUD" , L"Sprite\\UI\\Health_Energy_EXP_Bars.bmp" , RGB ( 188 , 255 , 235 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"LoginPanel" , L"Sprite\\UI\\LoginPanel.bmp" , RGB ( 0 , 0 , 0 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PartyInvite" , L"Sprite\\UI\\PartyInvite.bmp" , RGB ( 0 , 0 , 0 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PartyStatus" , L"Sprite\\UI\\PartyStatus.bmp" , RGB ( 0 , 0 , 0 ) );
 
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage01" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage01" ) , 0 , 0 , 0 , 0 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage02" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage02" ) , 0 , 0 , 0 , 0 );
@@ -73,6 +75,8 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town2" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 71 , 0 , 64 , 40 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Dungeon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 142 , 0 , 64 , 40 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"LoginPanel" , GET_SINGLE ( ResourceManager )->GetTexture ( L"LoginPanel" ) , 0 , 0 , 0 , 0 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"PartyInvite" , GET_SINGLE ( ResourceManager )->GetTexture ( L"PartyInvite" ) , 0 , 0 , 0 , 0 );
+	GET_SINGLE ( ResourceManager )->CreateSprite ( L"PartyStatus" , GET_SINGLE ( ResourceManager )->GetTexture ( L"PartyStatus" ) , 0 , 0 , 0 , 0 );
 
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Status_Frame" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 8 , 8 , 240 , 48 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 109 , 61 , 129 , 9 );
@@ -1169,15 +1173,22 @@ void DevScene::RenderPartyHUD ( HDC hdc )
 	const int32 barW = 80;
 	const int32 barH = 8;
 
-	// 반투명 배경
-	int32 bgH = 20 + ( int32 ) myPlayer->_partyMembers.size ( ) * rowH;
-	HBRUSH bgBrush = CreateSolidBrush ( RGB ( 0 , 0 , 0 ) );
-	RECT bgRect = { startX - 4 , startY - 4 , startX + 180 , startY + bgH };
-	FillRect ( hdc , &bgRect , bgBrush );
-	DeleteObject ( bgBrush );
+	Sprite* statusSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyStatus" );
+	if ( statusSprite )
+	{
+		const int32 w = statusSprite->GetSize ( ).x;
+		const int32 h = statusSprite->GetSize ( ).y;
+		::TransparentBlt ( hdc ,
+			startX - 4 , startY - 4 ,
+			w , h ,
+			statusSprite->GetDC ( ) ,
+			statusSprite->GetPos ( ).x , statusSprite->GetPos ( ).y ,
+			w , h ,
+			statusSprite->GetTransparent ( ) );
+	}
 
 	SetBkMode ( hdc , TRANSPARENT );
-	SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
 
 	// 타이틀
 	TextOut ( hdc , startX , startY , L"Party" , 5 );
@@ -1230,29 +1241,30 @@ void DevScene::RenderPartyInvite ( HDC hdc )
 	if ( myPlayer->_pendingInviteFrom == 0 )
 		return;
 
-	// 화면 중앙에 초대 팝업
+	Sprite* inviteSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyInvite" );
 	int32 popW = 300;
 	int32 popH = 80;
+	if ( inviteSprite )
+	{
+		popW = inviteSprite->GetSize ( ).x;
+		popH = inviteSprite->GetSize ( ).y;
+	}
 	int32 popX = ( GWinSizeX - popW ) / 2;
 	int32 popY = ( GWinSizeY - popH ) / 2 - 50;
 
-	// 배경
-	HBRUSH bgBrush = CreateSolidBrush ( RGB ( 30 , 30 , 60 ) );
-	RECT bgRect = { popX , popY , popX + popW , popY + popH };
-	FillRect ( hdc , &bgRect , bgBrush );
-	DeleteObject ( bgBrush );
-
-	// 테두리
-	HPEN pen = CreatePen ( PS_SOLID , 2 , RGB ( 200 , 200 , 255 ) );
-	HPEN oldPen = ( HPEN ) SelectObject ( hdc , pen );
-	HBRUSH oldBrush = ( HBRUSH ) SelectObject ( hdc , GetStockObject ( NULL_BRUSH ) );
-	Rectangle ( hdc , popX , popY , popX + popW , popY + popH );
-	SelectObject ( hdc , oldPen );
-	SelectObject ( hdc , oldBrush );
-	DeleteObject ( pen );
+	if ( inviteSprite )
+	{
+		::TransparentBlt ( hdc ,
+			popX , popY ,
+			popW , popH ,
+			inviteSprite->GetDC ( ) ,
+			inviteSprite->GetPos ( ).x , inviteSprite->GetPos ( ).y ,
+			popW , popH ,
+			inviteSprite->GetTransparent ( ) );
+	}
 
 	SetBkMode ( hdc , TRANSPARENT );
-	SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+	SetTextColor ( hdc , RGB ( 50 , 50 , 50 ) );
 
 	// 메시지
 	wstring msg = myPlayer->_pendingInviterName + L" invited you to party";
@@ -1262,6 +1274,6 @@ void DevScene::RenderPartyInvite ( HDC hdc )
 	// Y/N 안내
 	wstring hint = L"[Y] Accept    [N] Decline";
 	RECT hintRect = { popX + 10 , popY + 45 , popX + popW - 10 , popY + 70 };
-	SetTextColor ( hdc , RGB ( 180 , 180 , 180 ) );
+	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
 	DrawText ( hdc , hint.c_str ( ) , ( int32 ) hint.length ( ) , &hintRect , DT_CENTER );
 }
