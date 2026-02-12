@@ -197,13 +197,10 @@ void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffe
 	uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
 	if ( myId == info.objectid ( ) )
 	{
-		if ( info.state ( ) == IDLE )
+		if ( auto mp = dynamic_cast< MyPlayer* >( gameObject ) )
 		{
-			if ( auto mp = dynamic_cast< MyPlayer* >( gameObject ) )
-			{
-				mp->OnServerMoveEndAck ( );
-			}
-
+			// pending/blocked 상태 갱신
+			mp->OnServerMoveResult ( info );
 		}
 	}
 
