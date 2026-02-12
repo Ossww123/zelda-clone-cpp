@@ -63,6 +63,9 @@ void MyPlayer::TickInput ( )
 	else
 		_keyPressed = false;
 
+	if ( _keyPressed == false )
+		_blockedHold = false;
+
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::KEY_1 ) )
 		SetWeaponType ( WeaponType::Sword );
 	else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::KEY_2 ) )
@@ -109,6 +112,9 @@ void MyPlayer::TryMove ( )
 	const auto currentDir = info.dir ( );
 	const auto wantedDir = _wantedDir;
 
+	if ( _blockedHold && currentDir == wantedDir && _blockedDir == wantedDir )
+		return;
+
 	// 방향이 다르면 Turn
 	if ( currentDir != wantedDir )
 	{
@@ -122,6 +128,10 @@ void MyPlayer::TryMove ( )
 
 	if ( _turnGraceLeft > 0.f )
 		return;
+
+	_lastMoveFrom = GetCellPos ( );
+	_lastMoveDir = currentDir;
+	_hasLastMoveRequest = true;
 
 	// 방향이 같으면 Move
 	SendBufferRef sb = ClientPacketHandler::Make_C_Move ( currentDir );
@@ -154,3 +164,30 @@ void MyPlayer::TickSkill ( )
 {
 	Super::TickSkill ( );
 }
+
+void MyPlayer::OnServerMoveResult ( const Protocol::ObjectInfo& serverInfo )
+{
+	_movePending = false;
+
+	if ( _hasLastMoveRequest == false )
+		return;
+
+	uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+	if ( myId != serverInfo.objectid ( ) )
+		return;
+
+	Vec2Int newPos{ serverInfo.posx ( ), serverInfo.posy ( ) };
+	bool stayed = ( newPos == _lastMoveFrom );
+	if ( stayed && serverInfo.state ( ) == IDLE )
+	{
+		_blockedHold = true;
+		_blockedDir = _lastMoveDir;
+	}
+	else
+	{
+		_blockedHold = false;
+	}
+
+	_hasLastMoveRequest = false;
+}
+

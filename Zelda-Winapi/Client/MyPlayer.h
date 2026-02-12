@@ -43,6 +43,7 @@ public:
 	void OnServerTurnAck ( ) { _movePending = false; _turnGraceLeft = TURN_GRACE; }
 	void OnServerMoveEndAck ( ) { _movePending = false; }
 	void OnServerAttackAck ( ) { _attackPending = false; }
+	void OnServerMoveResult ( const Protocol::ObjectInfo& info );
 
 public:
 	// 인벤토리
@@ -63,8 +64,15 @@ private:
 	bool _movePending = false;
 	float _turnGraceLeft = 0.f;
 	static constexpr float TURN_GRACE = 0.05f;
+
 	bool  _attackPending = false;
 	float _attackPendingStart = 0.f;
 	float _attackCooldownUntil = 0.f;
+
+	bool _blockedHold = false;
+	Protocol::DIR_TYPE _blockedDir = DIR_DOWN;
+	Vec2Int _lastMoveFrom{ 0, 0 };
+	Protocol::DIR_TYPE _lastMoveDir = DIR_DOWN;
+	bool _hasLastMoveRequest = false;
 };
 
