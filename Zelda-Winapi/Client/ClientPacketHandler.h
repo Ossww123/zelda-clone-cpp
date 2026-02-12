@@ -12,6 +12,7 @@ enum
 	C_PartyAnswer = 109 ,
 	C_PartyInvite = 108 ,
 	C_PartyLeave = 110 ,
+	C_Login = 111 ,
 
 	S_TEST = 201 ,
 	S_EnterGame = 202 ,
@@ -34,8 +35,6 @@ enum
 	S_PartyLeave = 220 ,
 	S_PartyUpdate = 219 ,
 	// [AUTO-GEN ENUM BEGIN]
-
-
 
 	// [AUTO-GEN ENUM END]
 };
@@ -78,12 +77,9 @@ public:
 	static SendBufferRef Make_C_PartyInvite ( uint64 targetId );
 	static SendBufferRef Make_C_PartyAnswer ( uint64 inviterId , bool accept );
 	static SendBufferRef Make_C_PartyLeave ( );
+	static SendBufferRef Make_C_Login ( const string& username );
 
 	// [AUTO-GEN DECLS BEGIN]
-
-
-	
-	
 
 	// [AUTO-GEN DECLS END]
 

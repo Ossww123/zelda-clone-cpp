@@ -192,3 +192,8 @@ message S_PartyUpdate
 message S_PartyLeave
 {
 }
+
+message C_Login
+{
+    string username = 1;
+}

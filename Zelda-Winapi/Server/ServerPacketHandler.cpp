@@ -7,6 +7,7 @@
 #include "GameRoomManager.h"
 #include "Player.h"
 #include "PartyManager.h"
+#include "DBManager.h"
 
 
 void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int32 len)
@@ -46,15 +47,13 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	case C_PartyAnswer:
 		Handle_C_PartyAnswer(session, buffer, len);
 		break;
-
 	case C_PartyLeave:
 		Handle_C_PartyLeave(session, buffer, len);
 		break;
+	case C_Login:
+		Handle_C_Login(session, buffer, len);
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
-
-
-		
-
 
 	// [AUTO-GEN SWITCH END]
 	default:
@@ -709,4 +708,64 @@ SendBufferRef ServerPacketHandler::Make_S_PartyLeave()
 {
 	Protocol::S_PartyLeave pkt;
 	return MakeSendBuffer(pkt, S_PartyLeave);
+}
+
+// ---- Login ----
+
+void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	PacketHeader* header = (PacketHeader*)buffer;
+	uint16 size = header->size;
+
+	Protocol::C_Login pkt;
+	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+
+	string username = pkt.username();
+	if (username.empty())
+		return;
+
+	// DB에서 계정 조회/생성
+	int64 accountId = GDBManager.FindOrCreateAccount(username);
+	if (accountId == 0)
+		return;
+
+	session->_accountId = accountId;
+
+	// 플레이어 생성
+	PlayerRef player = GameObject::CreatePlayer();
+
+	if (GDBManager.HasPlayerData(accountId))
+	{
+		// 기존 데이터 로드
+		PlayerSaveData saveData;
+		GDBManager.LoadPlayerData(accountId, saveData);
+		player->ApplyFromSaveData(saveData);
+	}
+	else
+	{
+		// 새 계정: username을 이름으로, 초기 데이터 저장
+		player->info.set_name(username);
+		PlayerSaveData initData = player->ToSaveData();
+		GDBManager.SavePlayerData(accountId, initData);
+	}
+
+	// S_EnterGame 전송
+	{
+		Protocol::S_EnterGame enterPkt;
+		enterPkt.set_success(true);
+		enterPkt.set_accountid(accountId);
+		session->Send(MakeSendBuffer(enterPkt, S_EnterGame));
+	}
+
+	// 마을에 입장
+	GameRoomRef room = GRoomManager.GetStaticRoom(FieldId::Town, 1);
+	if (room)
+	{
+		room->PushJob([room, session, player]()
+			{
+				room->EnterRoom(session, player);
+			});
+	}
+
+	cout << "[Login] " << username << " logged in (accountId=" << accountId << ")" << endl;
 }

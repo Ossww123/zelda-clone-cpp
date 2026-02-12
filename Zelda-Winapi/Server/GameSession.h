@@ -20,4 +20,5 @@ public:
 public:
 	weak_ptr<GameRoom> gameRoom;
 	weak_ptr<Player> player;
+	int64 _accountId = 0;
 };

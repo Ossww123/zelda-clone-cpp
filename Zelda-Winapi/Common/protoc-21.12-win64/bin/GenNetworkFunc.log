@@ -1,15 +1,5 @@
 [OK] Updated enum/decls/switch blocks (merge). Implementations untouched.
 [INFO] Proto: C:\Users\User\Desktop\zelda\zelda-clone-cpp\Zelda-Winapi\Common\protoc-21.12-win64\bin\Protocol.proto
-[INFO] New messages: ['C_PartyInvite', 'C_PartyAnswer', 'C_PartyLeave', 'S_PartyInvite', 'S_PartyUpdate', 'S_PartyLeave']
-  - C_PartyInvite = 108
-    params: uint64 targetId
-  - C_PartyAnswer = 109
-    params: uint64 inviterId , bool accept
-  - C_PartyLeave = 110
-    params: (none)
-  - S_PartyInvite = 218
-    params: uint64 inviterId , const string& inviterName
-  - S_PartyUpdate = 219
-    params: const vector<Protocol::PartyMemberInfo>& members
-  - S_PartyLeave = 220
-    params: (none)
+[INFO] New messages: ['C_Login']
+  - C_Login = 111
+    params: const string& username
