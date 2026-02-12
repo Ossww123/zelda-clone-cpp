@@ -53,9 +53,6 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Hit" , L"Sprite\\Effect\\Hit.bmp" , RGB ( 0 , 0 , 0 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Explode" , L"Sprite\\Effect\\Explode.bmp" , RGB ( 123 , 173 , 148 ) );
 
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Start" , L"Sprite\\UI\\Start.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Edit" , L"Sprite\\UI\\Edit.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Exit" , L"Sprite\\UI\\Exit.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"MapButton" , L"Sprite\\UI\\MapButton.bmp" , RGB ( 211 , 249 , 188 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"HUD" , L"Sprite\\UI\\Health_Energy_EXP_Bars.bmp" , RGB ( 188 , 255 , 235 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"LoginPanel" , L"Sprite\\UI\\LoginPanel.bmp" , RGB ( 0 , 0 , 0 ) );
@@ -66,12 +63,6 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage02" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage02" ) , 0 , 0 , 0 , 0 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileO" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 0 , 0 , 48 , 48 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileX" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 48 , 0 , 48 , 48 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Start_Off" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Start" ) , 0 , 0 , 150 , 150 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Start_On" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Start" ) , 150 , 0 , 150 , 150 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Edit_Off" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Edit" ) , 0 , 0 , 150 , 150 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Edit_On" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Edit" ) , 150 , 0 , 150 , 150 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Exit_Off" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Exit" ) , 0 , 0 , 150 , 150 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Exit_On" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Exit" ) , 150 , 0 , 150 , 150 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town1" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 0 , 0 , 64 , 40 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town2" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 71 , 0 , 64 , 40 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Dungeon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 142 , 0 , 64 , 40 );
@@ -113,11 +104,13 @@ void DevScene::Init ( )
 	_currentMapId = Protocol::MAP_ID_TOWN;
 	_hasMapId = true;
 
-	if (false)
-	{
-		GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
-		GET_SINGLE ( ResourceManager )->LoadSound ( L"Attack" , L"Sound\\Sword.wav" );
-	}
+	GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
+	GET_SINGLE ( ResourceManager )->LoadSound ( L"Sword" , L"Sound\\Sword.wav" );
+	GET_SINGLE ( ResourceManager )->LoadSound ( L"Arrow" , L"Sound\\Arrow.wav" );
+	GET_SINGLE ( ResourceManager )->LoadSound ( L"Explode" , L"Sound\\Explode.wav" );
+	GET_SINGLE ( ResourceManager )->LoadSound ( L"UISound" , L"Sound\\UISound.wav" );
+	GET_SINGLE ( SoundManager )->Play ( L"BGM" , true );
+	
 
 	CreateMapButtons ( );
 	Super::Init ( );
@@ -138,6 +131,7 @@ void DevScene::Update ( )
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::I ) )
 	{
 		_showInventory = !_showInventory;
+		GET_SINGLE ( SoundManager )->Play ( L"UISound" );
 		if ( !_showInventory )
 			_invDragging = false;
 	}
@@ -1163,6 +1157,7 @@ void DevScene::HandlePartyInput ( )
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 			myPlayer->_pendingInviteFrom = 0;
 			myPlayer->_pendingInviterName.clear ( );
+			GET_SINGLE ( SoundManager )->Play ( L"UISound" );
 		}
 		else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::N ) )
 		{
@@ -1170,6 +1165,7 @@ void DevScene::HandlePartyInput ( )
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 			myPlayer->_pendingInviteFrom = 0;
 			myPlayer->_pendingInviterName.clear ( );
+			GET_SINGLE ( SoundManager )->Play ( L"UISound" );
 		}
 		return;  // 초대 팝업 중에는 다른 입력 무시
 	}

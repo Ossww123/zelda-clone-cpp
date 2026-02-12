@@ -7,6 +7,7 @@
 #include "HitEffect.h"
 #include "ExplodeEffect.h"
 #include "Flipbook.h"
+#include "SoundManager.h"
 
 void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer, int32 len)
 {
@@ -222,6 +223,21 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene )
 	{
+		switch ( pkt.weapontype ( ) )
+		{
+		case Protocol::WEAPON_TYPE_SWORD:
+			GET_SINGLE ( SoundManager )->Play ( L"Sword" );
+			break;
+		case Protocol::WEAPON_TYPE_BOW:
+			GET_SINGLE ( SoundManager )->Play ( L"Arrow" );
+			break;
+		case Protocol::WEAPON_TYPE_STAFF:
+			GET_SINGLE ( SoundManager )->Play ( L"Explode" );
+			break;
+		default:
+			break;
+		}
+
 		GameObject* gameObject = scene->GetObjectW ( pkt.attackerid ( ) );
 		if ( gameObject )
 		{
@@ -662,6 +678,7 @@ void ClientPacketHandler::Handle_S_PartyInvite ( ServerSessionRef session , BYTE
 		return;
 
 	myPlayer->_pendingInviteFrom = pkt.inviterid ( );
+	GET_SINGLE ( SoundManager )->Play ( L"UISound" );
 
 	// string → wstring 변환
 	string name = pkt.invitername ( );
@@ -720,6 +737,12 @@ void ClientPacketHandler::Handle_S_PartyLeave ( ServerSessionRef session , BYTE*
 		return;
 
 	myPlayer->_partyMembers.clear ( );
+	if ( myPlayer->_pendingInviteFrom != 0 )
+	{
+		myPlayer->_pendingInviteFrom = 0;
+		myPlayer->_pendingInviterName.clear ( );
+		GET_SINGLE ( SoundManager )->Play ( L"UISound" );
+	}
 }
 
 SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( uint64 targetId )
