@@ -50,6 +50,7 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerRight" , L"Sprite\\Player\\PlayerRight.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Snake" , L"Sprite\\Monster\\Snake.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Hit" , L"Sprite\\Effect\\Hit.bmp" , RGB ( 0 , 0 , 0 ) );
+	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Explode" , L"Sprite\\Effect\\Explode.bmp" , RGB ( 123 , 173 , 148 ) );
 
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Start" , L"Sprite\\UI\\Start.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Edit" , L"Sprite\\UI\\Edit.bmp" );
@@ -191,23 +192,11 @@ void DevScene::Render ( HDC hdc )
 void DevScene::AddActor ( Actor* actor )
 {
 	Super::AddActor ( actor );
-
-	Monster* monster = dynamic_cast< Monster* >( actor );
-	if ( monster )
-	{
-		_monsterCount++;
-	}
 }
 
 void DevScene::RemoveActor ( Actor* actor )
 {
 	Super::RemoveActor ( actor );
-
-	Monster* monster = dynamic_cast< Monster* >( actor );
-	if ( monster )
-	{
-		_monsterCount--;
-	}
 }
 
 void DevScene::LoadMap ( )
@@ -392,6 +381,11 @@ void DevScene::LoadEffect ( )
 		Flipbook* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_Hit" );
 		fb->SetInfo ( { texture, L"FB_Hit", {50, 47}, 0, 5, 0, 0.5f, false } );
 	}
+	{
+		Texture* texture = GET_SINGLE ( ResourceManager )->GetTexture ( L"Explode" );
+		Flipbook* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_Explode" );
+		fb->SetInfo ( { texture, L"FB_Explode", {144, 144}, 0, 11, 0, 0.5f, false } );
+	}
 }
 
 void DevScene::LoadTilemap ( )
@@ -466,15 +460,10 @@ void DevScene::LoadTilemap ( const wchar_t* tilemapFile )
 	_tilemapActor->SetShowDebug ( false );
 }
 
-
-
 void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
 {
 	ClearWorldActors ( );
 	ChangeBackground ( mapId );
-
-	// 카운트 리셋
-	_monsterCount = 0;
 
 	// 타일맵 교체
 	if ( mapId == Protocol::MAP_ID_TOWN )
@@ -507,7 +496,6 @@ void DevScene::ChangeBackground ( Protocol::MAP_ID mapId )
 	const Vec2Int size = sprite->GetSize ( );
 	_background->SetPos ( Vec2 ( size.x / 2 , size.y / 2 ) );
 }
-
 
 void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
 {
