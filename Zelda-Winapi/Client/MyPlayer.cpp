@@ -130,9 +130,3 @@ void MyPlayer::TickSkill ( )
 {
 	Super::TickSkill ( );
 }
-
-void MyPlayer::SyncToServer ( )
-{
-	//SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Move ( );
-	//GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
-}
