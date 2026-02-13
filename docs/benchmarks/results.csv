@@ -1,0 +1,3 @@
+result_id,mode,repeat_count,bot_count,move_ms,attack_ms,duration_sec,s_move_avg,s_attack_avg,s_damaged_avg,source
+single_avg_3runs,single,3,100,120,700,180,112.37,110.69,14.34,README.md
+multi_avg_3runs,multi,3,100,120,700,180,388.98,260.42,179.01,README.md

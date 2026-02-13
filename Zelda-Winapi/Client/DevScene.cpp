@@ -559,9 +559,10 @@ void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
 		else if ( info.objecttype ( ) == Protocol::OBJECT_TYPE_MONSTER )
 		{
 			Monster* monster = SpawnObject<Monster> ( Vec2Int{ info.posx ( ), info.posy ( ) } );
+			monster->info = info;
 			monster->SetDir ( info.dir ( ) );
 			monster->SetState ( info.state ( ) );
-			monster->info = info;
+			monster->SetCellPos ( Vec2Int{ info.posx ( ), info.posy ( ) } , true );
 		}
 		else if ( info.objecttype() == Protocol::OBJECT_TYPE_PROJECTILE)
 		{
