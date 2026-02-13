@@ -1111,7 +1111,7 @@ void DevScene::HandleInventoryClick ( )
 		return;
 	}
 	// Potion: (290,68) 32x32
-	if ( mx >= 290 && mx < 290 && my >= 68 && my < 100 )
+	if ( mx >= 290 && mx < 322 && my >= 68 && my < 100 )
 	{
 		if ( myPlayer->_equipPotion.itemId > 0 )
 		{
