@@ -1,657 +1,155 @@
-# Zelda-Clone Multiplayer Game
+﻿###### 26.02.10 프로젝트 스냅샷을 별도 브랜치로 남깁니다.
+# 온라인 RPG 게임 (IOCP Server & WinAPI Client)
 
-> **C++ 기반 2D 액션 RPG 멀티플레이어 게임**
-> Client-Server 아키텍처를 활용한 실시간 동기화 게임 프로젝트
+**WinAPI 클라이언트**와 **IOCP 기반 C++ 서버**를 직접 구현하여 구축한 서버 권위(Server-Authoritative) 구조의  RPG입니다.
 
-## 목차
-- [프로젝트 개요](#프로젝트-개요)
-- [기술 스택](#기술-스택)
-- [아키텍처](#아키텍처)
-- [주요 구현 시스템](#주요-구현-시스템)
-- [핵심 기술 구현](#핵심-기술-구현)
-- [학습 내용 및 트러블슈팅](#학습-내용-및-트러블슈팅)
-- [빌드 및 실행](#빌드-및-실행)
+<!-- 타이틀/플레이 이미지 -->
+
+![Title](media/Title.png)
+---
+
+## 📺 프로젝트 시연 영상
+(추가 예정)
+###### *위 이미지를 클릭하면 유튜브 시연 영상으로 이동합니다.*
 
 ---
 
-## 프로젝트 개요
+## 게임 개요 (Game Overview)
 
-Zelda 스타일의 2D 액션 RPG를 멀티플레이어로 구현한 프로젝트입니다. 클라이언트-서버 아키텍처를 기반으로 **서버 권위 시스템(Server-Authoritative)** 을 적용하였습니다.
+- **장르**: 2D 타일맵 온라인RPG
+- **개발 인원**: 1인
+- **기간**: 2025.12.18 ~ 2026.02.12 (8주)
+- **목적**: IOCP 기반 게임 서버를 직접 구현해보며 온라인 게임에 필요한 게임 서버 구조를 학습
 
-### 주요 특징
-- **실시간 멀티플레이어**: 여러 플레이어가 동시에 접속하여 게임 플레이
-- **마을/던전 시스템**: 공용 마을과 파티별 인스턴스 던전
-- **채널 시스템**: 서버 부하 분산을 위한 채널 구조
-- **서버 권위 전투**: 전투 판정 및 피해 계산을 서버에서 처리
-- **몬스터 AI**: Aggro/Leash 메커니즘을 활용한 몬스터 행동 패턴
-
----
-
-## 기술 스택
-
-### Client
-- **C++ / Win32 API**: 게임 클라이언트 렌더링 및 입력 처리
-- **Custom Game Engine**: Component 기반 게임 오브젝트 시스템
-  - Sprite/Flipbook 애니메이션
-  - Collider 기반 충돌 감지
-  - Scene 관리 시스템
-
-### Server
-- **C++ / ServerCore**: 커스텀 네트워킹 라이브러리
-- **Protobuf**: 네트워크 패킷 직렬화
-- **Multi-threaded Architecture**: IOCP 기반 비동기 네트워크 처리
-
-### Core Technologies
-- **IOCP (I/O Completion Port)**: 고성능 비동기 네트워크 통신
-- **Job Queue**: 멀티스레드 환경 동기화
-- **Object Pool**: 메모리 효율적인 객체 관리
-- **A* Pathfinding**: 몬스터 이동 경로 탐색
+* **핵심 루프**: 로그인 ➔ 마을 접속 ➔ 파티 결성 ➔ 인스턴스 던전 입장 ➔ 몬스터 사냥 및 레벨업 ➔ 아이템 획득 및 장착.
+* **성장 시스템**: 적 처치 시 경험치를 획득하여 레벨업하고 획득한 장비를 장착하여 캐릭터 스탯을 강화할 수 있습니다.
+* **멀티플레이**: 룸 기반의 월드 관리로 수십 명의 플레이어가 동일한 공간에서 실시간으로 상호작용합니다.
 
 ---
 
-## 아키텍처
+## 시스템 아키텍처 (System Architecture)
 
-### 전체 구조
-```
-┌─────────────┐                  ┌──────────────────┐
-│   Client    │◄────Protobuf────►│     Server       │
-│  (Win32 API)│                  │  (ServerCore)    │
-└─────────────┘                  └──────────────────┘
-      │                                   │
-      │                                   ├─ GameRoomManager
-      │                                   │   ├─ Town (Static Room)
-      │                                   │   └─ Dungeon (Instance Room)
-      │                                   │
-      │                                   ├─ GameSession
-      └───────────────────────────────────┴─ Packet Handler
-```
+### 1. 스레드 모델 및 동기화 (Multi-threaded JobQueue)
 
-### GameRoom 시스템
+동시 접속 환경에서 네트워크 I/O를 처리하기 위해 **IOCP 모델**을 채택했으며, 로직 안정성을 위해 **JobQueue 기반의 직렬 처리 구조**를 설계했습니다.
 
-**GameRoom**은 게임 월드의 논리적 공간 단위입니다. 각 GameRoom은 독립적인 게임 로직 실행 환경을 제공하며, JobQueue를 통해 동기화 문제를 해결합니다.
+* **IOCP Worker Threads**: `AcceptEx`와 `GQCS`를 통해 여러 개의 연결을 비동기로 처리하며 패킷을 수신합니다.
+* **Game Logic Thread**: 네트워크 스레드와 게임 로직을 엄격히 분리하여, 각 룸의 `JobQueue`에 쌓인 작업을 단일 스레드에서 순차적으로 처리함으로써 룸 로직의 동시성 문제를 크게 완화했습니다.
+* **실행 모드 분리**: `Server.exe`(single), `Server.exe multi [workerCount]`(multi) 형태로 모드를 분리해 동일 시나리오 성능 비교가 가능하도록 구성했습니다.
+![SystemArchitecture](media/SystemArchitecture.png)
+![ConcurrencyModel](media/ConcurrencyModel.png)
 
-#### 1. Static Room (마을)
-- 모든 플레이어가 공유하는 공간
-- 채널별로 구분 (Town_CH1, Town_CH2, ...)
-- 몬스터 스폰 없음
+### 2. 월드 구성 및 인스턴스 시스템
 
-#### 2. Instance Room (던전)
-- 파티별로 독립적인 던전 생성
-- 고유 Instance ID 할당
-- 던전 내 몬스터 스폰/리스폰 관리
-- 플레이어 전원 퇴장 시 던전 삭제
-
-```cpp
-// GameRoom 구조 (데이터 기반)
-class GameRoom {
-    map<uint64, PlayerRef> _players;
-    map<uint64, MonsterRef> _monsters;
-    map<uint64, GameObjectRef> _projectiles;
-
-    Tilemap _tilemap;
-
-    // 데이터 기반 설정
-    const RoomConfigData* _config;
-    const RoomSpawnConfig* _spawnConfig;
-
-    queue<function<void()>> _jobs;  // JobQueue
-};
-```
+* **Static Room (마을)**: 모든 유저가 접속하는 공용 공간으로 채널 시스템을 통해 인원을 분산 관리합니다.
+* **Instance Room (던전)**: 파티의 입장 요청 시 동적으로 생성되는 독립 공간입니다. 던전 내 인원이 0명이 될 경우 자동으로 인스턴스를 제거하여 서버 자원을 최적화합니다.
+* **데이터 주도 설계 (Data-Driven)**: `RoomConfig.csv`, `MonsterSpawn.json` 등을 통해 코드 수정 없이 스테이지 구성 및 몬스터 스폰 패턴을 확장할 수 있습니다.
 
 ---
 
-## 주요 구현 시스템
+## 멀티스레드 성능 실측 결과
 
-### 1. Network Synchronization
+DummyClient 100개를 동원하여 단일 스레드 대비 멀티스레드 서버의 처리량(Throughput)을 실측했습니다.
+###### `docs/benchmarks/` 참고
 
-**Server-Authoritative 방식**으로 모든 게임 로직을 서버에서 처리하고, 클라이언트는 입력과 렌더링만 담당합니다.
+### 실험 재현 조건
+- Server 실행 모드:
+  - Single: `Server.exe`
+  - Multi: `Server.exe multi 8`
+- DummyClient: 100 bots, move interval 120ms, attack interval 700ms
+- 측정 시간: 180초
+- 집계 기준: 안정구간(`S_EnterGame=0`) 평균
+- 반복 횟수: Single 3회 / Multi 3회 평균
 
-#### 이동 동기화
-```cpp
-// Client → Server
-C_Move {
-    DIR_TYPE dir;
-    int32 targetx, targety;
-}
+| 지표 (Packet/sec) | Single Thread | **Multi Thread** | **개선율** |
+| --- | --- | --- | --- |
+| **S_Move (이동)** | 112.37 | **388.98** | **+246.1%** |
+| **S_Attack (공격)** | 110.69 | **260.42** | **+135.2%** |
+| **S_Damaged (피격)** | 14.34 | **179.01** | **+1148.2%** |
 
-// Server → All Clients
-S_Move {
-    ObjectInfo info;  // id, position, direction, state
-}
-```
-
-#### 전투 동기화
-```cpp
-// Client → Server
-C_Attack {
-    DIR_TYPE dir;
-    WEAPON_TYPE weaponType;  // Sword, Bow, Staff
-}
-
-// Server → All Clients
-S_Attack { /* 공격 애니메이션 */ }
-S_Damaged { /* 피해량 및 HP 업데이트 */ }
-```
-
-**서버 판정 로직**:
-1. 클라이언트가 공격 입력 전송
-2. 서버에서 공격 범위 내 타겟 검증
-3. 피해 계산 (공격 배율, 방어력 등)
-4. 모든 클라이언트에 결과 브로드캐스트
-
-### 2. 전투 시스템
-
-#### 무기별 공격 메커니즘
-
-| 무기 | 타입 | 특징 |
-|------|------|------|
-| **Sword** | 근접 | 즉발 판정, 범위 공격 |
-| **Bow** | 원거리 | 발사체(Arrow) 생성, 충돌 판정 |
-| **Staff** | 마법 | 관통형 발사체, 다수 타격 |
-
-```cpp
-void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack& pkt) {
-    PlayerRef attacker = FindPlayer(session->playerId);
-
-    switch (pkt.weapontype()) {
-        case WEAPON_TYPE::Sword:
-            Handle_SwordAttack(attacker, pkt);  // 즉시 판정
-            break;
-        case WEAPON_TYPE::Bow:
-            Handle_BowAttack(attacker, pkt);    // Arrow 생성
-            break;
-        case WEAPON_TYPE::Staff:
-            Handle_StaffAttack(attacker, pkt);  // 관통 발사체 생성
-            break;
-    }
-}
-```
-
-### 3. 몬스터 AI
-
-#### State Machine 기반 행동 패턴
-
-```cpp
-enum class CreatureState {
-    Idle,   // 대기 상태
-    Move,   // 이동 (추격)
-    Skill   // 공격 상태
-};
-```
-
-#### Aggro & Leash 시스템
-
-```cpp
-class Monster {
-    Vec2Int _homePos;      // 스폰 위치
-    int32 _aggroRange;     // 인식 범위 (8칸)
-    int32 _leashRange;     // 최대 추격 범위 (10칸)
-};
-
-void Monster::UpdateIdle() {
-    // 인식 범위 내 플레이어 탐색
-    PlayerRef target = _room->FindClosestPlayer(_cellPos);
-    if (distance(target, _cellPos) <= _aggroRange) {
-        _target = target;
-        SetState(CreatureState::Move);
-    }
-}
-
-void Monster::UpdateMove() {
-    // Leash 범위 초과 시 귀환
-    if (distance(_cellPos, _homePos) > _leashRange) {
-        _target.reset();
-        // A* 알고리즘으로 귀환 경로 탐색
-        FindPath(_cellPos, _homePos);
-    }
-}
-```
-
-#### 던전 전용 스폰 시스템
-
-- 몬스터는 **던전에서만 스폰**
-- 사망 시 **5초 후 자동 리스폰**
-- 홈 포지션 기반 행동 범위 제한
-
-```cpp
-void GameRoom::ReserveMonsterRespawn(Vec2Int homePos) {
-    uint64 respawnTime = GetTickCount64() + 5000;  // 5초 후
-    _respawnQueue.push_back({respawnTime, homePos});
-}
-```
-
-### 4. GameRoom Job Queue
-
-멀티스레드 환경에서 **Race Condition**을 방지하기 위해 각 GameRoom은 독립적인 JobQueue를 사용합니다.
-
-```cpp
-void GameRoom::PushJob(function<void()> job) {
-    WRITE_LOCK;
-    _jobs.push(job);
-}
-
-void GameRoom::Update() {
-    // JobQueue 처리
-    while (!_jobs.empty()) {
-        auto job = _jobs.front();
-        _jobs.pop();
-        job();  // 순차 실행으로 동기화 보장
-    }
-
-    // 게임 로직 업데이트
-    for (auto& monster : _monsters)
-        monster->Update();
-}
-```
-
-**적용 사례**:
-- 플레이어 이동/공격 패킷 처리
-- 몬스터 리스폰
-- 발사체 충돌 판정
-
-### 5. 맵 이동 및 채널 시스템
-
-```cpp
-void Handle_C_ChangeMap(GameSessionRef session, Protocol::C_ChangeMap pkt) {
-    FieldId targetField = pkt.mapid();
-    int32 channel = pkt.channel();
-
-    // 현재 룸에서 퇴장
-    currentRoom->LeaveRoom(session);
-
-    if (targetField == FieldId::Dungeon) {
-        // 던전: 새 인스턴스 생성
-        uint64 instanceId = GRoomManager.CreateDungeonInstance();
-        GameRoomRef dungeon = GRoomManager.GetDungeonInstance(instanceId);
-        dungeon->EnterRoom(session);
-    } else {
-        // 마을: 정적 룸 입장
-        GameRoomRef town = GRoomManager.GetStaticRoom(targetField, channel);
-        town->EnterRoom(session);
-    }
-}
-```
-
-### 6. A* Pathfinding
-
-몬스터의 스마트한 이동을 위한 경로 탐색 알고리즘 구현.
-
-```cpp
-bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 maxDepth) {
-    priority_queue<PQNode, vector<PQNode>, greater<PQNode>> pq;
-    map<Vec2Int, int32> best;
-    map<Vec2Int, Vec2Int> parent;
-
-    // A* 알고리즘
-    // F = G + H
-    // G: 시작점으로부터의 실제 거리
-    // H: 목표지점까지의 휴리스틱(맨하탄 거리)
-
-    pq.push(PQNode(0, src));
-    best[src] = 0;
-
-    while (!pq.empty()) {
-        PQNode node = pq.top();
-        pq.pop();
-
-        if (node.pos == dest) {
-            // 경로 복원
-            ReconstructPath(parent, dest, path);
-            return true;
-        }
-
-        // 4방향 탐색
-        for (Vec2Int delta : {Vec2Int{0,1}, {0,-1}, {1,0}, {-1,0}}) {
-            Vec2Int next = node.pos + delta;
-
-            if (!CanGo(next)) continue;
-
-            int32 g = best[node.pos] + 1;
-            int32 h = abs(dest.x - next.x) + abs(dest.y - next.y);
-
-            if (best.find(next) == best.end() || g < best[next]) {
-                best[next] = g;
-                pq.push(PQNode(g + h, next));
-                parent[next] = node.pos;
-            }
-        }
-    }
-
-    return false;
-}
-```
+* **해석**: 이번 측정에서는 멀티스레드 전환 후 **피격(Damaged) 지표가 Single 대비 약 11배 높게 관측**되었습니다.
 
 ---
 
-## 핵심 기술 구현
+### 데이터베이스 설계 (Database Design)
 
-### 1. RoomLogic 분리
+본 프로젝트는 별도 DB 서버 없이 실행 가능한 영속화 계층으로 **SQLite**를 사용했습니다. 로컬 개발/테스트 환경에서 설정 부담을 낮추고, 확장성을 고려해 정규화된 스키마를 구성했습니다.
 
-초기에는 GameRoom이 마을과 던전 로직을 모두 포함하고 있었으나, **Strategy Pattern**을 적용하여 로직을 분리했습니다.
+#### 1. 논리적 데이터 구조 (ERD)
 
-```cpp
-// Before: GameRoom에 모든 로직이 혼재
-class GameRoom {
-    void Update() {
-        if (_fieldId == FieldId::Town) {
-            // 마을 로직
-        } else if (_fieldId == FieldId::Dungeon) {
-            // 던전 로직 (몬스터 스폰 등)
-        }
-    }
-};
+기존 DB의 실제 연결 관계와 논리적 흐름을 도식화했습니다.
 
-// After: Strategy Pattern 적용
-class IRoomLogic {
-    virtual void Update(GameRoom* room) = 0;
-};
+![ERD](media/ERD.PNG)
 
-class TownLogic : public IRoomLogic {
-    void Update(GameRoom* room) override {
-        // 마을 전용 로직
-    }
-};
+#### 2. 데이터 영속화 및 최적화 전략
 
-class DungeonLogic : public IRoomLogic {
-    void Update(GameRoom* room) override {
-        // 몬스터 스폰/리스폰 처리
-        room->ProcessRespawn();
-    }
-};
-```
-
-**장점**:
-- 코드 가독성 향상
-- 새로운 필드 타입 추가 용이 (보스전 룸, PvP 룸 등)
-- 테스트 및 유지보수 편의성
-
-### 2. Camera System
-
-초기 하드코딩된 카메라를 Component 시스템으로 리팩토링.
-
-```cpp
-// Before: 하드코딩된 카메라 위치
-void Render() {
-    int32 cameraX = player->GetPos().x - SCREEN_WIDTH / 2;
-    int32 cameraY = player->GetPos().y - SCREEN_HEIGHT / 2;
-    // ...
-}
-
-// After: CameraComponent
-class CameraComponent : public Component {
-    void SetTarget(GameObject* target) { _target = target; }
-    Vec2 GetCameraPos();
-};
-```
-
-### 3. 공격 배율 시스템
-
-무기별 데미지 밸런싱을 위한 공격 배율 파라미터 추가.
-
-```cpp
-void Creature::OnDamaged(CreatureRef attacker, int32 damage, float multiplier) {
-    int32 finalDamage = static_cast<int32>(damage * multiplier);
-    _stat.hp = max(0, _stat.hp - finalDamage);
-
-    if (_stat.hp == 0) {
-        OnDead(attacker);
-    }
-}
-
-// 무기별 배율 설정
-Handle_SwordAttack(...) {
-    target->OnDamaged(attacker, damage, 1.0f);  // 기본 배율
-}
-
-Handle_StaffAttack(...) {
-    target->OnDamaged(attacker, damage, 0.7f);  // 약한 대신 관통
-}
-```
+* **WAL(Write-Ahead Logging) 모드**: `PRAGMA journal_mode=WAL` 설정을 적용해 읽기와 쓰기 경합을 줄이는 방향으로 구성했습니다.
+* **계정 중심 식별 구조**: 모든 테이블이 `account_id`를 외래 키(FK)로 참조하게 설계하여, 세션 종료 시 유저의 전체 상태(플레이어, 인벤토리, 장비)를 일관성 있게 일괄 저장합니다.
+* **저장 시점**: DB 트랜잭션은 유저 접속 종료 시점 이벤트에서 수행됩니다.
 
 ---
 
-## 학습 내용 및 트러블슈팅
+## 주요 구현 포인트
 
-### 1. 멀티스레드 환경에서의 동기화 문제
+### 1. 서버 권위(Server-Authoritative) 판정
 
-**문제**: 여러 스레드(네트워크 스레드, 게임 로직 스레드)에서 동시에 GameRoom의 데이터에 접근하여 **Race Condition** 발생
+* **전투 검증**: 클라이언트의 입력은 단순 제안으로 취급하며, 서버가 무기 타입(검/활/스태프)에 따른 사거리, 충돌, 데미지 판정을 최종 결정 후 브로드캐스트합니다.
+* **AI 시뮬레이션**: 서버 사이드에서 A* 알고리즘을 수행하여 장애물을 회피하며 유저를 추적하는 몬스터 AI를 구현했습니다.
 
-**해결**:
-- **JobQueue 패턴** 도입
-- 모든 GameRoom 작업을 Job으로 래핑하여 순차 실행
-- Lock을 최소화하면서도 데이터 무결성 보장
+![SequenceDiagram](media/SequenceDiagram.PNG)
 
-**학습 내용**:
-- Lock-based vs Lock-free 동기화 방식의 트레이드오프
-- Job System의 실제 게임 적용 경험
-- 멀티스레드 디버깅 기법
+### 2. 클라이언트 엔진 및 인터페이스 (Win32 API)
 
-### 2. 네트워크 지연과 클라이언트 예측
+* **자체 프레임워크**: Win32 GDI와 더블 버퍼링을 활용하여 2D 렌더링 환경을 구축했습니다.
+* **UI 동기화**: 서버 패킷과 연동된 인벤토리 장착 상태, 실시간 HP 바, 파티원 상태창 등을 구현했습니다.
 
-**문제**: 네트워크 지연으로 인한 끊김 현상
+### 3. 설계 철학: 객체의 단일 책임(SRP)과 결합도 완화
 
-**현재 구현**:
-- 서버 권위 방식으로 정확성 우선
-- 클라이언트는 서버 응답 대기
+프로젝트 진행 중 로직의 유연성을 위해 `OnDamaged` 함수를 리팩토링했습니다.
 
-**향후 개선 방향**:
-- Client-side Prediction 구현
-- Server Reconciliation으로 정확성과 반응성 양립
+* **기존 문제**: 피격 함수(`OnDamaged`)가 공격자 정보와 방어력을 직접 참조하여 데미지를 계산함 ➔ 객체 간 결합도가 높아지고 계산식 확장이 어려움.
+* **개선**: 데미지 계산 로직을 상위 레이어로 분리하고, `OnDamaged`는 **전달받은 수치만큼 HP를 차감하는 역할**만 수행하도록 수정했습니다.
+* **결과**: 무기에 따른 계산식을 `Creature` 클래스 수정 없이 유연하게 확장할 수 있는 구조를 확보했습니다.
 
-**학습 내용**:
-- 네트워크 게임의 근본적인 지연 문제 이해
-- Authoritative Server의 장단점
-- Prediction/Reconciliation 기법 이론 학습
-
-### 3. 인스턴스 던전 관리
-
-**문제**: 던전 인스턴스가 메모리에 계속 누적되는 문제
-
-**해결**:
 ```cpp
-void GameRoom::Update() {
-    // 던전이고 플레이어가 모두 나갔을 경우
-    if (IsDungeonInstance() && GetPlayerCount() == 0) {
-        GRoomManager.RequestRemoveDungeonInstance(_instanceId);
-    }
-}
-
-void GameRoomManager::Update() {
-    // 삭제 요청된 던전 제거
-    for (uint64 instanceId : _pendingRemoveDungeon) {
-        _dungeonInstances.erase(instanceId);
-    }
-    _pendingRemoveDungeon.clear();
-}
-```
-
-**학습 내용**:
-- 인스턴스 기반 콘텐츠의 라이프사이클 관리
-- 메모리 누수 디버깅 및 해결
-- RAII와 스마트 포인터의 중요성
-
-### 4. Protobuf 메시지 자동화
-
-**문제**: 패킷 핸들러 작성 시 반복 코드 과다
-
-**해결**:
-- Python 스크립트로 .proto 파일 파싱
-- PacketHandler 자동 생성 코드 작성
-- 메시지 ID 매핑 자동화
-
-**학습 내용**:
-- 코드 제너레이션을 통한 생산성 향상
-- 메타프로그래밍의 실용적 활용
-- 빌드 파이프라인 자동화
-
----
-
-## 빌드 및 실행
-
-### 요구사항
-- **Visual Studio 2022** (Platform Toolset v143)
-- **Windows 10 SDK**
-- **Protobuf 3.21.12** (포함됨)
-
-### 빌드 방법
-
-1. **솔루션 열기**
-   ```
-   Zelda-Winapi/Zelda-Winapi.sln
-   ```
-
-2. **빌드 순서**
-   ```
-   1) ServerCore (Static Library)
-   2) Server (Application)
-   3) Client (Application)
-   4) DummyClient (Optional)
-   ```
-
-3. **실행**
-   - Server 먼저 실행
-   - Client 실행 (여러 개 동시 실행 가능)
-
-### 프로젝트 구조
-```
-Zelda-Winapi/
-├── Client/           # 게임 클라이언트
-├── Server/           # 게임 서버
-├── ServerCore/       # 네트워킹 라이브러리
-├── DummyClient/      # 테스트용 더미 클라이언트
-├── Common/           # Protobuf 정의 및 공유 코드
-├── Libraries/        # 외부 라이브러리 (Protobuf)
-└── Resources/        # 게임 리소스 (스프라이트, 사운드, 타일맵)
-```
-
----
-
-## 개발 환경
-
-- **IDE**: Visual Studio 2022
-- **언어**: C++17
-- **플랫폼**: Windows
-- **버전 관리**: Git
-
----
-
-## 데이터 기반 GameRoom 시스템
-
-최근 리팩토링을 통해 **데이터 기반 GameRoom 시스템**으로 전환하였습니다. 이를 통해 코드 수정 없이 새로운 룸 타입과 몬스터 스폰 설정을 추가할 수 있게 되었습니다.
-
-### 아키텍처 변경
-
-**Before (코드 기반)**:
-```cpp
-// 하드코딩된 로직 클래스
-unique_ptr<IRoomLogic> _logic;  // TownLogic / DungeonLogic
-
-// 스폰 위치 하드코딩
-Vec2Int anchorUR = { 30, 5 };
-Vec2Int anchorDR = { 30, 25 };
-Vec2Int anchorDL = { 5, 25 };
-```
-
-**After (데이터 기반)**:
-```cpp
-// CSV/JSON 데이터 로딩
-const RoomConfigData* _config;
-const RoomSpawnConfig* _spawnConfig;
-
-// 데이터 기반 초기화
-room->InitFromConfig("dungeon_snake");
-```
-
-### 데이터 파일 구조
-
-#### 1. RoomConfig.csv (간단한 룸 설정)
-```csv
-RoomId,RoomName,SkillEnabled,MonsterSpawnEnabled,RespawnTimeMs,TilemapPath,MaxPlayers,IsInstance
-town_1,Town Square,false,false,0,../Resources/Tilemap/Tilemap_01.txt,50,false
-dungeon_snake,Snake Dungeon,true,true,10000,../Resources/Tilemap/Tilemap_02.txt,4,true
-```
-
-#### 2. MonsterSpawn.json (복잡한 스폰 설정)
-```json
+// before
+bool Creature::OnDamaged(CreatureRef attacker, int32& outDamage, float damageMultiplier)
 {
-  "dungeon_snake": {
-    "spawns": [
-      {
-        "groupId": "entrance_right",
-        "anchor": [30, 5],
-        "offsets": [[0, 0], [1, 0], [0, 1]],
-        "monsters": [
-          {
-            "templateId": 1001,
-            "count": 3,
-            "level": 1,
-            "aggroRange": 8,
-            "leashRange": 10
-          }
-        ]
-      }
-    ]
-  }
+    ...
+
+    // 데미지 계산 로직
+    int32 baseDamage = attackerInfo.attack() - info.defence();
+    int32 damage = static_cast<int32>(baseDamage * damageMultiplier);
+    damage = max(1, damage);
+    int32 newHp = max(0, info.hp() - damage);
+    info.set_hp(newHp);
+    outDamage = damage;
+
+    return true;
 }
+
 ```
 
-#### 3. MonsterTemplate.csv (몬스터 스탯)
-```csv
-templateId,name,maxHp,attack,defence
-1001,Snake,30,5,1
-1002,Slime,50,6,1
-1001,Snake,30,5,1
-1004,Wolf,60,8,1
-```
-
-### 새로운 룸 추가 방법
-
-**기존 방식**: 새로운 Logic 클래스 작성 + 컴파일 필요
-
-**데이터 기반**: 데이터 파일만 수정
-```csv
-# RoomConfig.csv에 추가
-boss_dragon,Dragon Lair,true,true,60000,../Resources/Tilemap/Boss_01.txt,4,true
-```
-
-```json
-// MonsterSpawn.json에 추가
+```cpp
+// after
+bool Creature::OnDamaged(int32 damage)
 {
-  "boss_dragon": {
-    "spawns": [
-      {
-        "groupId": "boss",
-        "anchor": [20, 15],
-        "offsets": [[0, 0]],
-        "monsters": [{"templateId": 2001, "count": 1, "level": 10}]
-      }
-    ]
-  }
+    if (damage <= 0)
+        return false;
+
+    // 데미지 계산은 상위에서 처리
+    int32 newHp = max(0, info.hp() - damage);
+    info.set_hp(newHp);
+    return true;
 }
+
 ```
-
-### 핵심 클래스
-
-- **RoomDataManager**: 싱글톤 패턴으로 모든 룸 데이터 로딩 및 관리
-- **RoomConfigData**: 룸 기본 설정 (스킬 허용, 몬스터 스폰 여부 등)
-- **RoomSpawnConfig**: 몬스터 스폰 위치 및 개수
-- **MonsterTemplateData**: 몬스터 종류별 스탯
-
-### 장점
-
-1. **확장성**: 새로운 룸/던전 추가가 데이터만으로 가능
-2. **유지보수**: 스폰 위치/개수 변경 시 재컴파일 불필요
-3. **기획자 친화적**: CSV/JSON 파일로 쉽게 설정 변경 가능
-4. **일관성**: MonsterTemplate.csv와 통합하여 데이터 일관성 확보
-
 ---
 
-## 향후 계획
+## 프로젝트 구조 및 기술 스택
 
-- [ ] Client-side Prediction 구현
-- [ ] 몬스터 종류 및 스킬 다양화
-- [ ] 인벤토리 시스템
-- [ ] 플레이어 스탯/레벨링 시스템
-- [ ] 데이터베이스 연동 (플레이어 정보 저장)
-- [ ] 파티 시스템
-
+* **ServerCore**: IOCP 엔진, 세션/버퍼 관리 범용 라이브러리.
+* **Server**: 게임 로직, AI, DB(SQLite WAL) 연동 도메인.
+* **Client**: WinAPI 렌더링 및 동기화 레이어.
+* **DummyClient**: 부하 테스트용 봇 클라이언트.
+* **Tech**: C++20, Protocol Buffers, JSON/CSV.

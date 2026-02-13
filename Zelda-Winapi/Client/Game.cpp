@@ -66,12 +66,14 @@ void Game::Render ( )
 
 	GET_SINGLE ( SceneManager )->Render ( _hdcBack );
 
+	if(false )
 	{
 		POINT mousePos = GET_SINGLE ( InputManager )->GetMousePos ( );
 		wstring str = std::format ( L"Mouse({0}), ({1})" , mousePos.x , mousePos.y );
 		::TextOut ( _hdcBack , 20 , 10 , str.c_str ( ) , static_cast< int32 >( str.size ( ) ) );
 	}
 
+	if(false )
 	{
 		wstring str = std::format ( L"FPS({0}), DT({1} ms)" , fps , static_cast< int32 >( deltaTime * 1000 ) );
 		::TextOut ( _hdcBack , 650 , 10 , str.c_str ( ) , static_cast< int32 >( str.size ( ) ) );
