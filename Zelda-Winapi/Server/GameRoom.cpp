@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "GameRoom.h"
 #include "Creature.h"
 #include "Player.h"
@@ -11,6 +11,31 @@
 #include "RoomDataManager.h"
 #include "PartyManager.h"
 
+namespace
+{
+	const char* ToWeaponName(Protocol::WEAPON_TYPE type)
+	{
+		switch (type)
+		{
+		case Protocol::WEAPON_TYPE_SWORD: return "Sword";
+		case Protocol::WEAPON_TYPE_BOW: return "Bow";
+		case Protocol::WEAPON_TYPE_STAFF: return "Staff";
+		default: return "Unknown";
+		}
+	}
+
+	const char* ToDirName(Protocol::DIR_TYPE dir)
+	{
+		switch (dir)
+		{
+		case Protocol::DIR_TYPE_UP: return "Up";
+		case Protocol::DIR_TYPE_DOWN: return "Down";
+		case Protocol::DIR_TYPE_LEFT: return "Left";
+		case Protocol::DIR_TYPE_RIGHT: return "Right";
+		default: return "Unknown";
+		}
+	}
+}
 GameRoom::GameRoom()
 {
 }
@@ -31,10 +56,10 @@ void GameRoom::InitFromConfig(const string& roomId)
 		return;
 	}
 
-	// 타일맵 로드
+	// ??쇰㏊ 濡쒕뱶
 	LoadMap(_config->tilemapPath.c_str());
 
-	// 몬스터 스폰 (설정에 따라)
+	// 紐ъ뒪???ㅽ룿 (?ㅼ젙???곕씪)
 	if (_config->monsterSpawnEnabled && _spawnConfig)
 	{
 		SpawnMonstersFromData();
@@ -46,7 +71,7 @@ void GameRoom::InitFromConfig(const string& roomId)
 
 void GameRoom::Init()
 {
-	// 레거시 로직 제거됨
+	// ?덇굅??濡쒖쭅 ?쒓굅??
 }
 
 void GameRoom::Update(uint64 now)
@@ -76,7 +101,7 @@ void GameRoom::Update(uint64 now)
 		steps++;
 	}
 
-	// 너무 밀렸으면 리셋
+	// ?덈Т 諛?몄쑝硫?由ъ뀑
 	if (now >= _nextTick)
 		_nextTick = now + kTickMs;
 }
@@ -100,7 +125,7 @@ void GameRoom::Step(uint64 now)
 		obj->Update();
 	}
 
-	// 데이터 기반 리스폰 처리
+	// ?곗씠??湲곕컲 由ъ뒪??泥섎━
 	if (ShouldSpawnMonsters())
 	{
 		ProcessRespawnFromData();
@@ -119,7 +144,7 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 	session->player = player;
 	player->session = session;
 
-	// 스폰 위치로 리셋
+	// ?ㅽ룿 ?꾩튂濡?由ъ뀑
 	player->info.set_posx(5);
 	player->info.set_posy(5);
 	player->info.set_state(IDLE);
@@ -159,7 +184,7 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 
 	AddObject(player);
 
-	// 파티 소속이면 같은 방의 모든 파티원에게 파티 정보 갱신
+	// ?뚰떚 ?뚯냽?대㈃ 媛숈? 諛⑹쓽 紐⑤뱺 ?뚰떚?먯뿉寃??뚰떚 ?뺣낫 媛깆떊
 	uint64 playerId = player->info.objectid();
 	uint64 partyId = GPartyManager.GetPartyIdByPlayer(playerId);
 	if (partyId != 0)
@@ -185,7 +210,7 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 				}
 				else
 				{
-					// 이름 + (Away) 형태
+					// ?대쫫 + (Away) ?뺥깭
 					auto nameIt = party->memberNames.find(memberId);
 					string name = (nameIt != party->memberNames.end()) ? nameIt->second : "Unknown";
 					m->set_name(name + "(Away)");
@@ -193,7 +218,7 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 			}
 			SendBufferRef sendBuffer = ServerPacketHandler::MakeSendBuffer(partyPkt, S_PartyUpdate);
 
-			// 이 방에 있는 모든 파티원에게 전송
+			// ??諛⑹뿉 ?덈뒗 紐⑤뱺 ?뚰떚?먯뿉寃??꾩넚
 			for (uint64 memberId : party->memberIds)
 			{
 				auto it = _players.find(memberId);
@@ -214,7 +239,7 @@ void GameRoom::LeaveRoom(GameSessionRef session)
 	uint64 id = session->player.lock()->info.objectid();
 	RemoveObject(id);
 
-	// 빈 던전 인스턴스 자동 제거
+	// 鍮??섏쟾 ?몄뒪?댁뒪 ?먮룞 ?쒓굅
 	if (IsDungeonInstance() && GetPlayerCount() == 0)
 	{
 		uint64 instanceId = GetInstanceId();
@@ -291,7 +316,7 @@ void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt
 	player->info.set_posx(nextPos.x);
 	player->info.set_posy(nextPos.y);
 
-	// TEMP : 고정 이동 시간 
+	// TEMP : 怨좎젙 ?대룞 ?쒓컙 
 	constexpr uint64 kMoveDurationMs = 75;
 	uint64 now = GetTickCount64();
 	player->StartMove(now, kMoveDurationMs);
@@ -311,7 +336,7 @@ void GameRoom::Handle_C_Turn(GameSessionRef session, const Protocol::C_Turn& pkt
 	if (!Protocol::DIR_TYPE_IsValid(static_cast<int>(dir)))
 		return;
 
-	// 이미 같은 방향
+	// ?대? 媛숈? 諛⑺뼢
 	if (player->info.dir() == dir)
 		return;
 
@@ -332,16 +357,24 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack&
 	if (!attacker)
 		return;
 
-	// 스킬 사용 가능 여부 체크 (타운에서는 금지)
-	if (!CanUseSkill())
-	{
-		cout << "[GameRoom] Attack blocked in room: " << _roomIdStr << " (SkillEnabled=false)" << endl;
-		return;
-	}
+	//cout << "[CombatAuth][Recv] room=" << _roomIdStr
+	//	<< " attacker=" << attacker->info.objectid()
+	//	<< " weapon=" << ToWeaponName(pkt.weapontype())
+	//	<< " dir=" << ToDirName(pkt.dir())
+	//	<< endl;
+
+	//if (!CanUseSkill())
+	//{
+	//	cout << "[CombatAuth][Reject] room=" << _roomIdStr
+	//		<< " attacker=" << attacker->info.objectid()
+	//		<< " reason=SkillDisabledInThisRoom" << endl;
+	//	return;
+	//}
+
+	//cout << "[CombatAuth][Accept] attacker=" << attacker->info.objectid()
+	//	<< " server_authoritative=true" << endl;
 
 	BroadcastAttack(attacker, pkt);
-
-	Protocol::WEAPON_TYPE weaponType = pkt.weapontype();
 
 	switch (pkt.weapontype())
 	{
@@ -391,7 +424,7 @@ void GameRoom::AddObject(GameObjectRef gameObject)
 
 	gameObject->room = GetRoomRef();
 
-	// �ű� ������Ʈ ���� ����
+	// 占신깍옙 占쏙옙占쏙옙占쏙옙트 占쏙옙占쏙옙 占쏙옙占쏙옙
 	{
 		Protocol::S_AddObject pkt;
 
@@ -409,7 +442,7 @@ void GameRoom::RemoveObject(uint64 id)
 	if (gameObject == nullptr)
 		return;
 
-	// 데이터 기반 몬스터 리스폰 예약
+	// ?곗씠??湲곕컲 紐ъ뒪??由ъ뒪???덉빟
 	if (gameObject->info.objecttype() == Protocol::OBJECT_TYPE_MONSTER && ShouldSpawnMonsters())
 	{
 		MonsterRef monster = static_pointer_cast<Monster>(gameObject);
@@ -418,7 +451,7 @@ void GameRoom::RemoveObject(uint64 id)
 		req.when = GetTickCount64() + GetRespawnTime();
 		req.homePos = monster->GetHomePos();
 		req.templateId = monster->GetTemplateId();
-		req.level = 1; // TODO: 레벨 시스템 구현 시 변경
+		req.level = 1; // TODO: ?덈꺼 ?쒖뒪??援ы쁽 ??蹂寃?
 		req.aggroRange = monster->GetAggroRange();
 		req.leashRange = monster->GetLeashRange();
 
@@ -442,7 +475,7 @@ void GameRoom::RemoveObject(uint64 id)
 
 	gameObject->room = nullptr;
 
-	// ������Ʈ ���� ����
+	// 占쏙옙占쏙옙占쏙옙트 占쏙옙占쏙옙 占쏙옙占쏙옙
 	{
 		Protocol::S_RemoveObject pkt;
 		pkt.add_ids(id);
@@ -493,7 +526,7 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 	map<Vec2Int, int32> best;
 	map<Vec2Int, Vec2Int> parent;
 
-	// �ʱⰪ
+	// 占십기값
 	{
 		int32 cost = abs(dest.y - src.y) + abs(dest.x - src.x);
 
@@ -514,22 +547,22 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 
 	while (pq.empty() == false)
 	{
-		// ���� ���� �ĺ��� ã�´�
+		// 占쏙옙占쏙옙 占쏙옙占쏙옙 占식븝옙占쏙옙 찾占승댐옙
 		PQNode node = pq.top();
 		pq.pop();
 
-		// �� ª�� ��θ� �ڴʰ� ã�Ҵٸ� ��ŵ
+		// 占쏙옙 짧占쏙옙 占쏙옙罐占?占쌘늦곤옙 찾占쌀다몌옙 占쏙옙킵
 		if (best[node.pos] < node.cost)
 			continue;
 
-		// �������� ���������� �ٷ� ����
+		// 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙 占쌕뤄옙 占쏙옙占쏙옙
 		if (node.pos == dest)
 		{
 			found = true;
 			break;
 		}
 
-		// �湮
+		// 占썸문
 		for (int32 dir = 0; dir < 4; dir++)
 		{
 			Vec2Int nextPos = node.pos + front[dir];
@@ -545,12 +578,12 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 			int32 bestValue = best[nextPos];
 			if (bestValue != 0)
 			{
-				// �ٸ� ��ο��� �� ���� ���� ã������ ��ŵ
+				// 占쌕몌옙 占쏙옙恝占쏙옙占?占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙 찾占쏙옙占쏙옙占쏙옙 占쏙옙킵
 				if (bestValue <= cost)
 					continue;
 			}
 
-			// ���� ����
+			// 占쏙옙占쏙옙 占쏙옙占쏙옙
 			best[nextPos] = cost;
 			pq.push(PQNode(cost, nextPos));
 			parent[nextPos] = node.pos;
@@ -566,7 +599,7 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 			Vec2Int pos = item.first;
 			int32 score = item.second;
 
-			// �����̶��, ���� ��ġ���� ���� �� �̵��ϴ� ������
+			// 占쏙옙占쏙옙占싱띰옙占? 占쏙옙占쏙옙 占쏙옙치占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙 占싱듸옙占싹댐옙 占쏙옙占쏙옙占쏙옙
 			if (bestScore == score)
 			{
 				int32 dist1 = abs(dest.x - src.x) + abs(dest.y - src.y);
@@ -589,7 +622,7 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 	{
 		path.push_back(pos);
 
-		// ������
+		// 占쏙옙占쏙옙占쏙옙
 		if (pos == parent[pos])
 			break;
 
@@ -618,7 +651,7 @@ Vec2Int GameRoom::GetRandomEmptyCellPos()
 
 	Vec2Int size = _tilemap.GetMapSize();
 
-	// �� �� �õ�?
+	// 占쏙옙 占쏙옙 占시듸옙?
 	while (true)
 	{
 		int32 x = rand() % size.x;
@@ -697,10 +730,22 @@ void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	CreatureRef target = std::dynamic_pointer_cast<Creature>(obj);
 
 	if (!target)
+	{
+		/*cout << "[CombatAuth][Result] weapon=Sword attacker=" << attacker->info.objectid()
+			<< " result=Miss reason=NoTargetAtFrontCell"
+			<< " front=(" << frontPos.x << "," << frontPos.y << ")" << endl;*/
 		return;
+	}
 
+	int32 beforeHp = target->info.hp();
 	int32 damage = max(1, attacker->info.attack() - target->info.defence());
 	target->OnDamaged(damage);
+	int32 afterHp = target->info.hp();
+
+	/*cout << "[CombatAuth][Result] weapon=Sword attacker=" << attacker->info.objectid()
+		<< " target=" << target->info.objectid()
+		<< " damage=" << damage
+		<< " hp=" << beforeHp << "->" << afterHp << endl;*/
 
 	BroadcastDamaged(attacker, target, damage);
 
@@ -728,6 +773,11 @@ void GameRoom::Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pk
 	arrow->SetOwner(attacker->info.objectid());
 
 	AddObject(arrow);
+
+	/*cout << "[CombatAuth][Result] weapon=Bow attacker=" << attacker->info.objectid()
+		<< " result=SpawnProjectile projectile=" << arrow->info.objectid()
+		<< " pos=(" << start.x << "," << start.y << ")"
+		<< " dir=" << ToDirName(pkt.dir()) << endl;*/
 }
 
 void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
@@ -759,6 +809,8 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	Vec2Int center = pos + forward;
 
 	std::vector<std::pair<uint64, MonsterRef>> deadTargets;
+	int32 hitCount = 0;
+	int32 totalDamage = 0;
 
 	for (int32 dy = -1; dy <= 1; dy++)
 	{
@@ -770,8 +822,17 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 			if (!target)
 				continue;
 
+			int32 beforeHp = target->info.hp();
 			int32 damage = max(1, static_cast<int32>((attacker->info.attack() - target->info.defence()) * 0.5f));
 			target->OnDamaged(damage);
+			int32 afterHp = target->info.hp();
+			hitCount++;
+			totalDamage += damage;
+
+			/*cout << "[CombatAuth][Result] weapon=Staff attacker=" << attacker->info.objectid()
+				<< " target=" << target->info.objectid()
+				<< " damage=" << damage
+				<< " hp=" << beforeHp << "->" << afterHp << endl;*/
 
 			BroadcastDamaged(attacker, target, damage);
 
@@ -785,6 +846,18 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 		DistributeExp(attacker, monster);
 		ProcessMonsterDrop(attacker, monster);
 		RemoveObject(id);
+	}
+
+	if (hitCount == 0)
+	{
+		/*cout << "[CombatAuth][Result] weapon=Staff attacker=" << attacker->info.objectid()
+			<< " result=Miss areaCenter=(" << center.x << "," << center.y << ")" << endl;*/
+	}
+	else
+	{
+		/*cout << "[CombatAuth][Result] weapon=Staff attacker=" << attacker->info.objectid()
+			<< " result=Hit targets=" << hitCount
+			<< " totalDamage=" << totalDamage << endl;*/
 	}
 }
 
@@ -812,29 +885,29 @@ void GameRoom::BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 da
 	Broadcast(sendBuffer);
 }
 
-// 데이터 기반 룸 설정 조회
+// ?곗씠??湲곕컲 猷??ㅼ젙 議고쉶
 bool GameRoom::CanUseSkill() const
 {
 	if (_config)
 		return _config->skillEnabled;
-	return true; // 기본값: 허용
+	return true; // 湲곕낯媛? ?덉슜
 }
 
 bool GameRoom::ShouldSpawnMonsters() const
 {
 	if (_config)
 		return _config->monsterSpawnEnabled;
-	return false; // 기본값: 스폰 안함
+	return false; // 湲곕낯媛? ?ㅽ룿 ?덊븿
 }
 
 uint32 GameRoom::GetRespawnTime() const
 {
 	if (_config)
 		return _config->respawnTimeMs;
-	return 10000; // 기본값: 10초
+	return 10000; // 湲곕낯媛? 10珥?
 }
 
-// 데이터 기반 몬스터 스폰
+// ?곗씠??湲곕컲 紐ъ뒪???ㅽ룿
 void GameRoom::SpawnMonstersFromData()
 {
 	if (!_spawnConfig)
@@ -860,7 +933,7 @@ void GameRoom::SpawnMonstersFromData()
 			cout << "[GameRoom] Monster templateId=" << monsterInfo.templateId
 				<< ", count=" << monsterInfo.count << endl;
 
-			// MonsterTemplate에서 스탯 로드
+			// MonsterTemplate?먯꽌 ?ㅽ꺈 濡쒕뱶
 			const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(monsterInfo.templateId);
 			if (!templateData)
 			{
@@ -889,7 +962,7 @@ void GameRoom::SpawnMonstersFromData()
 				m->SetLeashRange(monsterInfo.leashRange);
 				m->SetTemplateId(monsterInfo.templateId);
 
-				// MonsterTemplate 스탯 적용
+				// MonsterTemplate ?ㅽ꺈 ?곸슜
 				m->info.set_name(templateData->name);
 				m->info.set_maxhp(templateData->maxHp);
 				m->info.set_hp(templateData->maxHp);
@@ -904,7 +977,7 @@ void GameRoom::SpawnMonstersFromData()
 	cout << "[GameRoom] Spawned " << _monsters.size() << " monsters from data" << endl;
 }
 
-// 데이터 기반 리스폰 처리
+// ?곗씠??湲곕컲 由ъ뒪??泥섎━
 void GameRoom::ReserveMonsterRespawn(const RespawnRequest& req)
 {
 	_respawnQueue.push_back(req);
@@ -927,7 +1000,7 @@ void GameRoom::ProcessRespawnFromData()
 		if (!CanGo(pos))
 			pos = GetRandomEmptyCellPos();
 
-		// MonsterTemplate에서 스탯 로드
+		// MonsterTemplate?먯꽌 ?ㅽ꺈 濡쒕뱶
 		const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(it->templateId);
 
 		MonsterRef m = GameObject::CreateMonster();
@@ -937,7 +1010,7 @@ void GameRoom::ProcessRespawnFromData()
 		m->SetLeashRange(it->leashRange);
 		m->SetTemplateId(it->templateId);
 
-		// MonsterTemplate 스탯 적용
+		// MonsterTemplate ?ㅽ꺈 ?곸슜
 		if (templateData)
 		{
 			m->info.set_name(templateData->name);
@@ -975,7 +1048,7 @@ void GameRoom::DistributeExp(PlayerRef killer, MonsterRef monster)
 		return;
 	}
 
-	// 파티: 같은 방에 있는 파티원에게 균등 분배
+	// ?뚰떚: 媛숈? 諛⑹뿉 ?덈뒗 ?뚰떚?먯뿉寃?洹좊벑 遺꾨같
 	Party* party = GPartyManager.GetParty(partyId);
 	if (!party)
 	{
@@ -1016,3 +1089,4 @@ void GameRoom::ProcessMonsterDrop(PlayerRef killer, MonsterRef monster)
 		}
 	}
 }
+

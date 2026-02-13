@@ -2,17 +2,45 @@
 #include "RoomDataManager.h"
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+#include <array>
+
+namespace
+{
+	namespace fs = std::filesystem;
+
+	string ResolveExistingPath(const string& relativePath)
+	{
+		// Support both VS run (cwd=Server) and direct exe run (cwd=Binaries/x64/Server).
+		const array<string, 4> candidates =
+		{
+			relativePath,
+			"../" + relativePath,
+			"../../" + relativePath,
+			"../../../" + relativePath
+		};
+
+		for (const string& candidate : candidates)
+		{
+			std::error_code ec;
+			if (fs::exists(fs::path(candidate), ec))
+				return candidate;
+		}
+
+		return relativePath;
+	}
+}
 
 bool RoomDataManager::LoadAllData()
 {
 	bool success = true;
 
-	success &= LoadRoomConfigs("../Datasheets/RoomConfig.csv");
-	success &= LoadMonsterTemplates("../Datasheets/MonsterTemplate.csv");
-	success &= LoadMonsterSpawns("../Datasheets/MonsterSpawn.json");
-	success &= LoadLevelData("../Datasheets/LevelData.csv");
-	success &= LoadItemTemplates("../Datasheets/ItemTemplate.csv");
-	success &= LoadMonsterDrops("../Datasheets/MonsterDrop.csv");
+	success &= LoadRoomConfigs(ResolveExistingPath("../Datasheets/RoomConfig.csv"));
+	success &= LoadMonsterTemplates(ResolveExistingPath("../Datasheets/MonsterTemplate.csv"));
+	success &= LoadMonsterSpawns(ResolveExistingPath("../Datasheets/MonsterSpawn.json"));
+	success &= LoadLevelData(ResolveExistingPath("../Datasheets/LevelData.csv"));
+	success &= LoadItemTemplates(ResolveExistingPath("../Datasheets/ItemTemplate.csv"));
+	success &= LoadMonsterDrops(ResolveExistingPath("../Datasheets/MonsterDrop.csv"));
 
 	if (success)
 	{
@@ -70,9 +98,9 @@ bool RoomDataManager::LoadRoomConfigs(const string& csvPath)
 		getline(ss, token, ',');
 		data.respawnTimeMs = static_cast<uint32>(stoi(token));
 
-		// TilemapPath
+		// TilemapPath (support multiple working directories)
 		getline(ss, token, ',');
-		data.tilemapPath = StringToWString(token);
+		data.tilemapPath = StringToWString(ResolveExistingPath(token));
 
 		// MaxPlayers
 		getline(ss, token, ',');

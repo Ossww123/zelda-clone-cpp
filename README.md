@@ -9,7 +9,7 @@
 ---
 
 ## 📺 프로젝트 시연 영상
-(추가 예정)
+[![GamePlay Video](https://img.youtube.com/vi/wyDDfSWafTo/0.jpg)](https://youtu.be/wyDDfSWafTo)
 ###### *위 이미지를 클릭하면 유튜브 시연 영상으로 이동합니다.*
 
 ---
