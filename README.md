@@ -144,12 +144,3 @@ bool Creature::OnDamaged(int32 damage)
 }
 
 ```
----
-
-## 프로젝트 구조 및 기술 스택
-
-* **ServerCore**: IOCP 엔진, 세션/버퍼 관리 범용 라이브러리.
-* **Server**: 게임 로직, AI, DB(SQLite WAL) 연동 도메인.
-* **Client**: WinAPI 렌더링 및 동기화 레이어.
-* **DummyClient**: 부하 테스트용 봇 클라이언트.
-* **Tech**: C++20, Protocol Buffers, JSON/CSV.
