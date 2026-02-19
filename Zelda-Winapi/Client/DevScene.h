@@ -8,6 +8,8 @@ class UI;
 class SpriteActor;
 class Sprite;
 class InventoryPanel;
+class PartyPanel;
+class PartyInvitePanel;
 
 class DevScene : public Scene
 {
@@ -82,8 +84,6 @@ private:
 	// 게임 플레이
 	void RenderHUD ( HDC hdc );
 	void HandlePartyInput ( );
-	void RenderPartyHUD ( HDC hdc );
-	void RenderPartyInvite ( HDC hdc );
 
 private:
 	void CreateMapButtons ( );
@@ -97,6 +97,8 @@ private:
 	static const int32 MAX_USERNAME_LEN = 12;
 
 	InventoryPanel* _inventoryPanel = nullptr;
+	PartyPanel* _partyPanel = nullptr;
+	PartyInvitePanel* _partyInvitePanel = nullptr;
 
 	class TilemapActor* _tilemapActor = nullptr;
 	SpriteActor* _background = nullptr;

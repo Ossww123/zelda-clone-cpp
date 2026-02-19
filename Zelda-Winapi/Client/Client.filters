@@ -161,6 +161,12 @@
     <ClInclude Include="Panel.h">
       <Filter>Source Files\06. UI</Filter>
     </ClInclude>
+    <ClInclude Include="PartyPanel.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
+    <ClInclude Include="PartyInvitePanel.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
     <ClInclude Include="InventoryPanel.h">
       <Filter>Source Files\06. UI</Filter>
     </ClInclude>
@@ -300,6 +306,12 @@
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
     <ClCompile Include="Panel.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PartyPanel.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PartyInvitePanel.cpp">
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
     <ClCompile Include="InventoryPanel.cpp">

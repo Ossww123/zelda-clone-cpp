@@ -10,9 +10,6 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
-    <ClCompile Include="InventoryPanel.cpp">
-      <Filter>Source Files\06. UI</Filter>
-    </ClCompile>
     <ClCompile Include="NetworkManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     <ClCompile Include="Button.cpp">
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
-    <ClCompile Include="Panel.cpp">
-      <Filter>Source Files\06. UI</Filter>
-    </ClCompile>
     <ClCompile Include="UI.cpp">
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
@@ -133,6 +127,18 @@
     <ClCompile Include="ExplodeEffect.cpp">
       <Filter>Source Files\03. Objects\Game\Effect</Filter>
     </ClCompile>
+    <ClCompile Include="PartyInvitePanel.cpp">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="PartyPanel.cpp">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Panel.cpp">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="InventoryPanel.cpp">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -143,9 +149,6 @@
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Source Files\01. Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="InventoryPanel.h">
-      <Filter>Source Files\06. UI</Filter>
     </ClInclude>
     <ClInclude Include="NetworkManager.h">
       <Filter>Source Files\01. Manager</Filter>
@@ -231,9 +234,6 @@
     <ClInclude Include="Button.h">
       <Filter>Source Files\06. UI</Filter>
     </ClInclude>
-    <ClInclude Include="Panel.h">
-      <Filter>Source Files\06. UI</Filter>
-    </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>Source Files\06. UI</Filter>
     </ClInclude>
@@ -287,6 +287,18 @@
     </ClInclude>
     <ClInclude Include="ExplodeEffect.h">
       <Filter>Source Files\03. Objects\Game\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="PartyInvitePanel.h">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="PartyPanel.h">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Panel.h">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="InventoryPanel.h">
+      <Filter>Source Files\06. UI\Panel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -363,6 +375,9 @@
     </Filter>
     <Filter Include="Source Files\99. Headers\Default">
       <UniqueIdentifier>{4c7ff09a-417f-4ceb-89c9-2287f97ddf96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\06. UI\Panel">
+      <UniqueIdentifier>{b5905cff-c97d-4e85-b3bd-8b3aac337d2e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

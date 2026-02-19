@@ -25,6 +25,8 @@
 #include "NetworkManager.h"
 #include "ClientPacketHandler.h"
 #include "InventoryPanel.h"
+#include "PartyPanel.h"
+#include "PartyInvitePanel.h"
 #include "DevSceneResourceLoader.h"
 
 DevScene::DevScene ( )
@@ -34,6 +36,8 @@ DevScene::DevScene ( )
 DevScene::~DevScene ( )
 {
 	SAFE_DELETE ( _inventoryPanel );
+	SAFE_DELETE ( _partyPanel );
+	SAFE_DELETE ( _partyInvitePanel );
 }
 
 void DevScene::Init ( )
@@ -53,6 +57,8 @@ void DevScene::Init ( )
 	LoadSceneSounds ( );
 
 	_inventoryPanel = new InventoryPanel ( );
+	_partyPanel = new PartyPanel ( );
+	_partyInvitePanel = new PartyInvitePanel ( );
 
 	CreateMapButtons ( );
 	Super::Init ( );
@@ -78,6 +84,10 @@ void DevScene::Update ( )
 	}
 	if ( _inventoryPanel )
 		_inventoryPanel->Tick ( );
+	if ( _partyPanel )
+		_partyPanel->Tick ( );
+	if ( _partyInvitePanel )
+		_partyInvitePanel->Tick ( );
 	HandlePartyInput ( );
 }
 
@@ -91,11 +101,13 @@ void DevScene::Render ( HDC hdc )
 
 	Super::Render ( hdc );
 	RenderHUD ( hdc );
-	RenderPartyHUD ( hdc );
-	RenderPartyInvite ( hdc );
 
 	if ( _inventoryPanel )
 		_inventoryPanel->Render ( hdc );
+	if ( _partyPanel )
+		_partyPanel->Render ( hdc );
+	if ( _partyInvitePanel )
+		_partyInvitePanel->Render ( hdc );
 }
 
 void DevScene::AddActor ( Actor* actor )
@@ -590,6 +602,8 @@ void DevScene::HandlePartyInput ( )
 		// 인벤토리 드래그 중이면 무시
 		if ( _inventoryPanel && _inventoryPanel->IsVisible ( ) && _inventoryPanel->IsDragging ( ) )
 			return;
+		if ( _partyPanel && _partyPanel->IsVisible ( ) && _partyPanel->IsDragging ( ) )
+			return;
 
 		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
 		Vec2 cameraPos = GET_SINGLE ( SceneManager )->GetCameraPos ( );
@@ -624,126 +638,6 @@ void DevScene::HandlePartyInput ( )
 			}
 		}
 	}
-}
-
-void DevScene::RenderPartyHUD ( HDC hdc )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	if ( myPlayer->_partyMembers.empty ( ) )
-		return;
-
-	const int32 startX = 36;
-	const int32 startY = 100;
-	const int32 rowH = 24;
-	const int32 barW = 80;
-	const int32 barH = 8;
-
-	Sprite* statusSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyStatus" );
-	if ( statusSprite )
-	{
-		const int32 w = statusSprite->GetSize ( ).x;
-		const int32 h = statusSprite->GetSize ( ).y;
-		::TransparentBlt ( hdc ,
-			startX - 4 , startY - 4 ,
-			w , h ,
-			statusSprite->GetDC ( ) ,
-			statusSprite->GetPos ( ).x , statusSprite->GetPos ( ).y ,
-			w , h ,
-			statusSprite->GetTransparent ( ) );
-	}
-
-	SetBkMode ( hdc , TRANSPARENT );
-	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
-
-	// 타이틀
-	TextOut ( hdc , startX , startY , L"Party" , 5 );
-
-	for ( int32 i = 0; i < ( int32 ) myPlayer->_partyMembers.size ( ); i++ )
-	{
-		const auto& member = myPlayer->_partyMembers[ i ];
-		int32 y = startY + 18 + i * rowH;
-
-		// 리더 표시 + 이름
-		wstring display;
-		if ( member.isLeader )
-			display = L"* " + member.name;
-		else
-			display = L"  " + member.name;
-
-		TextOut ( hdc , startX , y , display.c_str ( ) , ( int32 ) display.length ( ) );
-
-		// HP 바
-		int32 barX = startX + 100;
-		int32 barY = y + 2;
-
-		// 배경 (어두운 빨강)
-		HBRUSH darkBrush = CreateSolidBrush ( RGB ( 80 , 0 , 0 ) );
-		RECT barBg = { barX , barY , barX + barW , barY + barH };
-		FillRect ( hdc , &barBg , darkBrush );
-		DeleteObject ( darkBrush );
-
-		// HP 바 (초록)
-		if ( member.maxHp > 0 && member.hp > 0 )
-		{
-			int32 fillW = barW * member.hp / member.maxHp;
-			if ( fillW > 0 )
-			{
-				HBRUSH hpBrush = CreateSolidBrush ( RGB ( 0 , 200 , 0 ) );
-				RECT hpRect = { barX , barY , barX + fillW , barY + barH };
-				FillRect ( hdc , &hpRect , hpBrush );
-				DeleteObject ( hpBrush );
-			}
-		}
-	}
-}
-
-void DevScene::RenderPartyInvite ( HDC hdc )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	if ( myPlayer->_pendingInviteFrom == 0 )
-		return;
-
-	Sprite* inviteSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyInvite" );
-	int32 popW = 300;
-	int32 popH = 80;
-	if ( inviteSprite )
-	{
-		popW = inviteSprite->GetSize ( ).x;
-		popH = inviteSprite->GetSize ( ).y;
-	}
-	int32 popX = ( GWinSizeX - popW ) / 2;
-	int32 popY = ( GWinSizeY - popH ) / 2 - 50;
-
-	if ( inviteSprite )
-	{
-		::TransparentBlt ( hdc ,
-			popX , popY ,
-			popW , popH ,
-			inviteSprite->GetDC ( ) ,
-			inviteSprite->GetPos ( ).x , inviteSprite->GetPos ( ).y ,
-			popW , popH ,
-			inviteSprite->GetTransparent ( ) );
-	}
-
-	SetBkMode ( hdc , TRANSPARENT );
-	SetTextColor ( hdc , RGB ( 50 , 50 , 50 ) );
-
-	// 메시지
-	wstring msg = myPlayer->_pendingInviterName + L" invited you to party";
-	RECT textRect = { popX + 10 , popY + 15 , popX + popW - 10 , popY + 40 };
-	DrawText ( hdc , msg.c_str ( ) , ( int32 ) msg.length ( ) , &textRect , DT_CENTER );
-
-	// Y/N 안내
-	wstring hint = L"[Y] Accept    [N] Decline";
-	RECT hintRect = { popX + 10 , popY + 45 , popX + popW - 10 , popY + 70 };
-	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
-	DrawText ( hdc , hint.c_str ( ) , ( int32 ) hint.length ( ) , &hintRect , DT_CENTER );
 }
 
 // Load functions
