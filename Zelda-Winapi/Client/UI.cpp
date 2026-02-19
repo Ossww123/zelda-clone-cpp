@@ -17,10 +17,14 @@ void UI::BeginPlay ( )
 
 void UI::Tick ( )
 {
+	if ( _visible == false || _enabled == false )
+		return;
 }
 
 void UI::Render ( HDC hdc )
 {
+	if ( _visible == false )
+		return;
 }
 
 RECT UI::GetRect ( )
@@ -38,6 +42,9 @@ RECT UI::GetRect ( )
 
 bool UI::IsMouseInRect ( )
 {
+	if ( _visible == false )
+		return false;
+
 	RECT rect = GetRect ( );
 
 	POINT mousePos = GET_SINGLE ( InputManager )->GetMousePos ( );

@@ -10,6 +10,9 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
+    <ClCompile Include="InventoryPanel.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
     <ClCompile Include="NetworkManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
@@ -137,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Source Files\01. Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="InventoryPanel.h">
+      <Filter>Source Files\06. UI</Filter>
     </ClInclude>
     <ClInclude Include="NetworkManager.h">
       <Filter>Source Files\01. Manager</Filter>

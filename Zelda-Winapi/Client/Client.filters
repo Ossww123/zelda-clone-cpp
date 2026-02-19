@@ -158,6 +158,9 @@
     <ClInclude Include="Panel.h">
       <Filter>Source Files\06. UI</Filter>
     </ClInclude>
+    <ClInclude Include="InventoryPanel.h">
+      <Filter>Source Files\06. UI</Filter>
+    </ClInclude>
     <ClInclude Include="Flipbook.h">
       <Filter>Source Files\04. Resources\Paper2D</Filter>
     </ClInclude>
@@ -291,6 +294,9 @@
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
     <ClCompile Include="Panel.cpp">
+      <Filter>Source Files\06. UI</Filter>
+    </ClCompile>
+    <ClCompile Include="InventoryPanel.cpp">
       <Filter>Source Files\06. UI</Filter>
     </ClCompile>
     <ClCompile Include="Flipbook.cpp">

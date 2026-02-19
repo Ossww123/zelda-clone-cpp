@@ -1,4 +1,4 @@
-#include "pch.h"
+Ôªø#include "pch.h"
 #include "DevScene.h"
 
 #include "Utils.h"
@@ -24,6 +24,275 @@
 #include "MyPlayer.h"
 #include "NetworkManager.h"
 #include "ClientPacketHandler.h"
+#include "InventoryPanel.h"
+#include <fstream>
+#include <sstream>
+#include <filesystem>
+#include <array>
+
+// JSON ÌååÏã± Ïú†Ìã∏ Ìï®ÏàòÎì§
+namespace
+{
+	string ResolveExistingPath ( const string& relativePath )
+	{
+		const array<string , 4> candidates =
+		{
+			relativePath ,
+			"../" + relativePath ,
+			"../../" + relativePath ,
+			"../../../" + relativePath
+		};
+
+		for ( const string& candidate : candidates )
+		{
+			std::error_code ec;
+			if ( std::filesystem::exists ( std::filesystem::path ( candidate ) , ec ) )
+				return candidate;
+		}
+
+		return relativePath;
+	}
+
+	string ReadAllText ( const string& filePath )
+	{
+		ifstream ifs ( filePath );
+		if ( !ifs.is_open ( ) )
+			return {};
+
+		ostringstream oss;
+		oss << ifs.rdbuf ( );
+		return oss.str ( );
+	}
+
+	wstring ToWideAscii ( const string& value )
+	{
+		return wstring ( value.begin ( ) , value.end ( ) );
+	}
+
+	size_t FindKey ( const string& json , const string& key , size_t startPos )
+	{
+		string searchKey = "\"" + key + "\"";
+		return json.find ( searchKey , startPos );
+	}
+
+	string GetStringValue ( const string& json , const string& key , size_t startPos )
+	{
+		size_t keyPos = FindKey ( json , key , startPos );
+		if ( keyPos == string::npos )
+			return "";
+
+		size_t colonPos = json.find ( ":" , keyPos );
+		if ( colonPos == string::npos )
+			return "";
+
+		size_t quoteStart = json.find ( "\"" , colonPos );
+		if ( quoteStart == string::npos )
+			return "";
+
+		size_t quoteEnd = json.find ( "\"" , quoteStart + 1 );
+		if ( quoteEnd == string::npos )
+			return "";
+
+		return json.substr ( quoteStart + 1 , quoteEnd - quoteStart - 1 );
+	}
+
+	int32 GetIntValue ( const string& json , const string& key , size_t startPos )
+	{
+		size_t keyPos = FindKey ( json , key , startPos );
+		if ( keyPos == string::npos )
+			return 0;
+
+		size_t colonPos = json.find ( ":" , keyPos );
+		if ( colonPos == string::npos )
+			return 0;
+
+		size_t numStart = colonPos + 1;
+		while ( numStart < json.length ( ) && ( json[numStart] == ' ' || json[numStart] == '\t' || json[numStart] == '\n' ) )
+			numStart++;
+
+		size_t numEnd = numStart;
+		while ( numEnd < json.length ( ) && ( isdigit ( json[numEnd] ) || json[numEnd] == '-' ) )
+			numEnd++;
+
+		if ( numEnd > numStart )
+		{
+			string numStr = json.substr ( numStart , numEnd - numStart );
+			return stoi ( numStr );
+		}
+
+		return 0;
+	}
+
+	vector<int32> GetIntArray ( const string& json , const string& key , size_t startPos )
+	{
+		vector<int32> result;
+
+		size_t keyPos = ( key.empty ( ) ) ? startPos : FindKey ( json , key , startPos );
+		if ( keyPos == string::npos )
+			return result;
+
+		size_t colonPos = ( key.empty ( ) ) ? keyPos : json.find ( ":" , keyPos );
+		size_t arrayStart = json.find ( "[" , colonPos );
+		if ( arrayStart == string::npos )
+			return result;
+
+		size_t arrayEnd = json.find ( "]" , arrayStart );
+		if ( arrayEnd == string::npos )
+			return result;
+
+		size_t pos = arrayStart + 1;
+		while ( pos < arrayEnd )
+		{
+			while ( pos < arrayEnd && ( json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n' || json[pos] == ',' ) )
+				pos++;
+
+			if ( pos >= arrayEnd )
+				break;
+
+			size_t numEnd = pos;
+			while ( numEnd < arrayEnd && ( isdigit ( json[numEnd] ) || json[numEnd] == '-' ) )
+				numEnd++;
+
+			if ( numEnd > pos )
+			{
+				string numStr = json.substr ( pos , numEnd - pos );
+				result.push_back ( stoi ( numStr ) );
+				pos = numEnd;
+			}
+			else
+			{
+				pos++;
+			}
+		}
+
+		return result;
+	}
+
+	string GetObjectBlock ( const string& json , size_t startPos , size_t& outEndPos )
+	{
+		size_t objStart = json.find ( "{" , startPos );
+		if ( objStart == string::npos )
+			return "";
+
+		int braceCount = 1;
+		size_t pos = objStart + 1;
+
+		while ( pos < json.length ( ) && braceCount > 0 )
+		{
+			if ( json[pos] == '{' )
+				braceCount++;
+			else if ( json[pos] == '}' )
+				braceCount--;
+
+			pos++;
+		}
+
+		if ( braceCount == 0 )
+		{
+			outEndPos = pos;
+			return json.substr ( objStart , pos - objStart );
+		}
+
+		return "";
+	}
+
+	vector<string> GetObjectsInArray ( const string& json , const string& arrayKey , size_t startPos )
+	{
+		vector<string> result;
+
+		size_t keyPos = FindKey ( json , arrayKey , startPos );
+		if ( keyPos == string::npos )
+			return result;
+
+		size_t colonPos = json.find ( ":" , keyPos );
+		if ( colonPos == string::npos )
+			return result;
+
+		size_t arrayStart = json.find ( "[" , colonPos );
+		if ( arrayStart == string::npos )
+			return result;
+
+		int bracketCount = 1;
+		size_t arrayEnd = arrayStart + 1;
+		while ( arrayEnd < json.length ( ) && bracketCount > 0 )
+		{
+			if ( json[arrayEnd] == '[' )
+				bracketCount++;
+			else if ( json[arrayEnd] == ']' )
+				bracketCount--;
+			arrayEnd++;
+		}
+
+		size_t pos = arrayStart + 1;
+		while ( pos < arrayEnd )
+		{
+			while ( pos < arrayEnd && ( json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n' || json[pos] == ',' ) )
+				pos++;
+
+			if ( pos >= arrayEnd || json[pos] == ']' )
+				break;
+
+			size_t endPos = 0;
+			string objBlock = GetObjectBlock ( json , pos , endPos );
+			if ( objBlock.empty ( ) )
+				break;
+
+			result.push_back ( objBlock );
+			pos = endPos;
+		}
+
+		return result;
+	}
+
+	bool ParseBoolValue ( const string& json , const string& key , size_t startPos , bool defaultValue = false )
+	{
+		size_t keyPos = FindKey ( json , key , startPos );
+		if ( keyPos == string::npos )
+			return defaultValue;
+
+		size_t colonPos = json.find ( ":" , keyPos );
+		if ( colonPos == string::npos )
+			return defaultValue;
+
+		size_t valueStart = colonPos + 1;
+		while ( valueStart < json.length ( ) && ( json[valueStart] == ' ' || json[valueStart] == '\t' || json[valueStart] == '\n' ) )
+			valueStart++;
+
+		if ( json.compare ( valueStart , 4 , "true" ) == 0 )
+			return true;
+		if ( json.compare ( valueStart , 5 , "false" ) == 0 )
+			return false;
+
+		return defaultValue;
+	}
+
+	bool TryGetColorKeyField ( const string& objectText , int32& r , int32& g , int32& b )
+	{
+		vector<int32> values = GetIntArray ( objectText , "colorkey" , 0 );
+		if ( values.size ( ) < 3 )
+			return false;
+
+		r = values[0];
+		g = values[1];
+		b = values[2];
+		return true;
+	}
+
+	string ExtractFilePathValue ( const string& objectText )
+	{
+		string value = GetStringValue ( objectText , "path" , 0 );
+		if ( value.empty ( ) )
+			return value;
+
+		for ( char& c : value )
+		{
+			if ( c == '/' )
+				c = '\\';
+		}
+
+		return value;
+	}
+}
 
 DevScene::DevScene ( )
 {
@@ -31,65 +300,13 @@ DevScene::DevScene ( )
 
 DevScene::~DevScene ( )
 {
+	SAFE_DELETE ( _inventoryPanel );
 }
 
 void DevScene::Init ( )
 {
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage01" , L"Sprite\\Map\\Stage01.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage02" , L"Sprite\\Map\\Stage02.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Arrow" , L"Sprite\\Item\\Arrow.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Items" , L"Sprite\\Item\\Items.bmp" , RGB ( 182 , 69 , 166 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Inventory" , L"Sprite\\UI\\Inventory.bmp" , RGB ( 118 , 134 , 255 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerDown" , L"Sprite\\Player\\PlayerDown.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerUp" , L"Sprite\\Player\\PlayerUp.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerLeft" , L"Sprite\\Player\\PlayerLeft.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PlayerRight" , L"Sprite\\Player\\PlayerRight.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Snake" , L"Sprite\\Monster\\Snake.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Octoroc" , L"Sprite\\Monster\\Octoroc.bmp" , RGB ( 128 , 128 , 128 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Hit" , L"Sprite\\Effect\\Hit.bmp" , RGB ( 0 , 0 , 0 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Explode" , L"Sprite\\Effect\\Explode.bmp" , RGB ( 123 , 173 , 148 ) );
-
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"MapButton" , L"Sprite\\UI\\MapButton.bmp" , RGB ( 211 , 249 , 188 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"HUD" , L"Sprite\\UI\\Health_Energy_EXP_Bars.bmp" , RGB ( 188 , 255 , 235 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"LoginPanel" , L"Sprite\\UI\\LoginPanel.bmp" , RGB ( 0 , 0 , 0 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PartyInvite" , L"Sprite\\UI\\PartyInvite.bmp" , RGB ( 0 , 0 , 0 ) );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"PartyStatus" , L"Sprite\\UI\\PartyStatus.bmp" , RGB ( 0 , 0 , 0 ) );
-
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage01" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage01" ) , 0 , 0 , 0 , 0 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Stage02" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Stage02" ) , 0 , 0 , 0 , 0 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileO" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 0 , 0 , 48 , 48 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"TileX" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Tile" ) , 48 , 0 , 48 , 48 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town1" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 0 , 0 , 64 , 40 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Town2" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 71 , 0 , 64 , 40 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Btn_Dungeon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"MapButton" ) , 142 , 0 , 64 , 40 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"LoginPanel" , GET_SINGLE ( ResourceManager )->GetTexture ( L"LoginPanel" ) , 0 , 0 , 0 , 0 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"PartyInvite" , GET_SINGLE ( ResourceManager )->GetTexture ( L"PartyInvite" ) , 0 , 0 , 0 , 0 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"PartyStatus" , GET_SINGLE ( ResourceManager )->GetTexture ( L"PartyStatus" ) , 0 , 0 , 0 , 0 );
-
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Status_Frame" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 8 , 8 , 240 , 48 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 109 , 61 , 129 , 9 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Exp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 101 , 110 , 219 , 6 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Enemy_Hp_Frame" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 261 , 8 , 102 , 12 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Enemy_Hp_Bar" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 264 , 23 , 96 , 6 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 61 , 63 , 39 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Bow_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 106 , 63 , 39 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Staff_Icon" , GET_SINGLE ( ResourceManager )->GetTexture ( L"HUD" ) , 14 , 151 , 63 , 39 );
-
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 0 , 32 , 32 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_B" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 32 , 0 , 32 , 32 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Sword_C" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 64 , 0 , 32 , 32 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 32 , 32 , 32 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_B" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 32 , 32 , 32 , 32 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Armor_C" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 64 , 32 , 32 , 32 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Potion_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 64 , 32 , 32 );
-	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Inventory" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Inventory" ) , 0 , 0 , 0 , 0 );
-
-	// Inventory ΩΩ∑‘∞˙ Item Ω∫«¡∂Û¿Ã∆Æ ≈©±‚¥¬ (32, 32)
-	// Inventory¿« Sword ¿Â¬¯ ΩΩ∑‘ (98, 38) ¿ßƒ°
-	// Inventory¿« Armor ¿Â¬¯ ΩΩ∑‘ (98, 80) ¿ßƒ°
-	// Inventory¿« Potion ¿Â¬¯ ΩΩ∑‘ (258, 68) ¿ßƒ°
-	// Inventory¿« æ∆¿Ã≈€ ∫∏∞¸ ΩΩ∑‘µÈ Ω√¿€ ¿ßƒ° (16, 168). 36px∞£∞›¿∏∑Œ ∞°∑Œ 9, ºº∑Œ 3 πËƒ°
-
+	LoadSceneTextures ( );
+	CreateSceneSprites ( );
 	LoadMap ( );
 	LoadPlayer ( );
 	LoadMonster ( );
@@ -100,13 +317,10 @@ void DevScene::Init ( )
 	_currentMapId = Protocol::MAP_ID_TOWN;
 	_hasMapId = true;
 
-	GET_SINGLE ( ResourceManager )->LoadSound ( L"BGM" , L"Sound\\BGM.wav" );
-	GET_SINGLE ( ResourceManager )->LoadSound ( L"Sword" , L"Sound\\Sword.wav" );
-	GET_SINGLE ( ResourceManager )->LoadSound ( L"Arrow" , L"Sound\\Arrow.wav" );
-	GET_SINGLE ( ResourceManager )->LoadSound ( L"Explode" , L"Sound\\Explode.wav" );
-	GET_SINGLE ( ResourceManager )->LoadSound ( L"UISound" , L"Sound\\UISound.wav" );
-	GET_SINGLE ( SoundManager )->Play ( L"BGM" , true );
+	LoadSceneSounds ( );
 	
+
+	_inventoryPanel = new InventoryPanel ( );
 
 	CreateMapButtons ( );
 	Super::Init ( );
@@ -126,61 +340,12 @@ void DevScene::Update ( )
 
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::I ) )
 	{
-		_showInventory = !_showInventory;
+		if ( _inventoryPanel )
+			_inventoryPanel->SetVisible ( !_inventoryPanel->IsVisible ( ) );
 		GET_SINGLE ( SoundManager )->Play ( L"UISound" );
-		if ( !_showInventory )
-			_invDragging = false;
 	}
-
-	if ( _showInventory )
-	{
-		// ¿Œ∫•≈‰∏Æ ¿ßƒ° √ ±‚»≠ (√π ø≠±‚ Ω√ »≠∏È ¡ﬂæ”)
-		if ( _invPos.x < 0 )
-		{
-			Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
-			if ( invSprite )
-			{
-				_invPos.x = ( GWinSizeX - invSprite->GetSize ( ).x ) / 2;
-				_invPos.y = ( GWinSizeY - invSprite->GetSize ( ).y ) / 2;
-			}
-		}
-
-		// µÂ∑°±◊ √≥∏Æ
-		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
-		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse ) )
-		{
-			Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
-			if ( invSprite )
-			{
-				int32 invW = invSprite->GetSize ( ).x;
-				// ≈∏¿Ã∆≤πŸ øµø™: ¿Œ∫•≈‰∏Æ ªÛ¥‹ 30px
-				if ( mouse.x >= _invPos.x && mouse.x < _invPos.x + invW &&
-					mouse.y >= _invPos.y && mouse.y < _invPos.y + 30 )
-				{
-					_invDragging = true;
-					_invDragOffset = { mouse.x - _invPos.x, mouse.y - _invPos.y };
-				}
-			}
-		}
-
-		if ( _invDragging )
-		{
-			bool held = GET_SINGLE ( InputManager )->GetButton ( KeyType::LeftMouse )
-				|| GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse );
-			if ( held )
-			{
-				_invPos.x = mouse.x - _invDragOffset.x;
-				_invPos.y = mouse.y - _invDragOffset.y;
-			}
-			else
-			{
-				_invDragging = false;
-			}
-		}
-
-		HandleInventoryClick ( );
-	}
-
+	if ( _inventoryPanel )
+		_inventoryPanel->Tick ( );
 	HandlePartyInput ( );
 }
 
@@ -197,8 +362,8 @@ void DevScene::Render ( HDC hdc )
 	RenderPartyHUD ( hdc );
 	RenderPartyInvite ( hdc );
 
-	if ( _showInventory )
-		RenderInventory ( hdc );
+	if ( _inventoryPanel )
+		_inventoryPanel->Render ( hdc );
 }
 
 void DevScene::AddActor ( Actor* actor )
@@ -219,7 +384,7 @@ void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
 	ClearWorldActors ( );
 	ChangeBackground ( mapId );
 
-	// ≈∏¿œ∏  ±≥√º
+	// ÌÉÄÏùºÎßµ ÍµêÏ≤¥
 	if ( mapId == Protocol::MAP_ID_TOWN )
 	{
 		LoadTilemap ( L"Tilemap\\Tilemap_01.txt" );
@@ -437,13 +602,13 @@ void DevScene::RenderLogin ( HDC hdc )
 	Sprite* panel = GET_SINGLE ( ResourceManager )->GetSprite ( L"LoginPanel" );
 	if ( panel )
 	{
-		// √¢ ≈©±‚ø° ∏¬√Á Ω∫ƒ…¿œ∏µ
+		// Ï∞Ω ÌÅ¨Í∏∞Ïóê ÎßûÏ∂∞ Ïä§ÏºÄÏùºÎßÅ
 		::TransparentBlt (
 			hdc ,
 			0 , 0 ,
 			GWinSizeX , GWinSizeY ,
-			panel->GetDC ( ) ,
-			panel->GetPos ( ).x , panel->GetPos ( ).y ,
+			panel->GetDC ( ) , 
+			panel->GetPos ( ).x , panel->GetPos ().y ,
 			panel->GetSize ( ).x , panel->GetSize ( ).y ,
 			RGB ( 0 , 0 , 0 ) // colorkey
 		);
@@ -456,7 +621,7 @@ void DevScene::RenderLogin ( HDC hdc )
 	int32 boxX = ( GWinSizeX - boxW ) / 2;
 	int32 boxY = ( GWinSizeY - boxH ) / 2;
 
-	// ¿‘∑¬ ≈ÿΩ∫∆Æ + ƒøº≠
+	// ÏûÖÎ†• ÌÖçÏä§Ìä∏ + Ïª§ÏÑú
 	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
 	int32 fieldX = boxX + 30;
 	int32 fieldY = boxY + 65;
@@ -473,7 +638,7 @@ void DevScene::RenderLogin ( HDC hdc )
 		DT_LEFT | DT_VCENTER | DT_SINGLELINE
 	);
 
-	// æ»≥ª πÆ±∏
+	// ÏïàÎÇ¥ Î¨∏Íµ¨
 	SetTextColor ( hdc , RGB ( 180 , 180 , 180 ) );
 	RECT hintRect = { boxX, boxY + 105, boxX + boxW, boxY + 130 };
 	DrawText ( hdc , L"Enter your name and press Enter" , 31 , &hintRect , DT_CENTER );
@@ -501,7 +666,7 @@ void DevScene::RenderHUD ( HDC hdc )
 			frame->GetTransparent ( ) );
 	}
 
-	// Weapon Icon (º±≈√µ» π´±‚∏∏ «•Ω√)
+	// Weapon Icon (ÏÑ†ÌÉùÎêú Î¨¥Í∏∞Îßå ÌëúÏãú)
 	{
 		Sprite* weaponSprite = nullptr;
 		switch ( myPlayer->GetWeaponType ( ) )
@@ -593,7 +758,7 @@ void DevScene::CreateMapButtons ( )
 	int32 startX = screenW - marginX - totalW;
 	int32 y = marginY + btnH / 2;
 
-	// ∏∂¿ª1 πˆ∆∞
+	// ÎßàÏùÑ1 Î≤ÑÌäº
 	{
 		Button* b = new Button ( );
 		b->SetSize ( { btnW, btnH } );
@@ -606,7 +771,7 @@ void DevScene::CreateMapButtons ( )
 		startX += btnW + gap;
 	}
 
-	// ∏∂¿ª2 πˆ∆∞
+	// ÎßàÏùÑ2 Î≤ÑÌäº
 	{
 		Button* b = new Button ( );
 		b->SetSize ( { btnW, btnH } );
@@ -619,7 +784,7 @@ void DevScene::CreateMapButtons ( )
 		startX += btnW + gap;
 	}
 
-	// ¥¯¿¸ πˆ∆∞
+	// ÎçòÏ†Ñ Î≤ÑÌäº
 	{
 		Button* b = new Button ( );
 		b->SetSize ( { btnW, btnH } );
@@ -649,220 +814,13 @@ void DevScene::OnClickDungeon ( )
 	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }
 
-Sprite* DevScene::GetItemSprite ( int32 itemId )
-{
-	switch ( itemId )
-	{
-	case 2001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Potion_A" );
-	case 3001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_A" );
-	case 3002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_B" );
-	case 3003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_C" );
-	case 4001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_A" );
-	case 4002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_B" );
-	case 4003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_C" );
-	default: return nullptr;
-	}
-}
-
-void DevScene::RenderInventory ( HDC hdc )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
-	if ( invSprite == nullptr )
-		return;
-
-	int32 invW = invSprite->GetSize ( ).x;
-	int32 invH = invSprite->GetSize ( ).y;
-	int32 invX = _invPos.x;
-	int32 invY = _invPos.y;
-
-	::TransparentBlt ( hdc ,
-		invX , invY ,
-		invW , invH ,
-		invSprite->GetDC ( ) ,
-		invSprite->GetPos ( ).x , invSprite->GetPos ( ).y ,
-		invW , invH ,
-		invSprite->GetTransparent ( ) );
-
-	// =========================
-	// (¿”Ω√) ¿Œ∫•≈‰∏Æ Ω∫≈» ≈ÿΩ∫∆Æ «•Ω√
-	// =========================
-	{
-		const Protocol::PlayerExtra& extra = myPlayer->info.player ( );
-
-		int32 level = extra.level ( );
-		int32 hp = myPlayer->info.hp ( );
-		int32 maxHp = myPlayer->info.maxhp ( );
-		int32 attack = myPlayer->info.attack ( );
-		int32 defence = myPlayer->info.defence ( );
-
-		wchar_t buf[ 256 ];
-		swprintf_s ( buf ,
-			L"Level: %d\nMax HP: %d\nHP: %d\nATK: %d\nDEF: %d" ,
-			level , maxHp , hp , attack , defence );
-
-		::SetBkMode ( hdc , TRANSPARENT );
-		::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
-
-		// ∆˘∆Æ(¿”Ω√)
-		static HFONT sFont = nullptr;
-		if ( sFont == nullptr )
-		{
-			sFont = ::CreateFontW (
-				18 , 0 , 0 , 0 , FW_BOLD , FALSE , FALSE , FALSE ,
-				DEFAULT_CHARSET , OUT_DEFAULT_PRECIS , CLIP_DEFAULT_PRECIS ,
-				DEFAULT_QUALITY , DEFAULT_PITCH | FF_DONTCARE ,
-				L"Consolas" );
-		}
-
-		HGDIOBJ oldFont = nullptr;
-		if ( sFont ) oldFont = ::SelectObject ( hdc , sFont );
-
-		RECT rc;
-		rc.left = invX + 184;
-		rc.top = invY + 32;
-		rc.right = invX + invW - 16;
-		rc.bottom = invY + 150;
-
-		::DrawTextW ( hdc , buf , -1 , &rc , DT_LEFT | DT_TOP | DT_WORDBREAK );
-
-		if ( oldFont ) ::SelectObject ( hdc , oldFont );
-	}
-
-	// ¿Â¬¯ ΩΩ∑‘ æ∆¿Ã≈€ ∑ª¥ı∏µ
-	auto renderItem = [&] ( int32 itemId , int32 count , int32 relX , int32 relY )
-	{
-		if ( itemId == 0 )
-			return;
-		Sprite* sp = GetItemSprite ( itemId );
-		if ( sp == nullptr )
-			return;
-		::TransparentBlt ( hdc ,
-			invX + relX , invY + relY ,
-			32 , 32 ,
-			sp->GetDC ( ) ,
-			sp->GetPos ( ).x , sp->GetPos ( ).y ,
-			sp->GetSize ( ).x , sp->GetSize ( ).y ,
-			sp->GetTransparent ( ) );
-
-		// ºˆ∑Æ «•Ω√ (2 ¿ÃªÛ¿œ ∂ß∏∏)
-		if ( count > 1 )
-		{
-			wchar_t buf[ 8 ];
-			swprintf_s ( buf , L"%d" , count );
-			::SetBkMode ( hdc , TRANSPARENT );
-			::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
-			::TextOut ( hdc , invX + relX + 18 , invY + relY + 18 , buf , ( int ) wcslen ( buf ) );
-		}
-	};
-
-	// ¿Â¬¯ ΩΩ∑‘: Sword(98,38), Armor(98,80), Potion(290,68)
-	renderItem ( myPlayer->_equipWeapon.itemId , myPlayer->_equipWeapon.count , 98 , 38 );
-	renderItem ( myPlayer->_equipArmor.itemId , myPlayer->_equipArmor.count , 98 , 80 );
-	renderItem ( myPlayer->_equipPotion.itemId , myPlayer->_equipPotion.count , 290 , 68 );
-
-	// ∫∏∞¸ ΩΩ∑‘: Ω√¿€(16,168), 36px ∞£∞›, ∞°∑Œ 9 x ºº∑Œ 3
-	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
-	{
-		int32 col = i % 9;
-		int32 row = i / 9;
-		int32 slotX = 16 + col * 36;
-		int32 slotY = 168 + row * 36;
-
-		renderItem ( myPlayer->_storage[ i ].itemId , myPlayer->_storage[ i ].count , slotX , slotY );
-	}
-}
-
-void DevScene::HandleInventoryClick ( )
-{
-	if ( !GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::RightMouse ) )
-		return;
-
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
-	if ( invSprite == nullptr )
-		return;
-
-	int32 invW = invSprite->GetSize ( ).x;
-	int32 invH = invSprite->GetSize ( ).y;
-	int32 invX = _invPos.x;
-	int32 invY = _invPos.y;
-
-	POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
-	int32 mx = mouse.x - invX;
-	int32 my = mouse.y - invY;
-
-	// ¿Œ∫•≈‰∏Æ øµø™ π€¿Ã∏È π´Ω√
-	if ( mx < 0 || my < 0 || mx >= invW || my >= invH )
-		return;
-
-	// ¿Â¬¯ ΩΩ∑‘ ≈¨∏Ø »Æ¿Œ (¿Â¬¯ «ÿ¡¶)
-	// Weapon: (98,38) 32x32
-	if ( mx >= 98 && mx < 130 && my >= 38 && my < 70 )
-	{
-		if ( myPlayer->_equipWeapon.itemId > 0 )
-		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 0 );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-		}
-		return;
-	}
-	// Armor: (98,80) 32x32
-	if ( mx >= 98 && mx < 130 && my >= 80 && my < 112 )
-	{
-		if ( myPlayer->_equipArmor.itemId > 0 )
-		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 1 );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-		}
-		return;
-	}
-	// Potion: (290,68) 32x32
-	if ( mx >= 290 && mx < 322 && my >= 68 && my < 100 )
-	{
-		if ( myPlayer->_equipPotion.itemId > 0 )
-		{
-			// ∆˜º«¿∫ øÏ≈¨∏Ø Ω√ ªÁøÎ
-			SendBufferRef sb = ClientPacketHandler::Make_C_UseItem ( -1 );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-		}
-		return;
-	}
-
-	// ∫∏∞¸ ΩΩ∑‘ ≈¨∏Ø »Æ¿Œ
-	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
-	{
-		int32 col = i % 9;
-		int32 row = i / 9;
-		int32 slotX = 16 + col * 36;
-		int32 slotY = 168 + row * 36;
-
-		if ( mx >= slotX && mx < slotX + 32 && my >= slotY && my < slotY + 32 )
-		{
-			if ( myPlayer->_storage[ i ].itemId > 0 )
-			{
-				// ¿Â∫Ò æ∆¿Ã≈€¿∫ ¿Â¬¯, º“∫Ò æ∆¿Ã≈€¿∫ ªÁøÎ
-				SendBufferRef sb = ClientPacketHandler::Make_C_EquipItem ( i );
-				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-			}
-			return;
-		}
-	}
-}
-
 void DevScene::HandlePartyInput ( )
 {
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
 		return;
 
-	// √ ¥Î ºˆ∂Ù/∞≈¿˝ (Y/N)
+	// Ï¥àÎåÄ ÏàòÎùΩ/Í±∞Ï†à (Y/N)
 	if ( myPlayer->_pendingInviteFrom != 0 )
 	{
 		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::Y ) )
@@ -881,10 +839,10 @@ void DevScene::HandlePartyInput ( )
 			myPlayer->_pendingInviterName.clear ( );
 			GET_SINGLE ( SoundManager )->Play ( L"UISound" );
 		}
-		return;  // √ ¥Î ∆Àæ˜ ¡ﬂø°¥¬ ¥Ÿ∏• ¿‘∑¬ π´Ω√
+		return;  // Ï¥àÎåÄ ÌåùÏóÖ Ï§ëÏóêÎäî Îã§Î•∏ ÏûÖÎ†• Î¨¥Ïãú
 	}
 
-	// P≈∞ ∆ƒ∆º ≈ª≈
+	// PÌÇ§ ÌååÌã∞ ÌÉàÌá¥
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::P ) )
 	{
 		if ( !myPlayer->_partyMembers.empty ( ) )
@@ -894,30 +852,30 @@ void DevScene::HandlePartyInput ( )
 		}
 	}
 
-	// ¡¬≈¨∏Ø¿∏∑Œ ¥Ÿ∏• «√∑π¿ÃæÓ ≈¨∏Ø °Ê ∆ƒ∆º √ ¥Î
+	// Ï¢åÌÅ¥Î¶≠ÏúºÎ°ú Îã§Î•∏ ÌîåÎ†àÏù¥Ïñ¥ ÌÅ¥Î¶≠ ‚Üí ÌååÌã∞ Ï¥àÎåÄ
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse ) )
 	{
-		// ¿Œ∫•≈‰∏Æ µÂ∑°±◊ ¡ﬂ¿Ã∏È π´Ω√
-		if ( _showInventory && _invDragging )
+		// Ïù∏Î≤§ÌÜ†Î¶¨ ÎìúÎûòÍ∑∏ Ï§ëÏù¥Î©¥ Î¨¥Ïãú
+		if ( _inventoryPanel && _inventoryPanel->IsVisible ( ) && _inventoryPanel->IsDragging ( ) )
 			return;
 
 		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
 		Vec2 cameraPos = GET_SINGLE ( SceneManager )->GetCameraPos ( );
 
-		// ∏∂øÏΩ∫ Ω∫≈©∏∞ ¡¬«• °Ê ø˘µÂ ¡¬«•
+		// ÎßàÏö∞Ïä§ Ïä§ÌÅ¨Î¶∞ Ï¢åÌëú ‚Üí ÏõîÎìú Ï¢åÌëú
 		float worldX = mouse.x + cameraPos.x - GWinSizeX / 2.f;
 		float worldY = mouse.y + cameraPos.y - GWinSizeY / 2.f;
 
 		uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
 
-		// LAYER_OBJECT¿« Player º¯»∏
+		// LAYER_OBJECTÏùò Player ÏàúÌöå
 		for ( Actor* actor : _actors[ LAYER_OBJECT ] )
 		{
 			Player* player = dynamic_cast< Player* >( actor );
 			if ( player == nullptr )
 				continue;
 			if ( player->info.objectid ( ) == myId )
-				continue;  // ¿⁄±‚ ¿⁄Ω≈ ¡¶ø‹
+				continue;  // ÏûêÍ∏∞ ÏûêÏã† Ï†úÏô∏
 			if ( player->info.objecttype ( ) != Protocol::OBJECT_TYPE_PLAYER )
 				continue;
 
@@ -925,7 +883,7 @@ void DevScene::HandlePartyInput ( )
 			float dx = worldX - pos.x;
 			float dy = worldY - pos.y;
 
-			// ≈¨∏Ø π¸¿ß: «√∑π¿ÃæÓ ¡ﬂΩ…ø°º≠ 50px ¿Ã≥ª
+			// ÌÅ¥Î¶≠ Î≤îÏúÑ: ÌîåÎ†àÏù¥Ïñ¥ Ï§ëÏã¨ÏóêÏÑú 50px Ïù¥ÎÇ¥
 			if ( dx * dx + dy * dy < 50.f * 50.f )
 			{
 				SendBufferRef sb = ClientPacketHandler::Make_C_PartyInvite ( player->info.objectid ( ) );
@@ -968,7 +926,7 @@ void DevScene::RenderPartyHUD ( HDC hdc )
 	SetBkMode ( hdc , TRANSPARENT );
 	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
 
-	// ≈∏¿Ã∆≤
+	// ÌÉÄÏù¥ÌãÄ
 	TextOut ( hdc , startX , startY , L"Party" , 5 );
 
 	for ( int32 i = 0; i < ( int32 ) myPlayer->_partyMembers.size ( ); i++ )
@@ -976,7 +934,7 @@ void DevScene::RenderPartyHUD ( HDC hdc )
 		const auto& member = myPlayer->_partyMembers[ i ];
 		int32 y = startY + 18 + i * rowH;
 
-		// ∏Æ¥ı «•Ω√ + ¿Ã∏ß
+		// Î¶¨Îçî ÌëúÏãú + Ïù¥Î¶Ñ
 		wstring display;
 		if ( member.isLeader )
 			display = L"* " + member.name;
@@ -985,17 +943,17 @@ void DevScene::RenderPartyHUD ( HDC hdc )
 
 		TextOut ( hdc , startX , y , display.c_str ( ) , ( int32 ) display.length ( ) );
 
-		// HP πŸ
+		// HP Î∞î
 		int32 barX = startX + 100;
 		int32 barY = y + 2;
 
-		// πË∞Ê (æÓµŒøÓ ª°∞≠)
+		// Î∞∞Í≤Ω (Ïñ¥ÎëêÏö¥ Îπ®Í∞ï)
 		HBRUSH darkBrush = CreateSolidBrush ( RGB ( 80 , 0 , 0 ) );
 		RECT barBg = { barX , barY , barX + barW , barY + barH };
 		FillRect ( hdc , &barBg , darkBrush );
 		DeleteObject ( darkBrush );
 
-		// HP πŸ (√ ∑œ)
+		// HP Î∞î (Ï¥àÎ°ù)
 		if ( member.maxHp > 0 && member.hp > 0 )
 		{
 			int32 fillW = barW * member.hp / member.maxHp;
@@ -1044,12 +1002,12 @@ void DevScene::RenderPartyInvite ( HDC hdc )
 	SetBkMode ( hdc , TRANSPARENT );
 	SetTextColor ( hdc , RGB ( 50 , 50 , 50 ) );
 
-	// ∏ﬁΩ√¡ˆ
+	// Î©îÏãúÏßÄ
 	wstring msg = myPlayer->_pendingInviterName + L" invited you to party";
 	RECT textRect = { popX + 10 , popY + 15 , popX + popW - 10 , popY + 40 };
 	DrawText ( hdc , msg.c_str ( ) , ( int32 ) msg.length ( ) , &textRect , DT_CENTER );
 
-	// Y/N æ»≥ª
+	// Y/N ÏïàÎÇ¥
 	wstring hint = L"[Y] Accept    [N] Decline";
 	RECT hintRect = { popX + 10 , popY + 45 , popX + popW - 10 , popY + 70 };
 	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
@@ -1057,6 +1015,98 @@ void DevScene::RenderPartyInvite ( HDC hdc )
 }
 
 // Load functions
+
+void DevScene::LoadSceneTextures ( )
+{
+	string jsonPath = ResolveExistingPath ( "../DatasheetsClient/Textures.json" );
+	string json = ReadAllText ( jsonPath );
+	if ( json.empty ( ) )
+		return;
+
+	vector<string> objects = GetObjectsInArray ( json , "textures" , 0 );
+
+	for ( const string& obj : objects )
+	{
+		string id = GetStringValue ( obj , "id" , 0 );
+		if ( id.empty ( ) )
+			continue;
+		string path = ExtractFilePathValue ( obj );
+		if ( path.empty ( ) )
+			continue;
+
+		wstring wid = ToWideAscii ( id );
+
+		int32 r = 0;
+		int32 g = 0;
+		int32 b = 0;
+		if ( TryGetColorKeyField ( obj , r , g , b ) )
+			GET_SINGLE ( ResourceManager )->LoadTexture ( wid , ToWideAscii ( path ) , RGB ( r , g , b ) );
+		else
+			GET_SINGLE ( ResourceManager )->LoadTexture ( wid , ToWideAscii ( path ) );
+	}
+}
+
+void DevScene::CreateSceneSprites ( )
+{
+	string jsonPath = ResolveExistingPath ( "../DatasheetsClient/Sprites.json" );
+	string json = ReadAllText ( jsonPath );
+	if ( json.empty ( ) )
+		return;
+
+	vector<string> objects = GetObjectsInArray ( json , "sprites" , 0 );
+
+	for ( const string& obj : objects )
+	{
+		string id = GetStringValue ( obj , "id" , 0 );
+		if ( id.empty ( ) )
+			continue;
+		string textureId = GetStringValue ( obj , "texture" , 0 );
+		if ( textureId.empty ( ) )
+			continue;
+		int32 x = GetIntValue ( obj , "x" , 0 );
+		int32 y = GetIntValue ( obj , "y" , 0 );
+		int32 w = GetIntValue ( obj , "w" , 0 );
+		int32 h = GetIntValue ( obj , "h" , 0 );
+
+		wstring wid = ToWideAscii ( id );
+		wstring wTextureId = ToWideAscii ( textureId );
+
+		Texture* texture = GET_SINGLE ( ResourceManager )->GetTexture ( wTextureId );
+		if ( texture == nullptr )
+			continue;
+
+		GET_SINGLE ( ResourceManager )->CreateSprite ( wid , texture , x , y , w , h );
+	}
+}
+
+void DevScene::LoadSceneSounds ( )
+{
+	string jsonPath = ResolveExistingPath ( "../DatasheetsClient/Sounds.json" );
+	string json = ReadAllText ( jsonPath );
+	if ( json.empty ( ) )
+		return;
+
+	vector<string> objects = GetObjectsInArray ( json , "sounds" , 0 );
+
+	for ( const string& obj : objects )
+	{
+		string id = GetStringValue ( obj , "id" , 0 );
+		if ( id.empty ( ) )
+			continue;
+		string path = ExtractFilePathValue ( obj );
+		if ( path.empty ( ) )
+			continue;
+
+		wstring wid = ToWideAscii ( id );
+		wstring wpath = ToWideAscii ( path );
+
+		GET_SINGLE ( ResourceManager )->LoadSound ( wid , wpath );
+
+		bool loopOnInit = ParseBoolValue ( obj , "loop_on_init" , 0 , false );
+		if ( loopOnInit )
+			GET_SINGLE ( SoundManager )->Play ( wid , true );
+	}
+}
 
 void DevScene::LoadMap ( )
 {

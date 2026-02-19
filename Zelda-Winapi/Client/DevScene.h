@@ -7,6 +7,7 @@ class GameObject;
 class UI;
 class SpriteActor;
 class Sprite;
+class InventoryPanel;
 
 class DevScene : public Scene
 {
@@ -74,12 +75,12 @@ private:
 	void LoadSceneSounds ( );
 
 private:
+	// 로그인
 	void UpdateLogin ( );
 	void RenderLogin ( HDC hdc );
+
+	// 게임 플레이
 	void RenderHUD ( HDC hdc );
-	void RenderInventory ( HDC hdc );
-	void HandleInventoryClick ( );
-	Sprite* GetItemSprite ( int32 itemId );
 	void HandlePartyInput ( );
 	void RenderPartyHUD ( HDC hdc );
 	void RenderPartyInvite ( HDC hdc );
@@ -95,12 +96,7 @@ private:
 	wstring _loginText;
 	static const int32 MAX_USERNAME_LEN = 12;
 
-	bool _showInventory = false;
-
-	// 인벤토리 드래그
-	Vec2Int _invPos = { -1, -1 };  // 초기값 -1 → 첫 표시 시 화면 중앙으로
-	bool _invDragging = false;
-	Vec2Int _invDragOffset = { 0, 0 };
+	InventoryPanel* _inventoryPanel = nullptr;
 
 	class TilemapActor* _tilemapActor = nullptr;
 	SpriteActor* _background = nullptr;
