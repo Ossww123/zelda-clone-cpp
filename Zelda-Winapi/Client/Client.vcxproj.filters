@@ -34,6 +34,9 @@
     <ClCompile Include="DevScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
+    <ClCompile Include="DevSceneResourceLoader.cpp">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClCompile>
     <ClCompile Include="Actor.cpp">
       <Filter>Source Files\03. Objects\Unreal</Filter>
     </ClCompile>
@@ -163,6 +166,9 @@
       <Filter>Source Files\02. Scene</Filter>
     </ClInclude>
     <ClInclude Include="DevScene.h">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="DevSceneResourceLoader.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
     <ClInclude Include="Actor.h">

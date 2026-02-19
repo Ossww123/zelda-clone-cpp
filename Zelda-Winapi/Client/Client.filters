@@ -122,6 +122,9 @@
     <ClInclude Include="DevScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
+    <ClInclude Include="DevSceneResourceLoader.h">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClInclude>
     <ClInclude Include="ResourceBase.h">
       <Filter>Source Files\04. Resources</Filter>
     </ClInclude>
@@ -261,6 +264,9 @@
       <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
     <ClCompile Include="DevScene.cpp">
+      <Filter>Source Files\02. Scene\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="DevSceneResourceLoader.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
     <ClCompile Include="ResourceBase.cpp">
