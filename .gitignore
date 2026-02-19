@@ -28,3 +28,18 @@ x64/
 !Zelda-Winapi/Common/protoc-21.12-win64/
 !Zelda-Winapi/Common/protoc-21.12-win64/bin/
 !Zelda-Winapi/Common/protoc-21.12-win64/bin/**
+
+# Local build outputs
+Zelda-Winapi/Binaries/
+Zelda-Winapi/Intermediate/
+
+# Visual Studio user/cache files
+*.vcxproj.user
+*.aps
+
+# Runtime database artifacts
+*.db-wal
+*.db-shm
+
+# Generated logs
+Zelda-Winapi/Common/protoc-21.12-win64/bin/*.log

@@ -7,7 +7,6 @@
 
 #include "Flipbook.h"
 #include "CameraComponent.h"
-#include "BoxCollider.h"
 #include "SceneManager.h"
 #include "DevScene.h"
 

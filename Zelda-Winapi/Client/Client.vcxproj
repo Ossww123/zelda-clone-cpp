@@ -152,17 +152,13 @@
   <ItemGroup>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="Arrow.h" />
-    <ClInclude Include="BoxCollider.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="CameraComponent.h" />
     <ClInclude Include="ClientPacketHandler.h" />
-    <ClInclude Include="Collider.h" />
-    <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Creature.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="DevScene.h" />
-    <ClInclude Include="EditScene.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="Enum.pb.h" />
     <ClInclude Include="Enums.h" />
@@ -185,7 +181,6 @@
     <ClInclude Include="ServerSession.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="SoundManager.h" />
-    <ClInclude Include="SphereCollider.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SpriteActor.h" />
     <ClInclude Include="Struct.pb.h" />
@@ -208,16 +203,12 @@
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Arrow.cpp" />
-    <ClCompile Include="BoxCollider.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="ClientPacketHandler.cpp" />
-    <ClCompile Include="Collider.cpp" />
-    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Creature.cpp" />
     <ClCompile Include="DevScene.cpp" />
-    <ClCompile Include="EditScene.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Enum.pb.cc">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -247,7 +238,6 @@
     <ClCompile Include="ServerSession.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="SoundManager.cpp" />
-    <ClCompile Include="SphereCollider.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="SpriteActor.cpp" />
     <ClCompile Include="Struct.pb.cc">

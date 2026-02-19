@@ -4,7 +4,6 @@ enum class SceneType
 {
 	None,
 	DevScene,
-	EditScene,
 };
 
 enum LAYER_TYPE
@@ -16,20 +15,6 @@ enum LAYER_TYPE
 	LAYER_UI,
 
 	LAYER_MAXCOUNT
-};
-
-enum class ColliderType
-{
-	Box,
-	Sphere,
-};
-
-enum COLLISION_LAYER_TYPE : uint8
-{
-	CLT_OBJECT,
-	CLT_GROUND,
-	CLT_WALL,
-	// ..
 };
 
 #include "Enum.pb.h"

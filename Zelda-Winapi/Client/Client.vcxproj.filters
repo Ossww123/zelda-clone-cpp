@@ -7,9 +7,6 @@
     <ClCompile Include="Client.cpp">
       <Filter>Source Files\00. MainGame</Filter>
     </ClCompile>
-    <ClCompile Include="CollisionManager.cpp">
-      <Filter>Source Files\01. Manager</Filter>
-    </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
@@ -32,9 +29,6 @@
       <Filter>Source Files\02. Scene</Filter>
     </ClCompile>
     <ClCompile Include="DevScene.cpp">
-      <Filter>Source Files\02. Scene\Game</Filter>
-    </ClCompile>
-    <ClCompile Include="EditScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
     <ClCompile Include="Actor.cpp">
@@ -87,15 +81,6 @@
     </ClCompile>
     <ClCompile Include="ResourceBase.cpp">
       <Filter>Source Files\04. Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="Collider.cpp">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="BoxCollider.cpp">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="SphereCollider.cpp">
-      <Filter>Source Files\05. Component\Collision</Filter>
     </ClCompile>
     <ClCompile Include="CameraComponent.cpp">
       <Filter>Source Files\05. Component\Camera</Filter>
@@ -150,9 +135,6 @@
     <ClInclude Include="Client.h">
       <Filter>Source Files\00. MainGame</Filter>
     </ClInclude>
-    <ClInclude Include="CollisionManager.h">
-      <Filter>Source Files\01. Manager</Filter>
-    </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
@@ -175,9 +157,6 @@
       <Filter>Source Files\02. Scene</Filter>
     </ClInclude>
     <ClInclude Include="DevScene.h">
-      <Filter>Source Files\02. Scene\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="EditScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
     <ClInclude Include="Actor.h">
@@ -230,15 +209,6 @@
     </ClInclude>
     <ClInclude Include="ResourceBase.h">
       <Filter>Source Files\04. Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="Collider.h">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="BoxCollider.h">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="SphereCollider.h">
-      <Filter>Source Files\05. Component\Collision</Filter>
     </ClInclude>
     <ClInclude Include="CameraComponent.h">
       <Filter>Source Files\05. Component\Camera</Filter>
@@ -378,9 +348,6 @@
     </Filter>
     <Filter Include="Source Files\05. Component\Camera">
       <UniqueIdentifier>{4c338353-5681-4d6b-9073-a97cb85ec21a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\05. Component\Collision">
-      <UniqueIdentifier>{d8a75171-eac6-4acf-82e7-602444d9a6f6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\99. Headers\Default">
       <UniqueIdentifier>{4c7ff09a-417f-4ceb-89c9-2287f97ddf96}</UniqueIdentifier>

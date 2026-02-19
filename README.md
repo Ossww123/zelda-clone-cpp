@@ -1,5 +1,4 @@
-﻿###### 26.02.10 프로젝트 스냅샷을 별도 브랜치로 남깁니다.
-# 온라인 RPG 게임 (IOCP Server & WinAPI Client)
+﻿# 온라인 RPG 게임 (IOCP Server & WinAPI Client)
 
 **WinAPI 클라이언트**와 **IOCP 기반 C++ 서버**를 직접 구현하여 구축한 서버 권위(Server-Authoritative) 구조의  RPG입니다.
 

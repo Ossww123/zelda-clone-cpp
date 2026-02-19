@@ -122,9 +122,6 @@
     <ClInclude Include="DevScene.h">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClInclude>
-    <ClInclude Include="EditScene.h">
-      <Filter>Source Files\02. Scene\Game</Filter>
-    </ClInclude>
     <ClInclude Include="ResourceBase.h">
       <Filter>Source Files\04. Resources</Filter>
     </ClInclude>
@@ -151,18 +148,6 @@
     </ClInclude>
     <ClInclude Include="CameraComponent.h">
       <Filter>Source Files\05. Component\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Collider.h">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="SphereCollider.h">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="BoxCollider.h">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="CollisionManager.h">
-      <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>Source Files\06. UI</Filter>
@@ -275,9 +260,6 @@
     <ClCompile Include="DevScene.cpp">
       <Filter>Source Files\02. Scene\Game</Filter>
     </ClCompile>
-    <ClCompile Include="EditScene.cpp">
-      <Filter>Source Files\02. Scene\Game</Filter>
-    </ClCompile>
     <ClCompile Include="ResourceBase.cpp">
       <Filter>Source Files\04. Resources</Filter>
     </ClCompile>
@@ -301,18 +283,6 @@
     </ClCompile>
     <ClCompile Include="CameraComponent.cpp">
       <Filter>Source Files\05. Component\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Collider.cpp">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="BoxCollider.cpp">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="SphereCollider.cpp">
-      <Filter>Source Files\05. Component\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="CollisionManager.cpp">
-      <Filter>Source Files\01. Manager</Filter>
     </ClCompile>
     <ClCompile Include="UI.cpp">
       <Filter>Source Files\06. UI</Filter>

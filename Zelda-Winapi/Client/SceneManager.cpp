@@ -2,7 +2,6 @@
 #include "SceneManager.h"
 
 #include "DevScene.h"
-#include "EditScene.h"
 
 #include "MyPlayer.h"
 
@@ -39,9 +38,6 @@ void SceneManager::ChangeScene ( SceneType sceneType )
 	{
 		case SceneType::DevScene:
 			newScene = new DevScene ( );
-			break;
-		case SceneType::EditScene:
-			newScene = new EditScene ( );
 			break;
 	}
 

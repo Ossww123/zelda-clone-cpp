@@ -6,7 +6,6 @@
 
 #include "TimeManager.h"
 #include "SceneManager.h"
-#include "CollisionManager.h"
 
 Scene::Scene ( )
 {
@@ -39,8 +38,6 @@ void Scene::Init()
 void Scene::Update()
 {
 	float deltaTime = GET_SINGLE(TimeManager)->GetDeltaTime();
-
-	GET_SINGLE(CollisionManager)->Update();
 
 	// 복사
 	for (const vector<Actor*> actors : _actors)

@@ -1,5 +1,0 @@
-[OK] Updated enum/decls/switch blocks (merge). Implementations untouched.
-[INFO] Proto: C:\Users\User\Desktop\zelda\zelda-clone-cpp\Zelda-Winapi\Common\protoc-21.12-win64\bin\Protocol.proto
-[INFO] New messages: ['C_Login']
-  - C_Login = 111
-    params: const string& username

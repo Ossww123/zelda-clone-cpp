@@ -7,8 +7,6 @@
 #include "Actor.h"
 #include "SpriteActor.h"
 #include "Flipbook.h"
-#include "BoxCollider.h"
-#include "SphereCollider.h"
 #include "Player.h"
 #include "Arrow.h"
 #include "UI.h"
@@ -21,7 +19,6 @@
 #include "InputManager.h"
 #include "TimeManager.h"
 #include "ResourceManager.h"
-#include "CollisionManager.h"
 #include "SoundManager.h"
 #include "SceneManager.h"
 #include "MyPlayer.h"
@@ -40,7 +37,6 @@ void DevScene::Init ( )
 {
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage01" , L"Sprite\\Map\\Stage01.bmp" );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Stage02" , L"Sprite\\Map\\Stage02.bmp" );
-	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Tile" , L"Sprite\\Map\\Tile.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Arrow" , L"Sprite\\Item\\Arrow.bmp" , RGB ( 128 , 128 , 128 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Items" , L"Sprite\\Item\\Items.bmp" , RGB ( 182 , 69 , 166 ) );
 	GET_SINGLE ( ResourceManager )->LoadTexture ( L"Inventory" , L"Sprite\\UI\\Inventory.bmp" , RGB ( 118 , 134 , 255 ) );
