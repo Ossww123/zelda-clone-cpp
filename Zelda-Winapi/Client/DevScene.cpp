@@ -1,4 +1,4 @@
-ï»¿#include "pch.h"
+#include "pch.h"
 #include "DevScene.h"
 
 #include "Utils.h"
@@ -84,11 +84,11 @@ void DevScene::Init ( )
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Potion_A" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Items" ) , 0 , 64 , 32 , 32 );
 	GET_SINGLE ( ResourceManager )->CreateSprite ( L"Inventory" , GET_SINGLE ( ResourceManager )->GetTexture ( L"Inventory" ) , 0 , 0 , 0 , 0 );
 
-	// Inventory ìŠ¬ë¡¯ê³¼ Item ìŠ¤í”„ë¼ì´íŠ¸ í¬ê¸°ëŠ” (32, 32)
-	// Inventoryì˜ Sword ì¥ì°© ìŠ¬ë¡¯ (98, 38) ìœ„ì¹˜
-	// Inventoryì˜ Armor ì¥ì°© ìŠ¬ë¡¯ (98, 80) ìœ„ì¹˜
-	// Inventoryì˜ Potion ì¥ì°© ìŠ¬ë¡¯ (258, 68) ìœ„ì¹˜
-	// Inventoryì˜ ì•„ì´í…œ ë³´ê´€ ìŠ¬ë¡¯ë“¤ ì‹œì‘ ìœ„ì¹˜ (16, 168). 36pxê°„ê²©ìœ¼ë¡œ ê°€ë¡œ 9, ì„¸ë¡œ 3 ë°°ì¹˜
+	// Inventory ½½·Ô°ú Item ½ºÇÁ¶óÀÌÆ® Å©±â´Â (32, 32)
+	// InventoryÀÇ Sword ÀåÂø ½½·Ô (98, 38) À§Ä¡
+	// InventoryÀÇ Armor ÀåÂø ½½·Ô (98, 80) À§Ä¡
+	// InventoryÀÇ Potion ÀåÂø ½½·Ô (258, 68) À§Ä¡
+	// InventoryÀÇ ¾ÆÀÌÅÛ º¸°ü ½½·Ôµé ½ÃÀÛ À§Ä¡ (16, 168). 36px°£°İÀ¸·Î °¡·Î 9, ¼¼·Î 3 ¹èÄ¡
 
 	LoadMap ( );
 	LoadPlayer ( );
@@ -134,7 +134,7 @@ void DevScene::Update ( )
 
 	if ( _showInventory )
 	{
-		// ì¸ë²¤í† ë¦¬ ìœ„ì¹˜ ì´ˆê¸°í™” (ì²« ì—´ê¸° ì‹œ í™”ë©´ ì¤‘ì•™)
+		// ÀÎº¥Åä¸® À§Ä¡ ÃÊ±âÈ­ (Ã¹ ¿­±â ½Ã È­¸é Áß¾Ó)
 		if ( _invPos.x < 0 )
 		{
 			Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
@@ -145,7 +145,7 @@ void DevScene::Update ( )
 			}
 		}
 
-		// ë“œë˜ê·¸ ì²˜ë¦¬
+		// µå·¡±× Ã³¸®
 		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
 		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse ) )
 		{
@@ -153,7 +153,7 @@ void DevScene::Update ( )
 			if ( invSprite )
 			{
 				int32 invW = invSprite->GetSize ( ).x;
-				// íƒ€ì´í‹€ë°” ì˜ì—­: ì¸ë²¤í† ë¦¬ ìƒë‹¨ 30px
+				// Å¸ÀÌÆ²¹Ù ¿µ¿ª: ÀÎº¥Åä¸® »ó´Ü 30px
 				if ( mouse.x >= _invPos.x && mouse.x < _invPos.x + invW &&
 					mouse.y >= _invPos.y && mouse.y < _invPos.y + 30 )
 				{
@@ -210,6 +210,853 @@ void DevScene::RemoveActor ( Actor* actor )
 {
 	Super::RemoveActor ( actor );
 }
+
+void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
+{
+	_currentMapId = mapId;
+	_hasMapId = true;
+
+	ClearWorldActors ( );
+	ChangeBackground ( mapId );
+
+	// Å¸ÀÏ¸Ê ±³Ã¼
+	if ( mapId == Protocol::MAP_ID_TOWN )
+	{
+		LoadTilemap ( L"Tilemap\\Tilemap_01.txt" );
+	}
+	else if ( mapId == Protocol::MAP_ID_DUNGEON )
+	{
+		LoadTilemap ( L"Tilemap\\Tilemap_02.txt" );
+	}
+}
+
+void DevScene::ChangeBackground ( Protocol::MAP_ID mapId )
+{
+	if ( _background == nullptr )
+		return;
+
+	Sprite* sprite = nullptr;
+
+	if ( mapId == Protocol::MAP_ID_TOWN )
+		sprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Stage01" );
+	else if ( mapId == Protocol::MAP_ID_DUNGEON )
+		sprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Stage02" );
+
+	if ( sprite == nullptr )
+		return;
+
+	_background->SetSprite ( sprite );
+
+	const Vec2Int size = sprite->GetSize ( );
+	_background->SetPos ( Vec2 ( size.x / 2 , size.y / 2 ) );
+}
+
+void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
+{
+	uint64 myPlayerId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+
+	const int32 size = pkt.objects_size ( );
+	for ( int32 i = 0; i < size; i++ )
+	{
+		const Protocol::ObjectInfo& info = pkt.objects ( i );
+		if ( myPlayerId == info.objectid ( ) )
+			continue;
+
+		if ( info.objecttype ( ) == Protocol::OBJECT_TYPE_PLAYER )
+		{
+			Player* player = SpawnObject<Player> ( Vec2Int{ info.posx ( ), info.posy ( ) } );
+			player->SetDir ( info.dir ( ) );
+			player->SetState ( info.state ( ) );
+			player->info = info;
+		}
+		else if ( info.objecttype ( ) == Protocol::OBJECT_TYPE_MONSTER )
+		{
+			Monster* monster = SpawnObject<Monster> ( Vec2Int{ info.posx ( ), info.posy ( ) } );
+			monster->info = info;
+			monster->SetDir ( info.dir ( ) );
+			monster->SetState ( info.state ( ) );
+			monster->SetCellPos ( Vec2Int{ info.posx ( ), info.posy ( ) } , true );
+		}
+		else if ( info.objecttype() == Protocol::OBJECT_TYPE_PROJECTILE)
+		{
+			 Arrow* arrow = SpawnObject<Arrow>( Vec2Int{info.posx(), info.posy()});
+			 arrow->info = info;
+			 arrow->SetDir(info.dir());
+			 arrow->SetState(info.state());
+			 arrow->SetCellPos({info.posx(), info.posy()}, true);
+		}
+	}
+}
+
+void DevScene::Handle_S_RemoveObject ( Protocol::S_RemoveObject& pkt )
+{
+	const int32 size = pkt.ids_size ( );
+	for ( int32 i = 0; i < size; i++ )
+	{
+		int32 id = pkt.ids ( i );
+
+		GameObject* object =  GetObject( id );
+		if ( object )
+			RemoveActor ( object );
+	}
+}
+
+GameObject* DevScene::GetObject ( uint64 id )
+{
+	for ( Actor* actor : _actors[ LAYER_OBJECT ] )
+	{
+		GameObject* gameObject = dynamic_cast< GameObject* >( actor );
+		if ( gameObject && gameObject->info.objectid ( ) == id )
+			return gameObject;
+	}
+
+	return nullptr;
+}
+
+Player* DevScene::FindClosestPlayer ( Vec2Int cellPos )
+{
+	float best = FLT_MAX;
+	Player* ret = nullptr;
+
+	for ( Actor* actor : _actors[ LAYER_OBJECT ] )
+	{
+		Player* player = dynamic_cast< Player* >( actor );
+		if ( player )
+		{
+			Vec2Int dir = cellPos - player->GetCellPos ( );
+			float dist = dir.LengthSquared ( );
+			if ( dist < best )
+			{
+				dist = best;
+				ret = player;
+			}
+		}
+	}
+	return ret;
+}
+
+bool DevScene::CanGo ( Vec2Int cellPos )
+{
+	if ( _tilemapActor == nullptr )
+		return false;
+
+	Tilemap* tm = _tilemapActor->GetTilemap ( );
+	if ( tm == nullptr )
+		return false;
+
+	Tile* tile = tm->GetTileAt ( cellPos );
+	if ( tile == nullptr )
+		return false;
+
+	if ( GetCreatureAt ( cellPos ) != nullptr )
+		return false;
+
+	return tile->value != 1;
+}
+
+Vec2 DevScene::ConvertPos ( Vec2Int cellPos )
+{
+	Vec2 ret = {};
+
+	if ( _tilemapActor == nullptr )
+		return ret;
+
+	Tilemap* tm = _tilemapActor->GetTilemap ( );
+	if ( tm == nullptr )
+		return ret;
+
+	int32 size = tm->GetTileSize ( );
+	Vec2 pos = _tilemapActor->GetPos ( );
+
+	ret.x = pos.x + cellPos.x * size + ( size / 2 );
+	ret.y = pos.y + cellPos.y * size + ( size / 2 );
+
+	return ret;
+}
+
+Vec2Int DevScene::GetWorldPixelSize ( ) const
+{
+	if ( _tilemapActor == nullptr )
+		return { 0, 0 };
+
+	Tilemap* tm = _tilemapActor->GetTilemap ( );
+	if ( tm == nullptr )
+		return { 0, 0 };
+
+	Vec2Int mapSize = tm->GetMapSize ( );
+	int32 tileSize = tm->GetTileSize ( );
+
+	return { mapSize.x * tileSize, mapSize.y * tileSize };
+}
+
+
+void DevScene::UpdateLogin ( )
+{
+	// A-Z
+	for ( int32 vk = 'A'; vk <= 'Z'; vk++ )
+	{
+		if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( vk ) ) )
+		{
+			if ( ( int32 ) _loginText.length ( ) < MAX_USERNAME_LEN )
+				_loginText += static_cast< wchar_t >( vk - 'A' + L'a' );
+		}
+	}
+
+	// 0-9
+	for ( int32 vk = '0'; vk <= '9'; vk++ )
+	{
+		if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( vk ) ) )
+		{
+			if ( ( int32 ) _loginText.length ( ) < MAX_USERNAME_LEN )
+				_loginText += static_cast< wchar_t >( vk );
+		}
+	}
+
+	// Backspace
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( VK_BACK ) ) )
+	{
+		if ( !_loginText.empty ( ) )
+			_loginText.pop_back ( );
+	}
+
+	// Enter
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( VK_RETURN ) ) )
+	{
+		if ( !_loginText.empty ( ) )
+		{
+			// wstring -> string
+			string username ( _loginText.begin ( ) , _loginText.end ( ) );
+			SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Login ( username );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+		}
+	}
+}
+
+void DevScene::RenderLogin ( HDC hdc )
+{
+	Sprite* panel = GET_SINGLE ( ResourceManager )->GetSprite ( L"LoginPanel" );
+	if ( panel )
+	{
+		// Ã¢ Å©±â¿¡ ¸ÂÃç ½ºÄÉÀÏ¸µ
+		::TransparentBlt (
+			hdc ,
+			0 , 0 ,
+			GWinSizeX , GWinSizeY ,
+			panel->GetDC ( ) ,
+			panel->GetPos ( ).x , panel->GetPos ( ).y ,
+			panel->GetSize ( ).x , panel->GetSize ( ).y ,
+			RGB ( 0 , 0 , 0 ) // colorkey
+		);
+	}
+
+	SetBkMode ( hdc , TRANSPARENT );
+
+	int32 boxW = 300;
+	int32 boxH = 150;
+	int32 boxX = ( GWinSizeX - boxW ) / 2;
+	int32 boxY = ( GWinSizeY - boxH ) / 2;
+
+	// ÀÔ·Â ÅØ½ºÆ® + Ä¿¼­
+	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
+	int32 fieldX = boxX + 30;
+	int32 fieldY = boxY + 65;
+	int32 fieldW = boxW - 60;
+	int32 fieldH = 28;
+
+	std::wstring displayText = _loginText + L"|";
+	RECT textRect = { fieldX + 6, fieldY + 4, fieldX + fieldW - 6, fieldY + fieldH - 4 };
+	DrawText (
+		hdc ,
+		displayText.c_str ( ) ,
+		( int32 ) displayText.length ( ) ,
+		&textRect ,
+		DT_LEFT | DT_VCENTER | DT_SINGLELINE
+	);
+
+	// ¾È³» ¹®±¸
+	SetTextColor ( hdc , RGB ( 180 , 180 , 180 ) );
+	RECT hintRect = { boxX, boxY + 105, boxX + boxW, boxY + 130 };
+	DrawText ( hdc , L"Enter your name and press Enter" , 31 , &hintRect , DT_CENTER );
+}
+
+void DevScene::RenderHUD ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	const int32 baseX = 36;
+	const int32 baseY = 36;
+
+	// Status Frame
+	Sprite* frame = GET_SINGLE ( ResourceManager )->GetSprite ( L"Status_Frame" );
+	if ( frame )
+	{
+		::TransparentBlt ( hdc ,
+			baseX , baseY ,
+			frame->GetSize ( ).x , frame->GetSize ( ).y ,
+			frame->GetDC ( ) ,
+			frame->GetPos ( ).x , frame->GetPos ( ).y ,
+			frame->GetSize ( ).x , frame->GetSize ( ).y ,
+			frame->GetTransparent ( ) );
+	}
+
+	// Weapon Icon (¼±ÅÃµÈ ¹«±â¸¸ Ç¥½Ã)
+	{
+		Sprite* weaponSprite = nullptr;
+		switch ( myPlayer->GetWeaponType ( ) )
+		{
+		case WeaponType::Sword:
+			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_Icon" );
+			break;
+		case WeaponType::Bow:
+			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Bow_Icon" );
+			break;
+		case WeaponType::Staff:
+			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Staff_Icon" );
+			break;
+		}
+
+		if ( weaponSprite )
+		{
+			::TransparentBlt ( hdc ,
+				baseX + 0 , baseY + 0 ,
+				weaponSprite->GetSize ( ).x , weaponSprite->GetSize ( ).y ,
+				weaponSprite->GetDC ( ) ,
+				weaponSprite->GetPos ( ).x , weaponSprite->GetPos ( ).y ,
+				weaponSprite->GetSize ( ).x , weaponSprite->GetSize ( ).y ,
+				weaponSprite->GetTransparent ( ) );
+		}
+	}
+
+	// HP Bar
+	{
+		Sprite* hpBar = GET_SINGLE ( ResourceManager )->GetSprite ( L"Hp_Bar" );
+		if ( hpBar )
+		{
+			int32 hp = myPlayer->info.hp ( );
+			int32 maxHp = myPlayer->info.maxhp ( );
+			int32 fullWidth = hpBar->GetSize ( ).x;
+			int32 barWidth = ( maxHp > 0 ) ? ( fullWidth * hp / maxHp ) : 0;
+
+			if ( barWidth > 0 )
+			{
+				::TransparentBlt ( hdc ,
+					baseX + 99 , baseY + 9 ,
+					barWidth , hpBar->GetSize ( ).y ,
+					hpBar->GetDC ( ) ,
+					hpBar->GetPos ( ).x , hpBar->GetPos ( ).y ,
+					barWidth , hpBar->GetSize ( ).y ,
+					hpBar->GetTransparent ( ) );
+			}
+		}
+	}
+
+	// EXP Bar
+	{
+		Sprite* expBar = GET_SINGLE ( ResourceManager )->GetSprite ( L"Exp_Bar" );
+		if ( expBar )
+		{
+			const Protocol::PlayerExtra& extra = myPlayer->info.player ( );
+			int32 exp = extra.exp ( );
+			int32 maxExp = extra.maxexp ( );
+			int32 fullWidth = expBar->GetSize ( ).x;
+			int32 barWidth = ( maxExp > 0 ) ? ( fullWidth * exp / maxExp ) : 0;
+
+			if ( barWidth > 0 )
+			{
+				::TransparentBlt ( hdc ,
+					baseX + 9 , baseY + 36 ,
+					barWidth , expBar->GetSize ( ).y ,
+					expBar->GetDC ( ) ,
+					expBar->GetPos ( ).x , expBar->GetPos ( ).y ,
+					barWidth , expBar->GetSize ( ).y ,
+					expBar->GetTransparent ( ) );
+			}
+		}
+	}
+}
+
+void DevScene::CreateMapButtons ( )
+{
+	int32 screenW = GWinSizeX;
+	int32 screenH = GWinSizeY;
+
+	const int32 btnW = 64;
+	const int32 btnH = 40;
+	const int32 gap = 7;
+	const int32 totalW = btnW * 3 + gap * 2;
+
+	const int32 marginX = 10;
+	const int32 marginY = 10;
+
+	int32 startX = screenW - marginX - totalW;
+	int32 y = marginY + btnH / 2;
+
+	// ¸¶À»1 ¹öÆ°
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town1" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &DevScene::OnClickTown1 );
+		_uis.push_back ( b );
+
+		startX += btnW + gap;
+	}
+
+	// ¸¶À»2 ¹öÆ°
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town2" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &DevScene::OnClickTown2 );
+		_uis.push_back ( b );
+
+		startX += btnW + gap;
+	}
+
+	// ´øÀü ¹öÆ°
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Dungeon" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &DevScene::OnClickDungeon );
+		_uis.push_back ( b );
+	}
+}
+
+void DevScene::OnClickTown1 ( )
+{
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 1 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+}
+
+void DevScene::OnClickTown2 ( )
+{
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 2 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+}
+
+void DevScene::OnClickDungeon ( )
+{
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_DUNGEON , 0 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+}
+
+Sprite* DevScene::GetItemSprite ( int32 itemId )
+{
+	switch ( itemId )
+	{
+	case 2001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Potion_A" );
+	case 3001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_A" );
+	case 3002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_B" );
+	case 3003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_C" );
+	case 4001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_A" );
+	case 4002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_B" );
+	case 4003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_C" );
+	default: return nullptr;
+	}
+}
+
+void DevScene::RenderInventory ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
+	if ( invSprite == nullptr )
+		return;
+
+	int32 invW = invSprite->GetSize ( ).x;
+	int32 invH = invSprite->GetSize ( ).y;
+	int32 invX = _invPos.x;
+	int32 invY = _invPos.y;
+
+	::TransparentBlt ( hdc ,
+		invX , invY ,
+		invW , invH ,
+		invSprite->GetDC ( ) ,
+		invSprite->GetPos ( ).x , invSprite->GetPos ( ).y ,
+		invW , invH ,
+		invSprite->GetTransparent ( ) );
+
+	// =========================
+	// (ÀÓ½Ã) ÀÎº¥Åä¸® ½ºÅÈ ÅØ½ºÆ® Ç¥½Ã
+	// =========================
+	{
+		const Protocol::PlayerExtra& extra = myPlayer->info.player ( );
+
+		int32 level = extra.level ( );
+		int32 hp = myPlayer->info.hp ( );
+		int32 maxHp = myPlayer->info.maxhp ( );
+		int32 attack = myPlayer->info.attack ( );
+		int32 defence = myPlayer->info.defence ( );
+
+		wchar_t buf[ 256 ];
+		swprintf_s ( buf ,
+			L"Level: %d\nMax HP: %d\nHP: %d\nATK: %d\nDEF: %d" ,
+			level , maxHp , hp , attack , defence );
+
+		::SetBkMode ( hdc , TRANSPARENT );
+		::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+
+		// ÆùÆ®(ÀÓ½Ã)
+		static HFONT sFont = nullptr;
+		if ( sFont == nullptr )
+		{
+			sFont = ::CreateFontW (
+				18 , 0 , 0 , 0 , FW_BOLD , FALSE , FALSE , FALSE ,
+				DEFAULT_CHARSET , OUT_DEFAULT_PRECIS , CLIP_DEFAULT_PRECIS ,
+				DEFAULT_QUALITY , DEFAULT_PITCH | FF_DONTCARE ,
+				L"Consolas" );
+		}
+
+		HGDIOBJ oldFont = nullptr;
+		if ( sFont ) oldFont = ::SelectObject ( hdc , sFont );
+
+		RECT rc;
+		rc.left = invX + 184;
+		rc.top = invY + 32;
+		rc.right = invX + invW - 16;
+		rc.bottom = invY + 150;
+
+		::DrawTextW ( hdc , buf , -1 , &rc , DT_LEFT | DT_TOP | DT_WORDBREAK );
+
+		if ( oldFont ) ::SelectObject ( hdc , oldFont );
+	}
+
+	// ÀåÂø ½½·Ô ¾ÆÀÌÅÛ ·»´õ¸µ
+	auto renderItem = [&] ( int32 itemId , int32 count , int32 relX , int32 relY )
+	{
+		if ( itemId == 0 )
+			return;
+		Sprite* sp = GetItemSprite ( itemId );
+		if ( sp == nullptr )
+			return;
+		::TransparentBlt ( hdc ,
+			invX + relX , invY + relY ,
+			32 , 32 ,
+			sp->GetDC ( ) ,
+			sp->GetPos ( ).x , sp->GetPos ( ).y ,
+			sp->GetSize ( ).x , sp->GetSize ( ).y ,
+			sp->GetTransparent ( ) );
+
+		// ¼ö·® Ç¥½Ã (2 ÀÌ»óÀÏ ¶§¸¸)
+		if ( count > 1 )
+		{
+			wchar_t buf[ 8 ];
+			swprintf_s ( buf , L"%d" , count );
+			::SetBkMode ( hdc , TRANSPARENT );
+			::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
+			::TextOut ( hdc , invX + relX + 18 , invY + relY + 18 , buf , ( int ) wcslen ( buf ) );
+		}
+	};
+
+	// ÀåÂø ½½·Ô: Sword(98,38), Armor(98,80), Potion(290,68)
+	renderItem ( myPlayer->_equipWeapon.itemId , myPlayer->_equipWeapon.count , 98 , 38 );
+	renderItem ( myPlayer->_equipArmor.itemId , myPlayer->_equipArmor.count , 98 , 80 );
+	renderItem ( myPlayer->_equipPotion.itemId , myPlayer->_equipPotion.count , 290 , 68 );
+
+	// º¸°ü ½½·Ô: ½ÃÀÛ(16,168), 36px °£°İ, °¡·Î 9 x ¼¼·Î 3
+	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
+	{
+		int32 col = i % 9;
+		int32 row = i / 9;
+		int32 slotX = 16 + col * 36;
+		int32 slotY = 168 + row * 36;
+
+		renderItem ( myPlayer->_storage[ i ].itemId , myPlayer->_storage[ i ].count , slotX , slotY );
+	}
+}
+
+void DevScene::HandleInventoryClick ( )
+{
+	if ( !GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::RightMouse ) )
+		return;
+
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
+	if ( invSprite == nullptr )
+		return;
+
+	int32 invW = invSprite->GetSize ( ).x;
+	int32 invH = invSprite->GetSize ( ).y;
+	int32 invX = _invPos.x;
+	int32 invY = _invPos.y;
+
+	POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
+	int32 mx = mouse.x - invX;
+	int32 my = mouse.y - invY;
+
+	// ÀÎº¥Åä¸® ¿µ¿ª ¹ÛÀÌ¸é ¹«½Ã
+	if ( mx < 0 || my < 0 || mx >= invW || my >= invH )
+		return;
+
+	// ÀåÂø ½½·Ô Å¬¸¯ È®ÀÎ (ÀåÂø ÇØÁ¦)
+	// Weapon: (98,38) 32x32
+	if ( mx >= 98 && mx < 130 && my >= 38 && my < 70 )
+	{
+		if ( myPlayer->_equipWeapon.itemId > 0 )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 0 );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+		return;
+	}
+	// Armor: (98,80) 32x32
+	if ( mx >= 98 && mx < 130 && my >= 80 && my < 112 )
+	{
+		if ( myPlayer->_equipArmor.itemId > 0 )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 1 );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+		return;
+	}
+	// Potion: (290,68) 32x32
+	if ( mx >= 290 && mx < 322 && my >= 68 && my < 100 )
+	{
+		if ( myPlayer->_equipPotion.itemId > 0 )
+		{
+			// Æ÷¼ÇÀº ¿ìÅ¬¸¯ ½Ã »ç¿ë
+			SendBufferRef sb = ClientPacketHandler::Make_C_UseItem ( -1 );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+		return;
+	}
+
+	// º¸°ü ½½·Ô Å¬¸¯ È®ÀÎ
+	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
+	{
+		int32 col = i % 9;
+		int32 row = i / 9;
+		int32 slotX = 16 + col * 36;
+		int32 slotY = 168 + row * 36;
+
+		if ( mx >= slotX && mx < slotX + 32 && my >= slotY && my < slotY + 32 )
+		{
+			if ( myPlayer->_storage[ i ].itemId > 0 )
+			{
+				// Àåºñ ¾ÆÀÌÅÛÀº ÀåÂø, ¼Òºñ ¾ÆÀÌÅÛÀº »ç¿ë
+				SendBufferRef sb = ClientPacketHandler::Make_C_EquipItem ( i );
+				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+			}
+			return;
+		}
+	}
+}
+
+void DevScene::HandlePartyInput ( )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	// ÃÊ´ë ¼ö¶ô/°ÅÀı (Y/N)
+	if ( myPlayer->_pendingInviteFrom != 0 )
+	{
+		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::Y ) )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , true );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+			myPlayer->_pendingInviteFrom = 0;
+			myPlayer->_pendingInviterName.clear ( );
+			GET_SINGLE ( SoundManager )->Play ( L"UISound" );
+		}
+		else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::N ) )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , false );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+			myPlayer->_pendingInviteFrom = 0;
+			myPlayer->_pendingInviterName.clear ( );
+			GET_SINGLE ( SoundManager )->Play ( L"UISound" );
+		}
+		return;  // ÃÊ´ë ÆË¾÷ Áß¿¡´Â ´Ù¸¥ ÀÔ·Â ¹«½Ã
+	}
+
+	// PÅ° ÆÄÆ¼ Å»Åğ
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::P ) )
+	{
+		if ( !myPlayer->_partyMembers.empty ( ) )
+		{
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyLeave ( );
+			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+		}
+	}
+
+	// ÁÂÅ¬¸¯À¸·Î ´Ù¸¥ ÇÃ·¹ÀÌ¾î Å¬¸¯ ¡æ ÆÄÆ¼ ÃÊ´ë
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse ) )
+	{
+		// ÀÎº¥Åä¸® µå·¡±× ÁßÀÌ¸é ¹«½Ã
+		if ( _showInventory && _invDragging )
+			return;
+
+		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
+		Vec2 cameraPos = GET_SINGLE ( SceneManager )->GetCameraPos ( );
+
+		// ¸¶¿ì½º ½ºÅ©¸° ÁÂÇ¥ ¡æ ¿ùµå ÁÂÇ¥
+		float worldX = mouse.x + cameraPos.x - GWinSizeX / 2.f;
+		float worldY = mouse.y + cameraPos.y - GWinSizeY / 2.f;
+
+		uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
+
+		// LAYER_OBJECTÀÇ Player ¼øÈ¸
+		for ( Actor* actor : _actors[ LAYER_OBJECT ] )
+		{
+			Player* player = dynamic_cast< Player* >( actor );
+			if ( player == nullptr )
+				continue;
+			if ( player->info.objectid ( ) == myId )
+				continue;  // ÀÚ±â ÀÚ½Å Á¦¿Ü
+			if ( player->info.objecttype ( ) != Protocol::OBJECT_TYPE_PLAYER )
+				continue;
+
+			Vec2 pos = player->GetPos ( );
+			float dx = worldX - pos.x;
+			float dy = worldY - pos.y;
+
+			// Å¬¸¯ ¹üÀ§: ÇÃ·¹ÀÌ¾î Áß½É¿¡¼­ 50px ÀÌ³»
+			if ( dx * dx + dy * dy < 50.f * 50.f )
+			{
+				SendBufferRef sb = ClientPacketHandler::Make_C_PartyInvite ( player->info.objectid ( ) );
+				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
+				break;
+			}
+		}
+	}
+}
+
+void DevScene::RenderPartyHUD ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	if ( myPlayer->_partyMembers.empty ( ) )
+		return;
+
+	const int32 startX = 36;
+	const int32 startY = 100;
+	const int32 rowH = 24;
+	const int32 barW = 80;
+	const int32 barH = 8;
+
+	Sprite* statusSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyStatus" );
+	if ( statusSprite )
+	{
+		const int32 w = statusSprite->GetSize ( ).x;
+		const int32 h = statusSprite->GetSize ( ).y;
+		::TransparentBlt ( hdc ,
+			startX - 4 , startY - 4 ,
+			w , h ,
+			statusSprite->GetDC ( ) ,
+			statusSprite->GetPos ( ).x , statusSprite->GetPos ( ).y ,
+			w , h ,
+			statusSprite->GetTransparent ( ) );
+	}
+
+	SetBkMode ( hdc , TRANSPARENT );
+	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
+
+	// Å¸ÀÌÆ²
+	TextOut ( hdc , startX , startY , L"Party" , 5 );
+
+	for ( int32 i = 0; i < ( int32 ) myPlayer->_partyMembers.size ( ); i++ )
+	{
+		const auto& member = myPlayer->_partyMembers[ i ];
+		int32 y = startY + 18 + i * rowH;
+
+		// ¸®´õ Ç¥½Ã + ÀÌ¸§
+		wstring display;
+		if ( member.isLeader )
+			display = L"* " + member.name;
+		else
+			display = L"  " + member.name;
+
+		TextOut ( hdc , startX , y , display.c_str ( ) , ( int32 ) display.length ( ) );
+
+		// HP ¹Ù
+		int32 barX = startX + 100;
+		int32 barY = y + 2;
+
+		// ¹è°æ (¾îµÎ¿î »¡°­)
+		HBRUSH darkBrush = CreateSolidBrush ( RGB ( 80 , 0 , 0 ) );
+		RECT barBg = { barX , barY , barX + barW , barY + barH };
+		FillRect ( hdc , &barBg , darkBrush );
+		DeleteObject ( darkBrush );
+
+		// HP ¹Ù (ÃÊ·Ï)
+		if ( member.maxHp > 0 && member.hp > 0 )
+		{
+			int32 fillW = barW * member.hp / member.maxHp;
+			if ( fillW > 0 )
+			{
+				HBRUSH hpBrush = CreateSolidBrush ( RGB ( 0 , 200 , 0 ) );
+				RECT hpRect = { barX , barY , barX + fillW , barY + barH };
+				FillRect ( hdc , &hpRect , hpBrush );
+				DeleteObject ( hpBrush );
+			}
+		}
+	}
+}
+
+void DevScene::RenderPartyInvite ( HDC hdc )
+{
+	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
+	if ( myPlayer == nullptr )
+		return;
+
+	if ( myPlayer->_pendingInviteFrom == 0 )
+		return;
+
+	Sprite* inviteSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyInvite" );
+	int32 popW = 300;
+	int32 popH = 80;
+	if ( inviteSprite )
+	{
+		popW = inviteSprite->GetSize ( ).x;
+		popH = inviteSprite->GetSize ( ).y;
+	}
+	int32 popX = ( GWinSizeX - popW ) / 2;
+	int32 popY = ( GWinSizeY - popH ) / 2 - 50;
+
+	if ( inviteSprite )
+	{
+		::TransparentBlt ( hdc ,
+			popX , popY ,
+			popW , popH ,
+			inviteSprite->GetDC ( ) ,
+			inviteSprite->GetPos ( ).x , inviteSprite->GetPos ( ).y ,
+			popW , popH ,
+			inviteSprite->GetTransparent ( ) );
+	}
+
+	SetBkMode ( hdc , TRANSPARENT );
+	SetTextColor ( hdc , RGB ( 50 , 50 , 50 ) );
+
+	// ¸Ş½ÃÁö
+	wstring msg = myPlayer->_pendingInviterName + L" invited you to party";
+	RECT textRect = { popX + 10 , popY + 15 , popX + popW - 10 , popY + 40 };
+	DrawText ( hdc , msg.c_str ( ) , ( int32 ) msg.length ( ) , &textRect , DT_CENTER );
+
+	// Y/N ¾È³»
+	wstring hint = L"[Y] Accept    [N] Decline";
+	RECT hintRect = { popX + 10 , popY + 45 , popX + popW - 10 , popY + 70 };
+	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
+	DrawText ( hdc , hint.c_str ( ) , ( int32 ) hint.length ( ) , &hintRect , DT_CENTER );
+}
+
+// Load functions
 
 void DevScene::LoadMap ( )
 {
@@ -494,847 +1341,3 @@ void DevScene::LoadTilemap ( const wchar_t* tilemapFile )
 	_tilemapActor->SetShowDebug ( false );
 }
 
-void DevScene::ChangeMap ( Protocol::MAP_ID mapId )
-{
-	_currentMapId = mapId;
-	_hasMapId = true;
-
-	ClearWorldActors ( );
-	ChangeBackground ( mapId );
-
-	// íƒ€ì¼ë§µ êµì²´
-	if ( mapId == Protocol::MAP_ID_TOWN )
-	{
-		LoadTilemap ( L"Tilemap\\Tilemap_01.txt" );
-	}
-	else if ( mapId == Protocol::MAP_ID_DUNGEON )
-	{
-		LoadTilemap ( L"Tilemap\\Tilemap_02.txt" );
-	}
-}
-
-void DevScene::ChangeBackground ( Protocol::MAP_ID mapId )
-{
-	if ( _background == nullptr )
-		return;
-
-	Sprite* sprite = nullptr;
-
-	if ( mapId == Protocol::MAP_ID_TOWN )
-		sprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Stage01" );
-	else if ( mapId == Protocol::MAP_ID_DUNGEON )
-		sprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Stage02" );
-
-	if ( sprite == nullptr )
-		return;
-
-	_background->SetSprite ( sprite );
-
-	const Vec2Int size = sprite->GetSize ( );
-	_background->SetPos ( Vec2 ( size.x / 2 , size.y / 2 ) );
-}
-
-void DevScene::Handle_S_AddObject ( Protocol::S_AddObject& pkt )
-{
-	uint64 myPlayerId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
-
-	const int32 size = pkt.objects_size ( );
-	for ( int32 i = 0; i < size; i++ )
-	{
-		const Protocol::ObjectInfo& info = pkt.objects ( i );
-		if ( myPlayerId == info.objectid ( ) )
-			continue;
-
-		if ( info.objecttype ( ) == Protocol::OBJECT_TYPE_PLAYER )
-		{
-			Player* player = SpawnObject<Player> ( Vec2Int{ info.posx ( ), info.posy ( ) } );
-			player->SetDir ( info.dir ( ) );
-			player->SetState ( info.state ( ) );
-			player->info = info;
-		}
-		else if ( info.objecttype ( ) == Protocol::OBJECT_TYPE_MONSTER )
-		{
-			Monster* monster = SpawnObject<Monster> ( Vec2Int{ info.posx ( ), info.posy ( ) } );
-			monster->info = info;
-			monster->SetDir ( info.dir ( ) );
-			monster->SetState ( info.state ( ) );
-			monster->SetCellPos ( Vec2Int{ info.posx ( ), info.posy ( ) } , true );
-		}
-		else if ( info.objecttype() == Protocol::OBJECT_TYPE_PROJECTILE)
-		{
-			 Arrow* arrow = SpawnObject<Arrow>( Vec2Int{info.posx(), info.posy()});
-			 arrow->info = info;
-			 arrow->SetDir(info.dir());
-			 arrow->SetState(info.state());
-			 arrow->SetCellPos({info.posx(), info.posy()}, true);
-		}
-	}
-}
-
-void DevScene::Handle_S_RemoveObject ( Protocol::S_RemoveObject& pkt )
-{
-	const int32 size = pkt.ids_size ( );
-	for ( int32 i = 0; i < size; i++ )
-	{
-		int32 id = pkt.ids ( i );
-
-		GameObject* object =  GetObject( id );
-		if ( object )
-			RemoveActor ( object );
-	}
-}
-
-GameObject* DevScene::GetObject ( uint64 id )
-{
-	for ( Actor* actor : _actors[ LAYER_OBJECT ] )
-	{
-		GameObject* gameObject = dynamic_cast< GameObject* >( actor );
-		if ( gameObject && gameObject->info.objectid ( ) == id )
-			return gameObject;
-	}
-
-	return nullptr;
-}
-
-Player* DevScene::FindClosestPlayer ( Vec2Int cellPos )
-{
-	float best = FLT_MAX;
-	Player* ret = nullptr;
-
-	for ( Actor* actor : _actors[ LAYER_OBJECT ] )
-	{
-		Player* player = dynamic_cast< Player* >( actor );
-		if ( player )
-		{
-			Vec2Int dir = cellPos - player->GetCellPos ( );
-			float dist = dir.LengthSquared ( );
-			if ( dist < best )
-			{
-				dist = best;
-				ret = player;
-			}
-		}
-	}
-	return ret;
-}
-
-bool DevScene::CanGo ( Vec2Int cellPos )
-{
-	if ( _tilemapActor == nullptr )
-		return false;
-
-	Tilemap* tm = _tilemapActor->GetTilemap ( );
-	if ( tm == nullptr )
-		return false;
-
-	Tile* tile = tm->GetTileAt ( cellPos );
-	if ( tile == nullptr )
-		return false;
-
-	if ( GetCreatureAt ( cellPos ) != nullptr )
-		return false;
-
-	return tile->value != 1;
-}
-
-Vec2 DevScene::ConvertPos ( Vec2Int cellPos )
-{
-	Vec2 ret = {};
-
-	if ( _tilemapActor == nullptr )
-		return ret;
-
-	Tilemap* tm = _tilemapActor->GetTilemap ( );
-	if ( tm == nullptr )
-		return ret;
-
-	int32 size = tm->GetTileSize ( );
-	Vec2 pos = _tilemapActor->GetPos ( );
-
-	ret.x = pos.x + cellPos.x * size + ( size / 2 );
-	ret.y = pos.y + cellPos.y * size + ( size / 2 );
-
-	return ret;
-}
-
-Vec2Int DevScene::GetWorldPixelSize ( ) const
-{
-	if ( _tilemapActor == nullptr )
-		return { 0, 0 };
-
-	Tilemap* tm = _tilemapActor->GetTilemap ( );
-	if ( tm == nullptr )
-		return { 0, 0 };
-
-	Vec2Int mapSize = tm->GetMapSize ( );
-	int32 tileSize = tm->GetTileSize ( );
-
-	return { mapSize.x * tileSize, mapSize.y * tileSize };
-}
-
-
-void DevScene::UpdateLogin ( )
-{
-	// A-Z
-	for ( int32 vk = 'A'; vk <= 'Z'; vk++ )
-	{
-		if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( vk ) ) )
-		{
-			if ( ( int32 ) _loginText.length ( ) < MAX_USERNAME_LEN )
-				_loginText += static_cast< wchar_t >( vk - 'A' + L'a' );
-		}
-	}
-
-	// 0-9
-	for ( int32 vk = '0'; vk <= '9'; vk++ )
-	{
-		if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( vk ) ) )
-		{
-			if ( ( int32 ) _loginText.length ( ) < MAX_USERNAME_LEN )
-				_loginText += static_cast< wchar_t >( vk );
-		}
-	}
-
-	// Backspace
-	if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( VK_BACK ) ) )
-	{
-		if ( !_loginText.empty ( ) )
-			_loginText.pop_back ( );
-	}
-
-	// Enter
-	if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( VK_RETURN ) ) )
-	{
-		if ( !_loginText.empty ( ) )
-		{
-			// wstring -> string
-			string username ( _loginText.begin ( ) , _loginText.end ( ) );
-			SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Login ( username );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
-		}
-	}
-}
-
-void DevScene::RenderLogin ( HDC hdc )
-{
-	Sprite* panel = GET_SINGLE ( ResourceManager )->GetSprite ( L"LoginPanel" );
-	if ( panel )
-	{
-		// ì°½ í¬ê¸°ì— ë§ì¶° ìŠ¤ì¼€ì¼ë§
-		::TransparentBlt (
-			hdc ,
-			0 , 0 ,
-			GWinSizeX , GWinSizeY ,
-			panel->GetDC ( ) ,
-			panel->GetPos ( ).x , panel->GetPos ( ).y ,
-			panel->GetSize ( ).x , panel->GetSize ( ).y ,
-			RGB ( 0 , 0 , 0 ) // colorkey
-		);
-	}
-
-	SetBkMode ( hdc , TRANSPARENT );
-
-	int32 boxW = 300;
-	int32 boxH = 150;
-	int32 boxX = ( GWinSizeX - boxW ) / 2;
-	int32 boxY = ( GWinSizeY - boxH ) / 2;
-
-	// ì…ë ¥ í…ìŠ¤íŠ¸ + ì»¤ì„œ
-	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
-	int32 fieldX = boxX + 30;
-	int32 fieldY = boxY + 65;
-	int32 fieldW = boxW - 60;
-	int32 fieldH = 28;
-
-	std::wstring displayText = _loginText + L"|";
-	RECT textRect = { fieldX + 6, fieldY + 4, fieldX + fieldW - 6, fieldY + fieldH - 4 };
-	DrawText (
-		hdc ,
-		displayText.c_str ( ) ,
-		( int32 ) displayText.length ( ) ,
-		&textRect ,
-		DT_LEFT | DT_VCENTER | DT_SINGLELINE
-	);
-
-	// ì•ˆë‚´ ë¬¸êµ¬
-	SetTextColor ( hdc , RGB ( 180 , 180 , 180 ) );
-	RECT hintRect = { boxX, boxY + 105, boxX + boxW, boxY + 130 };
-	DrawText ( hdc , L"Enter your name and press Enter" , 31 , &hintRect , DT_CENTER );
-}
-
-void DevScene::RenderHUD ( HDC hdc )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	const int32 baseX = 36;
-	const int32 baseY = 36;
-
-	// Status Frame
-	Sprite* frame = GET_SINGLE ( ResourceManager )->GetSprite ( L"Status_Frame" );
-	if ( frame )
-	{
-		::TransparentBlt ( hdc ,
-			baseX , baseY ,
-			frame->GetSize ( ).x , frame->GetSize ( ).y ,
-			frame->GetDC ( ) ,
-			frame->GetPos ( ).x , frame->GetPos ( ).y ,
-			frame->GetSize ( ).x , frame->GetSize ( ).y ,
-			frame->GetTransparent ( ) );
-	}
-
-	// Weapon Icon (ì„ íƒëœ ë¬´ê¸°ë§Œ í‘œì‹œ)
-	{
-		Sprite* weaponSprite = nullptr;
-		switch ( myPlayer->GetWeaponType ( ) )
-		{
-		case WeaponType::Sword:
-			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_Icon" );
-			break;
-		case WeaponType::Bow:
-			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Bow_Icon" );
-			break;
-		case WeaponType::Staff:
-			weaponSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Staff_Icon" );
-			break;
-		}
-
-		if ( weaponSprite )
-		{
-			::TransparentBlt ( hdc ,
-				baseX + 0 , baseY + 0 ,
-				weaponSprite->GetSize ( ).x , weaponSprite->GetSize ( ).y ,
-				weaponSprite->GetDC ( ) ,
-				weaponSprite->GetPos ( ).x , weaponSprite->GetPos ( ).y ,
-				weaponSprite->GetSize ( ).x , weaponSprite->GetSize ( ).y ,
-				weaponSprite->GetTransparent ( ) );
-		}
-	}
-
-	// HP Bar
-	{
-		Sprite* hpBar = GET_SINGLE ( ResourceManager )->GetSprite ( L"Hp_Bar" );
-		if ( hpBar )
-		{
-			int32 hp = myPlayer->info.hp ( );
-			int32 maxHp = myPlayer->info.maxhp ( );
-			int32 fullWidth = hpBar->GetSize ( ).x;
-			int32 barWidth = ( maxHp > 0 ) ? ( fullWidth * hp / maxHp ) : 0;
-
-			if ( barWidth > 0 )
-			{
-				::TransparentBlt ( hdc ,
-					baseX + 99 , baseY + 9 ,
-					barWidth , hpBar->GetSize ( ).y ,
-					hpBar->GetDC ( ) ,
-					hpBar->GetPos ( ).x , hpBar->GetPos ( ).y ,
-					barWidth , hpBar->GetSize ( ).y ,
-					hpBar->GetTransparent ( ) );
-			}
-		}
-	}
-
-	// EXP Bar
-	{
-		Sprite* expBar = GET_SINGLE ( ResourceManager )->GetSprite ( L"Exp_Bar" );
-		if ( expBar )
-		{
-			const Protocol::PlayerExtra& extra = myPlayer->info.player ( );
-			int32 exp = extra.exp ( );
-			int32 maxExp = extra.maxexp ( );
-			int32 fullWidth = expBar->GetSize ( ).x;
-			int32 barWidth = ( maxExp > 0 ) ? ( fullWidth * exp / maxExp ) : 0;
-
-			if ( barWidth > 0 )
-			{
-				::TransparentBlt ( hdc ,
-					baseX + 9 , baseY + 36 ,
-					barWidth , expBar->GetSize ( ).y ,
-					expBar->GetDC ( ) ,
-					expBar->GetPos ( ).x , expBar->GetPos ( ).y ,
-					barWidth , expBar->GetSize ( ).y ,
-					expBar->GetTransparent ( ) );
-			}
-		}
-	}
-}
-
-void DevScene::CreateMapButtons ( )
-{
-	int32 screenW = GWinSizeX;
-	int32 screenH = GWinSizeY;
-
-	const int32 btnW = 64;
-	const int32 btnH = 40;
-	const int32 gap = 7;
-	const int32 totalW = btnW * 3 + gap * 2;
-
-	const int32 marginX = 10;
-	const int32 marginY = 10;
-
-	int32 startX = screenW - marginX - totalW;
-	int32 y = marginY + btnH / 2;
-
-	// ë§ˆì„1 ë²„íŠ¼
-	{
-		Button* b = new Button ( );
-		b->SetSize ( { btnW, btnH } );
-		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
-		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town1" ) , BS_Default );
-		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
-		b->AddOnClickDelegate ( this , &DevScene::OnClickTown1 );
-		_uis.push_back ( b );
-
-		startX += btnW + gap;
-	}
-
-	// ë§ˆì„2 ë²„íŠ¼
-	{
-		Button* b = new Button ( );
-		b->SetSize ( { btnW, btnH } );
-		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
-		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town2" ) , BS_Default );
-		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
-		b->AddOnClickDelegate ( this , &DevScene::OnClickTown2 );
-		_uis.push_back ( b );
-
-		startX += btnW + gap;
-	}
-
-	// ë˜ì „ ë²„íŠ¼
-	{
-		Button* b = new Button ( );
-		b->SetSize ( { btnW, btnH } );
-		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
-		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Dungeon" ) , BS_Default );
-		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
-		b->AddOnClickDelegate ( this , &DevScene::OnClickDungeon );
-		_uis.push_back ( b );
-	}
-}
-
-void DevScene::OnClickTown1 ( )
-{
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 1 );
-	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
-}
-
-void DevScene::OnClickTown2 ( )
-{
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 2 );
-	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
-}
-
-void DevScene::OnClickDungeon ( )
-{
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_DUNGEON , 0 );
-	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
-}
-
-Sprite* DevScene::GetItemSprite ( int32 itemId )
-{
-	switch ( itemId )
-	{
-	case 2001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Potion_A" );
-	case 3001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_A" );
-	case 3002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_B" );
-	case 3003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Sword_C" );
-	case 4001: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_A" );
-	case 4002: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_B" );
-	case 4003: return GET_SINGLE ( ResourceManager )->GetSprite ( L"Armor_C" );
-	default: return nullptr;
-	}
-}
-
-void DevScene::RenderInventory ( HDC hdc )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
-	if ( invSprite == nullptr )
-		return;
-
-	int32 invW = invSprite->GetSize ( ).x;
-	int32 invH = invSprite->GetSize ( ).y;
-	int32 invX = _invPos.x;
-	int32 invY = _invPos.y;
-
-	::TransparentBlt ( hdc ,
-		invX , invY ,
-		invW , invH ,
-		invSprite->GetDC ( ) ,
-		invSprite->GetPos ( ).x , invSprite->GetPos ( ).y ,
-		invW , invH ,
-		invSprite->GetTransparent ( ) );
-
-	// =========================
-	// (ì„ì‹œ) ì¸ë²¤í† ë¦¬ ìŠ¤íƒ¯ í…ìŠ¤íŠ¸ í‘œì‹œ
-	// =========================
-	{
-		const Protocol::PlayerExtra& extra = myPlayer->info.player ( );
-
-		int32 level = extra.level ( );
-		int32 hp = myPlayer->info.hp ( );
-		int32 maxHp = myPlayer->info.maxhp ( );
-		int32 attack = myPlayer->info.attack ( );
-		int32 defence = myPlayer->info.defence ( );
-
-		wchar_t buf[ 256 ];
-		swprintf_s ( buf ,
-			L"Level: %d\nMax HP: %d\nHP: %d\nATK: %d\nDEF: %d" ,
-			level , maxHp , hp , attack , defence );
-
-		::SetBkMode ( hdc , TRANSPARENT );
-		::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
-
-		// í°íŠ¸(ì„ì‹œ)
-		static HFONT sFont = nullptr;
-		if ( sFont == nullptr )
-		{
-			sFont = ::CreateFontW (
-				18 , 0 , 0 , 0 , FW_BOLD , FALSE , FALSE , FALSE ,
-				DEFAULT_CHARSET , OUT_DEFAULT_PRECIS , CLIP_DEFAULT_PRECIS ,
-				DEFAULT_QUALITY , DEFAULT_PITCH | FF_DONTCARE ,
-				L"Consolas" );
-		}
-
-		HGDIOBJ oldFont = nullptr;
-		if ( sFont ) oldFont = ::SelectObject ( hdc , sFont );
-
-		RECT rc;
-		rc.left = invX + 184;
-		rc.top = invY + 32;
-		rc.right = invX + invW - 16;
-		rc.bottom = invY + 150;
-
-		::DrawTextW ( hdc , buf , -1 , &rc , DT_LEFT | DT_TOP | DT_WORDBREAK );
-
-		if ( oldFont ) ::SelectObject ( hdc , oldFont );
-	}
-
-	// ì¥ì°© ìŠ¬ë¡¯ ì•„ì´í…œ ë Œë”ë§
-	auto renderItem = [&] ( int32 itemId , int32 count , int32 relX , int32 relY )
-	{
-		if ( itemId == 0 )
-			return;
-		Sprite* sp = GetItemSprite ( itemId );
-		if ( sp == nullptr )
-			return;
-		::TransparentBlt ( hdc ,
-			invX + relX , invY + relY ,
-			32 , 32 ,
-			sp->GetDC ( ) ,
-			sp->GetPos ( ).x , sp->GetPos ( ).y ,
-			sp->GetSize ( ).x , sp->GetSize ( ).y ,
-			sp->GetTransparent ( ) );
-
-		// ìˆ˜ëŸ‰ í‘œì‹œ (2 ì´ìƒì¼ ë•Œë§Œ)
-		if ( count > 1 )
-		{
-			wchar_t buf[ 8 ];
-			swprintf_s ( buf , L"%d" , count );
-			::SetBkMode ( hdc , TRANSPARENT );
-			::SetTextColor ( hdc , RGB ( 255 , 255 , 255 ) );
-			::TextOut ( hdc , invX + relX + 18 , invY + relY + 18 , buf , ( int ) wcslen ( buf ) );
-		}
-	};
-
-	// ì¥ì°© ìŠ¬ë¡¯: Sword(98,38), Armor(98,80), Potion(290,68)
-	renderItem ( myPlayer->_equipWeapon.itemId , myPlayer->_equipWeapon.count , 98 , 38 );
-	renderItem ( myPlayer->_equipArmor.itemId , myPlayer->_equipArmor.count , 98 , 80 );
-	renderItem ( myPlayer->_equipPotion.itemId , myPlayer->_equipPotion.count , 290 , 68 );
-
-	// ë³´ê´€ ìŠ¬ë¡¯: ì‹œì‘(16,168), 36px ê°„ê²©, ê°€ë¡œ 9 x ì„¸ë¡œ 3
-	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
-	{
-		int32 col = i % 9;
-		int32 row = i / 9;
-		int32 slotX = 16 + col * 36;
-		int32 slotY = 168 + row * 36;
-
-		renderItem ( myPlayer->_storage[ i ].itemId , myPlayer->_storage[ i ].count , slotX , slotY );
-	}
-}
-
-void DevScene::HandleInventoryClick ( )
-{
-	if ( !GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::RightMouse ) )
-		return;
-
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	Sprite* invSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"Inventory" );
-	if ( invSprite == nullptr )
-		return;
-
-	int32 invW = invSprite->GetSize ( ).x;
-	int32 invH = invSprite->GetSize ( ).y;
-	int32 invX = _invPos.x;
-	int32 invY = _invPos.y;
-
-	POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
-	int32 mx = mouse.x - invX;
-	int32 my = mouse.y - invY;
-
-	// ì¸ë²¤í† ë¦¬ ì˜ì—­ ë°–ì´ë©´ ë¬´ì‹œ
-	if ( mx < 0 || my < 0 || mx >= invW || my >= invH )
-		return;
-
-	// ì¥ì°© ìŠ¬ë¡¯ í´ë¦­ í™•ì¸ (ì¥ì°© í•´ì œ)
-	// Weapon: (98,38) 32x32
-	if ( mx >= 98 && mx < 130 && my >= 38 && my < 70 )
-	{
-		if ( myPlayer->_equipWeapon.itemId > 0 )
-		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 0 );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-		}
-		return;
-	}
-	// Armor: (98,80) 32x32
-	if ( mx >= 98 && mx < 130 && my >= 80 && my < 112 )
-	{
-		if ( myPlayer->_equipArmor.itemId > 0 )
-		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 1 );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-		}
-		return;
-	}
-	// Potion: (290,68) 32x32
-	if ( mx >= 290 && mx < 322 && my >= 68 && my < 100 )
-	{
-		if ( myPlayer->_equipPotion.itemId > 0 )
-		{
-			// í¬ì…˜ì€ ìš°í´ë¦­ ì‹œ ì‚¬ìš©
-			SendBufferRef sb = ClientPacketHandler::Make_C_UseItem ( -1 );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-		}
-		return;
-	}
-
-	// ë³´ê´€ ìŠ¬ë¡¯ í´ë¦­ í™•ì¸
-	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
-	{
-		int32 col = i % 9;
-		int32 row = i / 9;
-		int32 slotX = 16 + col * 36;
-		int32 slotY = 168 + row * 36;
-
-		if ( mx >= slotX && mx < slotX + 32 && my >= slotY && my < slotY + 32 )
-		{
-			if ( myPlayer->_storage[ i ].itemId > 0 )
-			{
-				// ì¥ë¹„ ì•„ì´í…œì€ ì¥ì°©, ì†Œë¹„ ì•„ì´í…œì€ ì‚¬ìš©
-				SendBufferRef sb = ClientPacketHandler::Make_C_EquipItem ( i );
-				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-			}
-			return;
-		}
-	}
-}
-
-void DevScene::HandlePartyInput ( )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	// ì´ˆëŒ€ ìˆ˜ë½/ê±°ì ˆ (Y/N)
-	if ( myPlayer->_pendingInviteFrom != 0 )
-	{
-		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::Y ) )
-		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , true );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-			myPlayer->_pendingInviteFrom = 0;
-			myPlayer->_pendingInviterName.clear ( );
-			GET_SINGLE ( SoundManager )->Play ( L"UISound" );
-		}
-		else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::N ) )
-		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , false );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-			myPlayer->_pendingInviteFrom = 0;
-			myPlayer->_pendingInviterName.clear ( );
-			GET_SINGLE ( SoundManager )->Play ( L"UISound" );
-		}
-		return;  // ì´ˆëŒ€ íŒì—… ì¤‘ì—ëŠ” ë‹¤ë¥¸ ì…ë ¥ ë¬´ì‹œ
-	}
-
-	// Pí‚¤ íŒŒí‹° íƒˆí‡´
-	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::P ) )
-	{
-		if ( !myPlayer->_partyMembers.empty ( ) )
-		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_PartyLeave ( );
-			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-		}
-	}
-
-	// ì¢Œí´ë¦­ìœ¼ë¡œ ë‹¤ë¥¸ í”Œë ˆì´ì–´ í´ë¦­ â†’ íŒŒí‹° ì´ˆëŒ€
-	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::LeftMouse ) )
-	{
-		// ì¸ë²¤í† ë¦¬ ë“œë˜ê·¸ ì¤‘ì´ë©´ ë¬´ì‹œ
-		if ( _showInventory && _invDragging )
-			return;
-
-		POINT mouse = GET_SINGLE ( InputManager )->GetMousePos ( );
-		Vec2 cameraPos = GET_SINGLE ( SceneManager )->GetCameraPos ( );
-
-		// ë§ˆìš°ìŠ¤ ìŠ¤í¬ë¦° ì¢Œí‘œ â†’ ì›”ë“œ ì¢Œí‘œ
-		float worldX = mouse.x + cameraPos.x - GWinSizeX / 2.f;
-		float worldY = mouse.y + cameraPos.y - GWinSizeY / 2.f;
-
-		uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
-
-		// LAYER_OBJECTì˜ Player ìˆœíšŒ
-		for ( Actor* actor : _actors[ LAYER_OBJECT ] )
-		{
-			Player* player = dynamic_cast< Player* >( actor );
-			if ( player == nullptr )
-				continue;
-			if ( player->info.objectid ( ) == myId )
-				continue;  // ìê¸° ìì‹  ì œì™¸
-			if ( player->info.objecttype ( ) != Protocol::OBJECT_TYPE_PLAYER )
-				continue;
-
-			Vec2 pos = player->GetPos ( );
-			float dx = worldX - pos.x;
-			float dy = worldY - pos.y;
-
-			// í´ë¦­ ë²”ìœ„: í”Œë ˆì´ì–´ ì¤‘ì‹¬ì—ì„œ 50px ì´ë‚´
-			if ( dx * dx + dy * dy < 50.f * 50.f )
-			{
-				SendBufferRef sb = ClientPacketHandler::Make_C_PartyInvite ( player->info.objectid ( ) );
-				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
-				break;
-			}
-		}
-	}
-}
-
-void DevScene::RenderPartyHUD ( HDC hdc )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	if ( myPlayer->_partyMembers.empty ( ) )
-		return;
-
-	const int32 startX = 36;
-	const int32 startY = 100;
-	const int32 rowH = 24;
-	const int32 barW = 80;
-	const int32 barH = 8;
-
-	Sprite* statusSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyStatus" );
-	if ( statusSprite )
-	{
-		const int32 w = statusSprite->GetSize ( ).x;
-		const int32 h = statusSprite->GetSize ( ).y;
-		::TransparentBlt ( hdc ,
-			startX - 4 , startY - 4 ,
-			w , h ,
-			statusSprite->GetDC ( ) ,
-			statusSprite->GetPos ( ).x , statusSprite->GetPos ( ).y ,
-			w , h ,
-			statusSprite->GetTransparent ( ) );
-	}
-
-	SetBkMode ( hdc , TRANSPARENT );
-	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
-
-	// íƒ€ì´í‹€
-	TextOut ( hdc , startX , startY , L"Party" , 5 );
-
-	for ( int32 i = 0; i < ( int32 ) myPlayer->_partyMembers.size ( ); i++ )
-	{
-		const auto& member = myPlayer->_partyMembers[ i ];
-		int32 y = startY + 18 + i * rowH;
-
-		// ë¦¬ë” í‘œì‹œ + ì´ë¦„
-		wstring display;
-		if ( member.isLeader )
-			display = L"* " + member.name;
-		else
-			display = L"  " + member.name;
-
-		TextOut ( hdc , startX , y , display.c_str ( ) , ( int32 ) display.length ( ) );
-
-		// HP ë°”
-		int32 barX = startX + 100;
-		int32 barY = y + 2;
-
-		// ë°°ê²½ (ì–´ë‘ìš´ ë¹¨ê°•)
-		HBRUSH darkBrush = CreateSolidBrush ( RGB ( 80 , 0 , 0 ) );
-		RECT barBg = { barX , barY , barX + barW , barY + barH };
-		FillRect ( hdc , &barBg , darkBrush );
-		DeleteObject ( darkBrush );
-
-		// HP ë°” (ì´ˆë¡)
-		if ( member.maxHp > 0 && member.hp > 0 )
-		{
-			int32 fillW = barW * member.hp / member.maxHp;
-			if ( fillW > 0 )
-			{
-				HBRUSH hpBrush = CreateSolidBrush ( RGB ( 0 , 200 , 0 ) );
-				RECT hpRect = { barX , barY , barX + fillW , barY + barH };
-				FillRect ( hdc , &hpRect , hpBrush );
-				DeleteObject ( hpBrush );
-			}
-		}
-	}
-}
-
-void DevScene::RenderPartyInvite ( HDC hdc )
-{
-	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
-	if ( myPlayer == nullptr )
-		return;
-
-	if ( myPlayer->_pendingInviteFrom == 0 )
-		return;
-
-	Sprite* inviteSprite = GET_SINGLE ( ResourceManager )->GetSprite ( L"PartyInvite" );
-	int32 popW = 300;
-	int32 popH = 80;
-	if ( inviteSprite )
-	{
-		popW = inviteSprite->GetSize ( ).x;
-		popH = inviteSprite->GetSize ( ).y;
-	}
-	int32 popX = ( GWinSizeX - popW ) / 2;
-	int32 popY = ( GWinSizeY - popH ) / 2 - 50;
-
-	if ( inviteSprite )
-	{
-		::TransparentBlt ( hdc ,
-			popX , popY ,
-			popW , popH ,
-			inviteSprite->GetDC ( ) ,
-			inviteSprite->GetPos ( ).x , inviteSprite->GetPos ( ).y ,
-			popW , popH ,
-			inviteSprite->GetTransparent ( ) );
-	}
-
-	SetBkMode ( hdc , TRANSPARENT );
-	SetTextColor ( hdc , RGB ( 50 , 50 , 50 ) );
-
-	// ë©”ì‹œì§€
-	wstring msg = myPlayer->_pendingInviterName + L" invited you to party";
-	RECT textRect = { popX + 10 , popY + 15 , popX + popW - 10 , popY + 40 };
-	DrawText ( hdc , msg.c_str ( ) , ( int32 ) msg.length ( ) , &textRect , DT_CENTER );
-
-	// Y/N ì•ˆë‚´
-	wstring hint = L"[Y] Accept    [N] Decline";
-	RECT hintRect = { popX + 10 , popY + 45 , popX + popW - 10 , popY + 70 };
-	SetTextColor ( hdc , RGB ( 0 , 0 , 0 ) );
-	DrawText ( hdc , hint.c_str ( ) , ( int32 ) hint.length ( ) , &hintRect , DT_CENTER );
-}

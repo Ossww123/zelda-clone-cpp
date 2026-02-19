@@ -1,0 +1,30 @@
+{
+  "sprites": [
+    { "id": "Stage01", "texture": "Stage01", "x": 0, "y": 0, "w": 0, "h": 0 },
+    { "id": "Stage02", "texture": "Stage02", "x": 0, "y": 0, "w": 0, "h": 0 },
+    { "id": "TileO", "texture": "Tile", "x": 0, "y": 0, "w": 48, "h": 48 },
+    { "id": "TileX", "texture": "Tile", "x": 48, "y": 0, "w": 48, "h": 48 },
+    { "id": "Btn_Town1", "texture": "MapButton", "x": 0, "y": 0, "w": 64, "h": 40 },
+    { "id": "Btn_Town2", "texture": "MapButton", "x": 71, "y": 0, "w": 64, "h": 40 },
+    { "id": "Btn_Dungeon", "texture": "MapButton", "x": 142, "y": 0, "w": 64, "h": 40 },
+    { "id": "LoginPanel", "texture": "LoginPanel", "x": 0, "y": 0, "w": 0, "h": 0 },
+    { "id": "PartyInvite", "texture": "PartyInvite", "x": 0, "y": 0, "w": 0, "h": 0 },
+    { "id": "PartyStatus", "texture": "PartyStatus", "x": 0, "y": 0, "w": 0, "h": 0 },
+    { "id": "Status_Frame", "texture": "HUD", "x": 8, "y": 8, "w": 240, "h": 48 },
+    { "id": "Hp_Bar", "texture": "HUD", "x": 109, "y": 61, "w": 129, "h": 9 },
+    { "id": "Exp_Bar", "texture": "HUD", "x": 101, "y": 110, "w": 219, "h": 6 },
+    { "id": "Enemy_Hp_Frame", "texture": "HUD", "x": 261, "y": 8, "w": 102, "h": 12 },
+    { "id": "Enemy_Hp_Bar", "texture": "HUD", "x": 264, "y": 23, "w": 96, "h": 6 },
+    { "id": "Sword_Icon", "texture": "HUD", "x": 14, "y": 61, "w": 63, "h": 39 },
+    { "id": "Bow_Icon", "texture": "HUD", "x": 14, "y": 106, "w": 63, "h": 39 },
+    { "id": "Staff_Icon", "texture": "HUD", "x": 14, "y": 151, "w": 63, "h": 39 },
+    { "id": "Sword_A", "texture": "Items", "x": 0, "y": 0, "w": 32, "h": 32 },
+    { "id": "Sword_B", "texture": "Items", "x": 32, "y": 0, "w": 32, "h": 32 },
+    { "id": "Sword_C", "texture": "Items", "x": 64, "y": 0, "w": 32, "h": 32 },
+    { "id": "Armor_A", "texture": "Items", "x": 0, "y": 32, "w": 32, "h": 32 },
+    { "id": "Armor_B", "texture": "Items", "x": 32, "y": 32, "w": 32, "h": 32 },
+    { "id": "Armor_C", "texture": "Items", "x": 64, "y": 32, "w": 32, "h": 32 },
+    { "id": "Potion_A", "texture": "Items", "x": 0, "y": 64, "w": 32, "h": 32 },
+    { "id": "Inventory", "texture": "Inventory", "x": 0, "y": 0, "w": 0, "h": 0 }
+  ]
+}

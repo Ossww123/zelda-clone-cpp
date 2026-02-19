@@ -22,14 +22,6 @@ public:
 	virtual void AddActor ( Actor* actor ) override;
 	virtual void RemoveActor ( Actor* actor ) override;
 
-	void LoadMap ( );
-	void LoadPlayer ( );
-	void LoadMonster ( );
-	void LoadProjectiles ( );
-	void LoadEffect ( );
-	void LoadTilemap ( );
-	void LoadTilemap ( const wchar_t* tilemapFile );
-
 	template<typename T>
 	T* SpawnObject ( Vec2Int pos )
 	{
@@ -68,6 +60,18 @@ public:
 	bool IsTown ( ) const { return ( _hasMapId && _currentMapId == Protocol::MAP_ID_TOWN ); }
 
 	void SetLoggedIn ( bool value ) { _loggedIn = value; }
+
+private:
+	void LoadMap ( );
+	void LoadPlayer ( );
+	void LoadMonster ( );
+	void LoadProjectiles ( );
+	void LoadEffect ( );
+	void LoadTilemap ( );
+	void LoadTilemap ( const wchar_t* tilemapFile );
+	void LoadSceneTextures ( );
+	void CreateSceneSprites ( );
+	void LoadSceneSounds ( );
 
 private:
 	void UpdateLogin ( );

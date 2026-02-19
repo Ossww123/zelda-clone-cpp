@@ -1,0 +1,9 @@
+{
+  "sounds": [
+    { "id": "BGM", "path": "Sound/BGM.wav", "loop_on_init": true },
+    { "id": "Sword", "path": "Sound/Sword.wav" },
+    { "id": "Arrow", "path": "Sound/Arrow.wav" },
+    { "id": "Explode", "path": "Sound/Explode.wav" },
+    { "id": "UISound", "path": "Sound/UISound.wav" }
+  ]
+}

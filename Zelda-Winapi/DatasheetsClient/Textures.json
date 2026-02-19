@@ -1,0 +1,22 @@
+{
+  "textures": [
+    { "id": "Stage01", "path": "Sprite/Map/Stage01.bmp" },
+    { "id": "Stage02", "path": "Sprite/Map/Stage02.bmp" },
+    { "id": "Arrow", "path": "Sprite/Item/Arrow.bmp", "colorkey": [128, 128, 128] },
+    { "id": "Items", "path": "Sprite/Item/Items.bmp", "colorkey": [182, 69, 166] },
+    { "id": "Inventory", "path": "Sprite/UI/Inventory.bmp", "colorkey": [118, 134, 255] },
+    { "id": "PlayerDown", "path": "Sprite/Player/PlayerDown.bmp", "colorkey": [128, 128, 128] },
+    { "id": "PlayerUp", "path": "Sprite/Player/PlayerUp.bmp", "colorkey": [128, 128, 128] },
+    { "id": "PlayerLeft", "path": "Sprite/Player/PlayerLeft.bmp", "colorkey": [128, 128, 128] },
+    { "id": "PlayerRight", "path": "Sprite/Player/PlayerRight.bmp", "colorkey": [128, 128, 128] },
+    { "id": "Snake", "path": "Sprite/Monster/Snake.bmp", "colorkey": [128, 128, 128] },
+    { "id": "Octoroc", "path": "Sprite/Monster/Octoroc.bmp", "colorkey": [128, 128, 128] },
+    { "id": "Hit", "path": "Sprite/Effect/Hit.bmp", "colorkey": [0, 0, 0] },
+    { "id": "Explode", "path": "Sprite/Effect/Explode.bmp", "colorkey": [123, 173, 148] },
+    { "id": "MapButton", "path": "Sprite/UI/MapButton.bmp", "colorkey": [211, 249, 188] },
+    { "id": "HUD", "path": "Sprite/UI/Health_Energy_EXP_Bars.bmp", "colorkey": [188, 255, 235] },
+    { "id": "LoginPanel", "path": "Sprite/UI/LoginPanel.bmp", "colorkey": [0, 0, 0] },
+    { "id": "PartyInvite", "path": "Sprite/UI/PartyInvite.bmp", "colorkey": [0, 0, 0] },
+    { "id": "PartyStatus", "path": "Sprite/UI/PartyStatus.bmp", "colorkey": [0, 0, 0] }
+  ]
+}
