@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "PartyManager.h"
 #include "DBManager.h"
+#include "ChatConnector.h"
 
 static atomic<uint64> GRecvMovePerSec = 0;
 static atomic<uint64> GRecvAttackPerSec = 0;
@@ -725,9 +726,9 @@ SendBufferRef ServerPacketHandler::Make_S_PartyLeave()
 	return MakeSendBuffer(pkt, S_PartyLeave);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_Chat(const string& sender, const Protocol::CHAT_TYPE& type, const string& msg)
+SendBufferRef ServerPacketHandler::Make_S_Chat(const Protocol::S_Chat& pkt)
 {
-	return SendBufferRef();
+	return MakeSendBuffer(pkt, S_Chat);
 }
 
 // ---- Login ----
@@ -790,6 +791,43 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 	cout << "[Login] " << username << " logged in (accountId=" << accountId << ")" << endl;
 }
 
-void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len)
-{
+void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len) {
+	PacketHeader* header = (PacketHeader*)buffer;
+	uint16 size = header->size;
+
+	Protocol::C_Chat pkt;
+	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+
+	PlayerRef player = session->player.lock();
+	if (player == nullptr)
+		return;
+
+	string sender = player->info.name();
+
+	switch (pkt.type())
+	{
+	case Protocol::CHAT_TYPE_GLOBAL:
+	{
+		Protocol::SS_RelayChat relay;
+		relay.set_sender(sender);
+		relay.set_type(Protocol::CHAT_TYPE_GLOBAL);
+		relay.set_msg(pkt.msg());
+
+		SendBufferRef sendBuffer = MakeSendBuffer(relay, SS_RelayChat);
+		GChatConnector.Send(sendBuffer);
+		break;
+	}
+	case Protocol::CHAT_TYPE_PARTY:
+	{
+		// TODO: 파티 채팅 구현
+		break;
+	}
+	case Protocol::CHAT_TYPE_WHISPER:
+	{
+		// TODO: 귓속말 구현
+		break;
+	}
+	default:
+		break;
+	}
 }

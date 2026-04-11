@@ -97,7 +97,7 @@ public:
 	static SendBufferRef Make_S_PartyInvite(uint64 inviterId, const string& inviterName);
 	static SendBufferRef Make_S_PartyUpdate(const vector<Protocol::PartyMemberInfo>& members);
 	static SendBufferRef Make_S_PartyLeave();
-	static SendBufferRef Make_S_Chat(const string& sender, const Protocol::CHAT_TYPE& type, const string& msg);
+	static SendBufferRef Make_S_Chat(const Protocol::S_Chat& pkt);
 	// [AUTO-GEN DECLS BEGIN]
 
 

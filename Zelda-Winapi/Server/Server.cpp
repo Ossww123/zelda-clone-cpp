@@ -21,6 +21,7 @@ using namespace std;
 #include "ServerPacketHandler.h"
 #include "GameRoomManager.h"
 #include "DBManager.h"
+#include "ChatConnector.h"
 
 static bool IsMultiMode(int argc, char* argv[])
 {
@@ -57,6 +58,7 @@ int main(int argc, char* argv[])
 		100);
 
 	assert(service->Start());
+	GChatConnector.Connect(service->GetIocpCore());
 
 	auto reportPerfIfDue = [](uint64 now, uint64& lastReportAt)
 		{
@@ -67,10 +69,13 @@ int main(int argc, char* argv[])
 				return;
 
 			PacketPerfSnapshot s = ServerPacketHandler::ConsumePerfSnapshot();
-			cout << "[Perf][1s] recv_move=" << s.recvMove
-				<< " recv_attack=" << s.recvAttack
-				<< " recv_turn=" << s.recvTurn << endl;
 
+			if (false)
+			{
+				cout << "[Perf][1s] recv_move=" << s.recvMove
+					<< " recv_attack=" << s.recvAttack
+					<< " recv_turn=" << s.recvTurn << endl;
+			}
 			lastReportAt = now;
 		};
 

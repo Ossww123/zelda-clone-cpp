@@ -103,6 +103,9 @@
     <ClCompile Include="DBManager.cpp">
       <Filter>Source Files\DB</Filter>
     </ClCompile>
+    <ClCompile Include="ChatConnector.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -167,6 +170,9 @@
     </ClInclude>
     <ClInclude Include="DBManager.h">
       <Filter>Source Files\DB</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatConnector.h">
+      <Filter>Source Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
