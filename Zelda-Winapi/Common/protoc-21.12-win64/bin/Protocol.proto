@@ -197,3 +197,35 @@ message C_Login
 {
     string username = 1;
 }
+
+message C_Chat
+{
+    CHAT_TYPE type = 1;
+    string msg = 2;
+    string target = 3;
+}
+
+message S_Chat
+{
+    string sender = 1;
+    CHAT_TYPE type = 2;
+    string msg = 3;
+}
+
+// GameServer  ChatServer (S2S)
+message SS_RelayChat
+{
+    string sender = 1;
+    CHAT_TYPE type = 2;
+    string msg = 3;
+    string target = 4;
+    uint64 partyId = 5;
+}
+
+// ChatServer  GameServer (S2S)
+message SS_BroadcastChat
+{
+    string sender = 1;
+    CHAT_TYPE type = 2;
+    string msg = 3;
+}

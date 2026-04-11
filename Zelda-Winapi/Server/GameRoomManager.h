@@ -14,7 +14,6 @@ public:
     ~GameRoomManager();
 
     void Init();
-
     void Update(uint64 now);
 
     GameRoomRef GetStaticRoom(FieldId field, int32 channel);

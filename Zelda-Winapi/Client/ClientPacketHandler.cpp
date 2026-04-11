@@ -78,6 +78,9 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	case S_PartyLeave:
 		Handle_S_PartyLeave ( session , buffer , len );
 		break;
+	case S_Chat:
+		Handle_S_Chat ( session , buffer , len );
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
 
 	// [AUTO-GEN SWITCH END]
@@ -745,6 +748,10 @@ void ClientPacketHandler::Handle_S_PartyLeave ( ServerSessionRef session , BYTE*
 	}
 }
 
+void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+}
+
 SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( uint64 targetId )
 {
 	Protocol::C_PartyInvite pkt;
@@ -771,4 +778,9 @@ SendBufferRef ClientPacketHandler::Make_C_Login ( const string& username )
 	Protocol::C_Login pkt;
 	pkt.set_username ( username );
 	return MakeSendBuffer ( pkt , C_Login );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Chat ( const Protocol::CHAT_TYPE& type , const string& msg , const string& target )
+{
+	return SendBufferRef ( );
 }

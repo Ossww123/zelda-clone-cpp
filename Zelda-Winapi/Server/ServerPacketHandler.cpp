@@ -65,6 +65,9 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	case C_Login:
 		Handle_C_Login(session, buffer, len);
 		break;
+	case C_Chat:
+		Handle_C_Chat(session, buffer, len);
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
 
 	// [AUTO-GEN SWITCH END]
@@ -722,6 +725,11 @@ SendBufferRef ServerPacketHandler::Make_S_PartyLeave()
 	return MakeSendBuffer(pkt, S_PartyLeave);
 }
 
+SendBufferRef ServerPacketHandler::Make_S_Chat(const string& sender, const Protocol::CHAT_TYPE& type, const string& msg)
+{
+	return SendBufferRef();
+}
+
 // ---- Login ----
 
 void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, int32 len)
@@ -780,4 +788,8 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 	}
 
 	cout << "[Login] " << username << " logged in (accountId=" << accountId << ")" << endl;
+}
+
+void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len)
+{
 }

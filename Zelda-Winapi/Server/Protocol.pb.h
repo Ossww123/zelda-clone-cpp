@@ -54,6 +54,9 @@ extern C_AttackDefaultTypeInternal _C_Attack_default_instance_;
 class C_ChangeMap;
 struct C_ChangeMapDefaultTypeInternal;
 extern C_ChangeMapDefaultTypeInternal _C_ChangeMap_default_instance_;
+class C_Chat;
+struct C_ChatDefaultTypeInternal;
+extern C_ChatDefaultTypeInternal _C_Chat_default_instance_;
 class C_EquipItem;
 struct C_EquipItemDefaultTypeInternal;
 extern C_EquipItemDefaultTypeInternal _C_EquipItem_default_instance_;
@@ -81,6 +84,12 @@ extern C_UnequipItemDefaultTypeInternal _C_UnequipItem_default_instance_;
 class C_UseItem;
 struct C_UseItemDefaultTypeInternal;
 extern C_UseItemDefaultTypeInternal _C_UseItem_default_instance_;
+class SS_BroadcastChat;
+struct SS_BroadcastChatDefaultTypeInternal;
+extern SS_BroadcastChatDefaultTypeInternal _SS_BroadcastChat_default_instance_;
+class SS_RelayChat;
+struct SS_RelayChatDefaultTypeInternal;
+extern SS_RelayChatDefaultTypeInternal _SS_RelayChat_default_instance_;
 class S_AddItem;
 struct S_AddItemDefaultTypeInternal;
 extern S_AddItemDefaultTypeInternal _S_AddItem_default_instance_;
@@ -93,6 +102,9 @@ extern S_AttackDefaultTypeInternal _S_Attack_default_instance_;
 class S_ChangeMap;
 struct S_ChangeMapDefaultTypeInternal;
 extern S_ChangeMapDefaultTypeInternal _S_ChangeMap_default_instance_;
+class S_Chat;
+struct S_ChatDefaultTypeInternal;
+extern S_ChatDefaultTypeInternal _S_Chat_default_instance_;
 class S_Damaged;
 struct S_DamagedDefaultTypeInternal;
 extern S_DamagedDefaultTypeInternal _S_Damaged_default_instance_;
@@ -145,6 +157,7 @@ extern S_UseItemDefaultTypeInternal _S_UseItem_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
 template<> ::Protocol::C_Attack* Arena::CreateMaybeMessage<::Protocol::C_Attack>(Arena*);
 template<> ::Protocol::C_ChangeMap* Arena::CreateMaybeMessage<::Protocol::C_ChangeMap>(Arena*);
+template<> ::Protocol::C_Chat* Arena::CreateMaybeMessage<::Protocol::C_Chat>(Arena*);
 template<> ::Protocol::C_EquipItem* Arena::CreateMaybeMessage<::Protocol::C_EquipItem>(Arena*);
 template<> ::Protocol::C_Login* Arena::CreateMaybeMessage<::Protocol::C_Login>(Arena*);
 template<> ::Protocol::C_Move* Arena::CreateMaybeMessage<::Protocol::C_Move>(Arena*);
@@ -154,10 +167,13 @@ template<> ::Protocol::C_PartyLeave* Arena::CreateMaybeMessage<::Protocol::C_Par
 template<> ::Protocol::C_Turn* Arena::CreateMaybeMessage<::Protocol::C_Turn>(Arena*);
 template<> ::Protocol::C_UnequipItem* Arena::CreateMaybeMessage<::Protocol::C_UnequipItem>(Arena*);
 template<> ::Protocol::C_UseItem* Arena::CreateMaybeMessage<::Protocol::C_UseItem>(Arena*);
+template<> ::Protocol::SS_BroadcastChat* Arena::CreateMaybeMessage<::Protocol::SS_BroadcastChat>(Arena*);
+template<> ::Protocol::SS_RelayChat* Arena::CreateMaybeMessage<::Protocol::SS_RelayChat>(Arena*);
 template<> ::Protocol::S_AddItem* Arena::CreateMaybeMessage<::Protocol::S_AddItem>(Arena*);
 template<> ::Protocol::S_AddObject* Arena::CreateMaybeMessage<::Protocol::S_AddObject>(Arena*);
 template<> ::Protocol::S_Attack* Arena::CreateMaybeMessage<::Protocol::S_Attack>(Arena*);
 template<> ::Protocol::S_ChangeMap* Arena::CreateMaybeMessage<::Protocol::S_ChangeMap>(Arena*);
+template<> ::Protocol::S_Chat* Arena::CreateMaybeMessage<::Protocol::S_Chat>(Arena*);
 template<> ::Protocol::S_Damaged* Arena::CreateMaybeMessage<::Protocol::S_Damaged>(Arena*);
 template<> ::Protocol::S_EnterGame* Arena::CreateMaybeMessage<::Protocol::S_EnterGame>(Arena*);
 template<> ::Protocol::S_EquipItem* Arena::CreateMaybeMessage<::Protocol::S_EquipItem>(Arena*);
@@ -5270,6 +5286,753 @@ class C_Login final :
   union { Impl_ _impl_; };
   friend struct ::TableStruct_Protocol_2eproto;
 };
+// -------------------------------------------------------------------
+
+class C_Chat final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.C_Chat) */ {
+ public:
+  inline C_Chat() : C_Chat(nullptr) {}
+  ~C_Chat() override;
+  explicit PROTOBUF_CONSTEXPR C_Chat(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  C_Chat(const C_Chat& from);
+  C_Chat(C_Chat&& from) noexcept
+    : C_Chat() {
+    *this = ::std::move(from);
+  }
+
+  inline C_Chat& operator=(const C_Chat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline C_Chat& operator=(C_Chat&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const C_Chat& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const C_Chat* internal_default_instance() {
+    return reinterpret_cast<const C_Chat*>(
+               &_C_Chat_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    31;
+
+  friend void swap(C_Chat& a, C_Chat& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(C_Chat* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(C_Chat* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  C_Chat* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<C_Chat>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const C_Chat& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const C_Chat& from) {
+    C_Chat::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(C_Chat* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.C_Chat";
+  }
+  protected:
+  explicit C_Chat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kMsgFieldNumber = 2,
+    kTargetFieldNumber = 3,
+    kTypeFieldNumber = 1,
+  };
+  // string msg = 2;
+  void clear_msg();
+  const std::string& msg() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_msg(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_msg();
+  PROTOBUF_NODISCARD std::string* release_msg();
+  void set_allocated_msg(std::string* msg);
+  private:
+  const std::string& _internal_msg() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_msg(const std::string& value);
+  std::string* _internal_mutable_msg();
+  public:
+
+  // string target = 3;
+  void clear_target();
+  const std::string& target() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_target(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_target();
+  PROTOBUF_NODISCARD std::string* release_target();
+  void set_allocated_target(std::string* target);
+  private:
+  const std::string& _internal_target() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_target(const std::string& value);
+  std::string* _internal_mutable_target();
+  public:
+
+  // .Protocol.CHAT_TYPE type = 1;
+  void clear_type();
+  ::Protocol::CHAT_TYPE type() const;
+  void set_type(::Protocol::CHAT_TYPE value);
+  private:
+  ::Protocol::CHAT_TYPE _internal_type() const;
+  void _internal_set_type(::Protocol::CHAT_TYPE value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.C_Chat)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr msg_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr target_;
+    int type_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
+// -------------------------------------------------------------------
+
+class S_Chat final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.S_Chat) */ {
+ public:
+  inline S_Chat() : S_Chat(nullptr) {}
+  ~S_Chat() override;
+  explicit PROTOBUF_CONSTEXPR S_Chat(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  S_Chat(const S_Chat& from);
+  S_Chat(S_Chat&& from) noexcept
+    : S_Chat() {
+    *this = ::std::move(from);
+  }
+
+  inline S_Chat& operator=(const S_Chat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_Chat& operator=(S_Chat&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_Chat& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_Chat* internal_default_instance() {
+    return reinterpret_cast<const S_Chat*>(
+               &_S_Chat_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    32;
+
+  friend void swap(S_Chat& a, S_Chat& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(S_Chat* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_Chat* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_Chat* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<S_Chat>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const S_Chat& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const S_Chat& from) {
+    S_Chat::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(S_Chat* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.S_Chat";
+  }
+  protected:
+  explicit S_Chat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSenderFieldNumber = 1,
+    kMsgFieldNumber = 3,
+    kTypeFieldNumber = 2,
+  };
+  // string sender = 1;
+  void clear_sender();
+  const std::string& sender() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_sender(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_sender();
+  PROTOBUF_NODISCARD std::string* release_sender();
+  void set_allocated_sender(std::string* sender);
+  private:
+  const std::string& _internal_sender() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_sender(const std::string& value);
+  std::string* _internal_mutable_sender();
+  public:
+
+  // string msg = 3;
+  void clear_msg();
+  const std::string& msg() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_msg(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_msg();
+  PROTOBUF_NODISCARD std::string* release_msg();
+  void set_allocated_msg(std::string* msg);
+  private:
+  const std::string& _internal_msg() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_msg(const std::string& value);
+  std::string* _internal_mutable_msg();
+  public:
+
+  // .Protocol.CHAT_TYPE type = 2;
+  void clear_type();
+  ::Protocol::CHAT_TYPE type() const;
+  void set_type(::Protocol::CHAT_TYPE value);
+  private:
+  ::Protocol::CHAT_TYPE _internal_type() const;
+  void _internal_set_type(::Protocol::CHAT_TYPE value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.S_Chat)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr msg_;
+    int type_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SS_RelayChat final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.SS_RelayChat) */ {
+ public:
+  inline SS_RelayChat() : SS_RelayChat(nullptr) {}
+  ~SS_RelayChat() override;
+  explicit PROTOBUF_CONSTEXPR SS_RelayChat(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SS_RelayChat(const SS_RelayChat& from);
+  SS_RelayChat(SS_RelayChat&& from) noexcept
+    : SS_RelayChat() {
+    *this = ::std::move(from);
+  }
+
+  inline SS_RelayChat& operator=(const SS_RelayChat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SS_RelayChat& operator=(SS_RelayChat&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SS_RelayChat& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SS_RelayChat* internal_default_instance() {
+    return reinterpret_cast<const SS_RelayChat*>(
+               &_SS_RelayChat_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    33;
+
+  friend void swap(SS_RelayChat& a, SS_RelayChat& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SS_RelayChat* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SS_RelayChat* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SS_RelayChat* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SS_RelayChat>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SS_RelayChat& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SS_RelayChat& from) {
+    SS_RelayChat::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SS_RelayChat* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.SS_RelayChat";
+  }
+  protected:
+  explicit SS_RelayChat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSenderFieldNumber = 1,
+    kMsgFieldNumber = 3,
+    kTargetFieldNumber = 4,
+    kPartyIdFieldNumber = 5,
+    kTypeFieldNumber = 2,
+  };
+  // string sender = 1;
+  void clear_sender();
+  const std::string& sender() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_sender(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_sender();
+  PROTOBUF_NODISCARD std::string* release_sender();
+  void set_allocated_sender(std::string* sender);
+  private:
+  const std::string& _internal_sender() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_sender(const std::string& value);
+  std::string* _internal_mutable_sender();
+  public:
+
+  // string msg = 3;
+  void clear_msg();
+  const std::string& msg() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_msg(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_msg();
+  PROTOBUF_NODISCARD std::string* release_msg();
+  void set_allocated_msg(std::string* msg);
+  private:
+  const std::string& _internal_msg() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_msg(const std::string& value);
+  std::string* _internal_mutable_msg();
+  public:
+
+  // string target = 4;
+  void clear_target();
+  const std::string& target() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_target(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_target();
+  PROTOBUF_NODISCARD std::string* release_target();
+  void set_allocated_target(std::string* target);
+  private:
+  const std::string& _internal_target() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_target(const std::string& value);
+  std::string* _internal_mutable_target();
+  public:
+
+  // uint64 partyId = 5;
+  void clear_partyid();
+  uint64_t partyid() const;
+  void set_partyid(uint64_t value);
+  private:
+  uint64_t _internal_partyid() const;
+  void _internal_set_partyid(uint64_t value);
+  public:
+
+  // .Protocol.CHAT_TYPE type = 2;
+  void clear_type();
+  ::Protocol::CHAT_TYPE type() const;
+  void set_type(::Protocol::CHAT_TYPE value);
+  private:
+  ::Protocol::CHAT_TYPE _internal_type() const;
+  void _internal_set_type(::Protocol::CHAT_TYPE value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.SS_RelayChat)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr msg_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr target_;
+    uint64_t partyid_;
+    int type_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SS_BroadcastChat final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.SS_BroadcastChat) */ {
+ public:
+  inline SS_BroadcastChat() : SS_BroadcastChat(nullptr) {}
+  ~SS_BroadcastChat() override;
+  explicit PROTOBUF_CONSTEXPR SS_BroadcastChat(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  SS_BroadcastChat(const SS_BroadcastChat& from);
+  SS_BroadcastChat(SS_BroadcastChat&& from) noexcept
+    : SS_BroadcastChat() {
+    *this = ::std::move(from);
+  }
+
+  inline SS_BroadcastChat& operator=(const SS_BroadcastChat& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SS_BroadcastChat& operator=(SS_BroadcastChat&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const SS_BroadcastChat& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const SS_BroadcastChat* internal_default_instance() {
+    return reinterpret_cast<const SS_BroadcastChat*>(
+               &_SS_BroadcastChat_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    34;
+
+  friend void swap(SS_BroadcastChat& a, SS_BroadcastChat& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SS_BroadcastChat* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SS_BroadcastChat* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  SS_BroadcastChat* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<SS_BroadcastChat>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const SS_BroadcastChat& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const SS_BroadcastChat& from) {
+    SS_BroadcastChat::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SS_BroadcastChat* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.SS_BroadcastChat";
+  }
+  protected:
+  explicit SS_BroadcastChat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSenderFieldNumber = 1,
+    kMsgFieldNumber = 3,
+    kTypeFieldNumber = 2,
+  };
+  // string sender = 1;
+  void clear_sender();
+  const std::string& sender() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_sender(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_sender();
+  PROTOBUF_NODISCARD std::string* release_sender();
+  void set_allocated_sender(std::string* sender);
+  private:
+  const std::string& _internal_sender() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_sender(const std::string& value);
+  std::string* _internal_mutable_sender();
+  public:
+
+  // string msg = 3;
+  void clear_msg();
+  const std::string& msg() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_msg(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_msg();
+  PROTOBUF_NODISCARD std::string* release_msg();
+  void set_allocated_msg(std::string* msg);
+  private:
+  const std::string& _internal_msg() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_msg(const std::string& value);
+  std::string* _internal_mutable_msg();
+  public:
+
+  // .Protocol.CHAT_TYPE type = 2;
+  void clear_type();
+  ::Protocol::CHAT_TYPE type() const;
+  void set_type(::Protocol::CHAT_TYPE value);
+  private:
+  ::Protocol::CHAT_TYPE _internal_type() const;
+  void _internal_set_type(::Protocol::CHAT_TYPE value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.SS_BroadcastChat)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr msg_;
+    int type_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
 // ===================================================================
 
 
@@ -7346,9 +8109,583 @@ inline void C_Login::set_allocated_username(std::string* username) {
   // @@protoc_insertion_point(field_set_allocated:Protocol.C_Login.username)
 }
 
+// -------------------------------------------------------------------
+
+// C_Chat
+
+// .Protocol.CHAT_TYPE type = 1;
+inline void C_Chat::clear_type() {
+  _impl_.type_ = 0;
+}
+inline ::Protocol::CHAT_TYPE C_Chat::_internal_type() const {
+  return static_cast< ::Protocol::CHAT_TYPE >(_impl_.type_);
+}
+inline ::Protocol::CHAT_TYPE C_Chat::type() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_Chat.type)
+  return _internal_type();
+}
+inline void C_Chat::_internal_set_type(::Protocol::CHAT_TYPE value) {
+  
+  _impl_.type_ = value;
+}
+inline void C_Chat::set_type(::Protocol::CHAT_TYPE value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:Protocol.C_Chat.type)
+}
+
+// string msg = 2;
+inline void C_Chat::clear_msg() {
+  _impl_.msg_.ClearToEmpty();
+}
+inline const std::string& C_Chat::msg() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_Chat.msg)
+  return _internal_msg();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void C_Chat::set_msg(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.msg_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.C_Chat.msg)
+}
+inline std::string* C_Chat::mutable_msg() {
+  std::string* _s = _internal_mutable_msg();
+  // @@protoc_insertion_point(field_mutable:Protocol.C_Chat.msg)
+  return _s;
+}
+inline const std::string& C_Chat::_internal_msg() const {
+  return _impl_.msg_.Get();
+}
+inline void C_Chat::_internal_set_msg(const std::string& value) {
+  
+  _impl_.msg_.Set(value, GetArenaForAllocation());
+}
+inline std::string* C_Chat::_internal_mutable_msg() {
+  
+  return _impl_.msg_.Mutable(GetArenaForAllocation());
+}
+inline std::string* C_Chat::release_msg() {
+  // @@protoc_insertion_point(field_release:Protocol.C_Chat.msg)
+  return _impl_.msg_.Release();
+}
+inline void C_Chat::set_allocated_msg(std::string* msg) {
+  if (msg != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.msg_.SetAllocated(msg, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.msg_.IsDefault()) {
+    _impl_.msg_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.C_Chat.msg)
+}
+
+// string target = 3;
+inline void C_Chat::clear_target() {
+  _impl_.target_.ClearToEmpty();
+}
+inline const std::string& C_Chat::target() const {
+  // @@protoc_insertion_point(field_get:Protocol.C_Chat.target)
+  return _internal_target();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void C_Chat::set_target(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.target_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.C_Chat.target)
+}
+inline std::string* C_Chat::mutable_target() {
+  std::string* _s = _internal_mutable_target();
+  // @@protoc_insertion_point(field_mutable:Protocol.C_Chat.target)
+  return _s;
+}
+inline const std::string& C_Chat::_internal_target() const {
+  return _impl_.target_.Get();
+}
+inline void C_Chat::_internal_set_target(const std::string& value) {
+  
+  _impl_.target_.Set(value, GetArenaForAllocation());
+}
+inline std::string* C_Chat::_internal_mutable_target() {
+  
+  return _impl_.target_.Mutable(GetArenaForAllocation());
+}
+inline std::string* C_Chat::release_target() {
+  // @@protoc_insertion_point(field_release:Protocol.C_Chat.target)
+  return _impl_.target_.Release();
+}
+inline void C_Chat::set_allocated_target(std::string* target) {
+  if (target != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.target_.SetAllocated(target, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.target_.IsDefault()) {
+    _impl_.target_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.C_Chat.target)
+}
+
+// -------------------------------------------------------------------
+
+// S_Chat
+
+// string sender = 1;
+inline void S_Chat::clear_sender() {
+  _impl_.sender_.ClearToEmpty();
+}
+inline const std::string& S_Chat::sender() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_Chat.sender)
+  return _internal_sender();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void S_Chat::set_sender(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.sender_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.S_Chat.sender)
+}
+inline std::string* S_Chat::mutable_sender() {
+  std::string* _s = _internal_mutable_sender();
+  // @@protoc_insertion_point(field_mutable:Protocol.S_Chat.sender)
+  return _s;
+}
+inline const std::string& S_Chat::_internal_sender() const {
+  return _impl_.sender_.Get();
+}
+inline void S_Chat::_internal_set_sender(const std::string& value) {
+  
+  _impl_.sender_.Set(value, GetArenaForAllocation());
+}
+inline std::string* S_Chat::_internal_mutable_sender() {
+  
+  return _impl_.sender_.Mutable(GetArenaForAllocation());
+}
+inline std::string* S_Chat::release_sender() {
+  // @@protoc_insertion_point(field_release:Protocol.S_Chat.sender)
+  return _impl_.sender_.Release();
+}
+inline void S_Chat::set_allocated_sender(std::string* sender) {
+  if (sender != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.sender_.SetAllocated(sender, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.sender_.IsDefault()) {
+    _impl_.sender_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.S_Chat.sender)
+}
+
+// .Protocol.CHAT_TYPE type = 2;
+inline void S_Chat::clear_type() {
+  _impl_.type_ = 0;
+}
+inline ::Protocol::CHAT_TYPE S_Chat::_internal_type() const {
+  return static_cast< ::Protocol::CHAT_TYPE >(_impl_.type_);
+}
+inline ::Protocol::CHAT_TYPE S_Chat::type() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_Chat.type)
+  return _internal_type();
+}
+inline void S_Chat::_internal_set_type(::Protocol::CHAT_TYPE value) {
+  
+  _impl_.type_ = value;
+}
+inline void S_Chat::set_type(::Protocol::CHAT_TYPE value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:Protocol.S_Chat.type)
+}
+
+// string msg = 3;
+inline void S_Chat::clear_msg() {
+  _impl_.msg_.ClearToEmpty();
+}
+inline const std::string& S_Chat::msg() const {
+  // @@protoc_insertion_point(field_get:Protocol.S_Chat.msg)
+  return _internal_msg();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void S_Chat::set_msg(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.msg_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.S_Chat.msg)
+}
+inline std::string* S_Chat::mutable_msg() {
+  std::string* _s = _internal_mutable_msg();
+  // @@protoc_insertion_point(field_mutable:Protocol.S_Chat.msg)
+  return _s;
+}
+inline const std::string& S_Chat::_internal_msg() const {
+  return _impl_.msg_.Get();
+}
+inline void S_Chat::_internal_set_msg(const std::string& value) {
+  
+  _impl_.msg_.Set(value, GetArenaForAllocation());
+}
+inline std::string* S_Chat::_internal_mutable_msg() {
+  
+  return _impl_.msg_.Mutable(GetArenaForAllocation());
+}
+inline std::string* S_Chat::release_msg() {
+  // @@protoc_insertion_point(field_release:Protocol.S_Chat.msg)
+  return _impl_.msg_.Release();
+}
+inline void S_Chat::set_allocated_msg(std::string* msg) {
+  if (msg != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.msg_.SetAllocated(msg, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.msg_.IsDefault()) {
+    _impl_.msg_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.S_Chat.msg)
+}
+
+// -------------------------------------------------------------------
+
+// SS_RelayChat
+
+// string sender = 1;
+inline void SS_RelayChat::clear_sender() {
+  _impl_.sender_.ClearToEmpty();
+}
+inline const std::string& SS_RelayChat::sender() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_RelayChat.sender)
+  return _internal_sender();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SS_RelayChat::set_sender(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.sender_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.SS_RelayChat.sender)
+}
+inline std::string* SS_RelayChat::mutable_sender() {
+  std::string* _s = _internal_mutable_sender();
+  // @@protoc_insertion_point(field_mutable:Protocol.SS_RelayChat.sender)
+  return _s;
+}
+inline const std::string& SS_RelayChat::_internal_sender() const {
+  return _impl_.sender_.Get();
+}
+inline void SS_RelayChat::_internal_set_sender(const std::string& value) {
+  
+  _impl_.sender_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SS_RelayChat::_internal_mutable_sender() {
+  
+  return _impl_.sender_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SS_RelayChat::release_sender() {
+  // @@protoc_insertion_point(field_release:Protocol.SS_RelayChat.sender)
+  return _impl_.sender_.Release();
+}
+inline void SS_RelayChat::set_allocated_sender(std::string* sender) {
+  if (sender != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.sender_.SetAllocated(sender, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.sender_.IsDefault()) {
+    _impl_.sender_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.SS_RelayChat.sender)
+}
+
+// .Protocol.CHAT_TYPE type = 2;
+inline void SS_RelayChat::clear_type() {
+  _impl_.type_ = 0;
+}
+inline ::Protocol::CHAT_TYPE SS_RelayChat::_internal_type() const {
+  return static_cast< ::Protocol::CHAT_TYPE >(_impl_.type_);
+}
+inline ::Protocol::CHAT_TYPE SS_RelayChat::type() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_RelayChat.type)
+  return _internal_type();
+}
+inline void SS_RelayChat::_internal_set_type(::Protocol::CHAT_TYPE value) {
+  
+  _impl_.type_ = value;
+}
+inline void SS_RelayChat::set_type(::Protocol::CHAT_TYPE value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:Protocol.SS_RelayChat.type)
+}
+
+// string msg = 3;
+inline void SS_RelayChat::clear_msg() {
+  _impl_.msg_.ClearToEmpty();
+}
+inline const std::string& SS_RelayChat::msg() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_RelayChat.msg)
+  return _internal_msg();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SS_RelayChat::set_msg(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.msg_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.SS_RelayChat.msg)
+}
+inline std::string* SS_RelayChat::mutable_msg() {
+  std::string* _s = _internal_mutable_msg();
+  // @@protoc_insertion_point(field_mutable:Protocol.SS_RelayChat.msg)
+  return _s;
+}
+inline const std::string& SS_RelayChat::_internal_msg() const {
+  return _impl_.msg_.Get();
+}
+inline void SS_RelayChat::_internal_set_msg(const std::string& value) {
+  
+  _impl_.msg_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SS_RelayChat::_internal_mutable_msg() {
+  
+  return _impl_.msg_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SS_RelayChat::release_msg() {
+  // @@protoc_insertion_point(field_release:Protocol.SS_RelayChat.msg)
+  return _impl_.msg_.Release();
+}
+inline void SS_RelayChat::set_allocated_msg(std::string* msg) {
+  if (msg != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.msg_.SetAllocated(msg, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.msg_.IsDefault()) {
+    _impl_.msg_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.SS_RelayChat.msg)
+}
+
+// string target = 4;
+inline void SS_RelayChat::clear_target() {
+  _impl_.target_.ClearToEmpty();
+}
+inline const std::string& SS_RelayChat::target() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_RelayChat.target)
+  return _internal_target();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SS_RelayChat::set_target(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.target_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.SS_RelayChat.target)
+}
+inline std::string* SS_RelayChat::mutable_target() {
+  std::string* _s = _internal_mutable_target();
+  // @@protoc_insertion_point(field_mutable:Protocol.SS_RelayChat.target)
+  return _s;
+}
+inline const std::string& SS_RelayChat::_internal_target() const {
+  return _impl_.target_.Get();
+}
+inline void SS_RelayChat::_internal_set_target(const std::string& value) {
+  
+  _impl_.target_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SS_RelayChat::_internal_mutable_target() {
+  
+  return _impl_.target_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SS_RelayChat::release_target() {
+  // @@protoc_insertion_point(field_release:Protocol.SS_RelayChat.target)
+  return _impl_.target_.Release();
+}
+inline void SS_RelayChat::set_allocated_target(std::string* target) {
+  if (target != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.target_.SetAllocated(target, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.target_.IsDefault()) {
+    _impl_.target_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.SS_RelayChat.target)
+}
+
+// uint64 partyId = 5;
+inline void SS_RelayChat::clear_partyid() {
+  _impl_.partyid_ = uint64_t{0u};
+}
+inline uint64_t SS_RelayChat::_internal_partyid() const {
+  return _impl_.partyid_;
+}
+inline uint64_t SS_RelayChat::partyid() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_RelayChat.partyId)
+  return _internal_partyid();
+}
+inline void SS_RelayChat::_internal_set_partyid(uint64_t value) {
+  
+  _impl_.partyid_ = value;
+}
+inline void SS_RelayChat::set_partyid(uint64_t value) {
+  _internal_set_partyid(value);
+  // @@protoc_insertion_point(field_set:Protocol.SS_RelayChat.partyId)
+}
+
+// -------------------------------------------------------------------
+
+// SS_BroadcastChat
+
+// string sender = 1;
+inline void SS_BroadcastChat::clear_sender() {
+  _impl_.sender_.ClearToEmpty();
+}
+inline const std::string& SS_BroadcastChat::sender() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_BroadcastChat.sender)
+  return _internal_sender();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SS_BroadcastChat::set_sender(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.sender_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.SS_BroadcastChat.sender)
+}
+inline std::string* SS_BroadcastChat::mutable_sender() {
+  std::string* _s = _internal_mutable_sender();
+  // @@protoc_insertion_point(field_mutable:Protocol.SS_BroadcastChat.sender)
+  return _s;
+}
+inline const std::string& SS_BroadcastChat::_internal_sender() const {
+  return _impl_.sender_.Get();
+}
+inline void SS_BroadcastChat::_internal_set_sender(const std::string& value) {
+  
+  _impl_.sender_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SS_BroadcastChat::_internal_mutable_sender() {
+  
+  return _impl_.sender_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SS_BroadcastChat::release_sender() {
+  // @@protoc_insertion_point(field_release:Protocol.SS_BroadcastChat.sender)
+  return _impl_.sender_.Release();
+}
+inline void SS_BroadcastChat::set_allocated_sender(std::string* sender) {
+  if (sender != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.sender_.SetAllocated(sender, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.sender_.IsDefault()) {
+    _impl_.sender_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.SS_BroadcastChat.sender)
+}
+
+// .Protocol.CHAT_TYPE type = 2;
+inline void SS_BroadcastChat::clear_type() {
+  _impl_.type_ = 0;
+}
+inline ::Protocol::CHAT_TYPE SS_BroadcastChat::_internal_type() const {
+  return static_cast< ::Protocol::CHAT_TYPE >(_impl_.type_);
+}
+inline ::Protocol::CHAT_TYPE SS_BroadcastChat::type() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_BroadcastChat.type)
+  return _internal_type();
+}
+inline void SS_BroadcastChat::_internal_set_type(::Protocol::CHAT_TYPE value) {
+  
+  _impl_.type_ = value;
+}
+inline void SS_BroadcastChat::set_type(::Protocol::CHAT_TYPE value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:Protocol.SS_BroadcastChat.type)
+}
+
+// string msg = 3;
+inline void SS_BroadcastChat::clear_msg() {
+  _impl_.msg_.ClearToEmpty();
+}
+inline const std::string& SS_BroadcastChat::msg() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_BroadcastChat.msg)
+  return _internal_msg();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SS_BroadcastChat::set_msg(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.msg_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.SS_BroadcastChat.msg)
+}
+inline std::string* SS_BroadcastChat::mutable_msg() {
+  std::string* _s = _internal_mutable_msg();
+  // @@protoc_insertion_point(field_mutable:Protocol.SS_BroadcastChat.msg)
+  return _s;
+}
+inline const std::string& SS_BroadcastChat::_internal_msg() const {
+  return _impl_.msg_.Get();
+}
+inline void SS_BroadcastChat::_internal_set_msg(const std::string& value) {
+  
+  _impl_.msg_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SS_BroadcastChat::_internal_mutable_msg() {
+  
+  return _impl_.msg_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SS_BroadcastChat::release_msg() {
+  // @@protoc_insertion_point(field_release:Protocol.SS_BroadcastChat.msg)
+  return _impl_.msg_.Release();
+}
+inline void SS_BroadcastChat::set_allocated_msg(std::string* msg) {
+  if (msg != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.msg_.SetAllocated(msg, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.msg_.IsDefault()) {
+    _impl_.msg_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.SS_BroadcastChat.msg)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

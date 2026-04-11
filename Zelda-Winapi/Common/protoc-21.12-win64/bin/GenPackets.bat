@@ -13,6 +13,13 @@ XCOPY /Y Struct.pb.cc "../../../Server"
 XCOPY /Y Protocol.pb.h "../../../Server"
 XCOPY /Y Protocol.pb.cc "../../../Server"
 
+XCOPY /Y Enum.pb.h "../../../ChatServer"
+XCOPY /Y Enum.pb.cc "../../../ChatServer"
+XCOPY /Y Struct.pb.h "../../../ChatServer"
+XCOPY /Y Struct.pb.cc "../../../ChatServer"
+XCOPY /Y Protocol.pb.h "../../../ChatServer"
+XCOPY /Y Protocol.pb.cc "../../../ChatServer"
+
 XCOPY /Y Enum.pb.h "../../../DummyClient"
 XCOPY /Y Enum.pb.cc "../../../DummyClient"
 XCOPY /Y Struct.pb.h "../../../DummyClient"
@@ -30,5 +37,3 @@ XCOPY /Y Protocol.pb.cc "../../../Client"
 DEL /Q /F *.pb.h
 DEL /Q /F *.pb.cc
 DEL /Q /F *.h
-
-PAUSE

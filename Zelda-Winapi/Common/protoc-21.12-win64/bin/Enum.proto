@@ -45,3 +45,10 @@ enum MAP_ID
     MAP_ID_TOWN = 1;
     MAP_ID_DUNGEON = 2;
 }
+
+enum CHAT_TYPE
+  {
+      CHAT_TYPE_GLOBAL = 0;
+      CHAT_TYPE_PARTY = 1;
+      CHAT_TYPE_WHISPER = 2;
+  }

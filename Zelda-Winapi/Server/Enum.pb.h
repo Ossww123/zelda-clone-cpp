@@ -206,6 +206,32 @@ inline bool MAP_ID_Parse(
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<MAP_ID>(
     MAP_ID_descriptor(), name, value);
 }
+enum CHAT_TYPE : int {
+  CHAT_TYPE_GLOBAL = 0,
+  CHAT_TYPE_PARTY = 1,
+  CHAT_TYPE_WHISPER = 2,
+  CHAT_TYPE_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  CHAT_TYPE_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
+};
+bool CHAT_TYPE_IsValid(int value);
+constexpr CHAT_TYPE CHAT_TYPE_MIN = CHAT_TYPE_GLOBAL;
+constexpr CHAT_TYPE CHAT_TYPE_MAX = CHAT_TYPE_WHISPER;
+constexpr int CHAT_TYPE_ARRAYSIZE = CHAT_TYPE_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CHAT_TYPE_descriptor();
+template<typename T>
+inline const std::string& CHAT_TYPE_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, CHAT_TYPE>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function CHAT_TYPE_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    CHAT_TYPE_descriptor(), enum_t_value);
+}
+inline bool CHAT_TYPE_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, CHAT_TYPE* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<CHAT_TYPE>(
+    CHAT_TYPE_descriptor(), name, value);
+}
 // ===================================================================
 
 
@@ -257,6 +283,11 @@ template <> struct is_proto_enum< ::Protocol::MAP_ID> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::MAP_ID>() {
   return ::Protocol::MAP_ID_descriptor();
+}
+template <> struct is_proto_enum< ::Protocol::CHAT_TYPE> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Protocol::CHAT_TYPE>() {
+  return ::Protocol::CHAT_TYPE_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

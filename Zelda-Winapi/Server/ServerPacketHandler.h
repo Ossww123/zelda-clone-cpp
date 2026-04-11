@@ -13,6 +13,7 @@ enum
 	C_PartyInvite = 108,
 	C_PartyLeave = 110,
 	C_Login = 111,
+	C_Chat = 112,
 
 	S_TEST = 201,
 	S_EnterGame = 202,
@@ -34,12 +35,10 @@ enum
 	S_PartyInvite = 218,
 	S_PartyLeave = 220,
 	S_PartyUpdate = 219,
+	S_Chat = 221,
 
 	// [AUTO-GEN ENUM BEGIN]
 
-	
-
-	
 
 	// [AUTO-GEN ENUM END]
 };
@@ -75,6 +74,7 @@ public:
 	static void Handle_C_PartyAnswer(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_PartyLeave(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_Login(GameSessionRef session, BYTE* buffer, int32 len);
+	static void Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len);
 
 	// 보내기
 	static SendBufferRef Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs);
@@ -97,7 +97,12 @@ public:
 	static SendBufferRef Make_S_PartyInvite(uint64 inviterId, const string& inviterName);
 	static SendBufferRef Make_S_PartyUpdate(const vector<Protocol::PartyMemberInfo>& members);
 	static SendBufferRef Make_S_PartyLeave();
+	static SendBufferRef Make_S_Chat(const string& sender, const Protocol::CHAT_TYPE& type, const string& msg);
 	// [AUTO-GEN DECLS BEGIN]
+
+
+	
+	
 
 	// [AUTO-GEN DECLS END]
 
