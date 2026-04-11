@@ -10,6 +10,7 @@ class Sprite;
 class InventoryPanel;
 class PartyPanel;
 class PartyInvitePanel;
+class ChatPanel;
 
 class DevScene : public Scene
 {
@@ -64,6 +65,8 @@ public:
 
 	void SetLoggedIn ( bool value ) { _loggedIn = value; }
 
+	void AddChatMessage ( const wstring& sender , const wstring& msg );
+
 private:
 	void LoadMap ( );
 	void LoadPlayer ( );
@@ -99,6 +102,7 @@ private:
 	InventoryPanel* _inventoryPanel = nullptr;
 	PartyPanel* _partyPanel = nullptr;
 	PartyInvitePanel* _partyInvitePanel = nullptr;
+	ChatPanel* _chatPanel = nullptr;
 
 	class TilemapActor* _tilemapActor = nullptr;
 	SpriteActor* _background = nullptr;

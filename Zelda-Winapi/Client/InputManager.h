@@ -57,6 +57,9 @@ public:
 
 	POINT GetMousePos ( ) { return _mousePos; }
 
+	void SetInputLocked ( bool locked ) { _inputLocked = locked; }
+	bool IsInputLocked ( ) const { return _inputLocked; }
+
 private:
 	KeyState GetState ( KeyType key ) { return _states[ static_cast< uint8 >( key ) ]; }
 
@@ -64,4 +67,5 @@ private:
 	HWND _hwnd = 0;
 	vector<KeyState> _states;
 	POINT _mousePos;
+	bool _inputLocked = false;
 };

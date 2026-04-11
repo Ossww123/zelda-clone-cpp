@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "DevScene.h"
 
+#include "Client.h"
+
 #include "Utils.h"
 #include "Texture.h"
 #include "Sprite.h"
@@ -27,6 +29,7 @@
 #include "InventoryPanel.h"
 #include "PartyPanel.h"
 #include "PartyInvitePanel.h"
+#include "ChatPanel.h"
 #include "DevSceneResourceLoader.h"
 
 DevScene::DevScene ( )
@@ -38,6 +41,7 @@ DevScene::~DevScene ( )
 	SAFE_DELETE ( _inventoryPanel );
 	SAFE_DELETE ( _partyPanel );
 	SAFE_DELETE ( _partyInvitePanel );
+	SAFE_DELETE ( _chatPanel );
 }
 
 void DevScene::Init ( )
@@ -59,6 +63,8 @@ void DevScene::Init ( )
 	_inventoryPanel = new InventoryPanel ( );
 	_partyPanel = new PartyPanel ( );
 	_partyInvitePanel = new PartyInvitePanel ( );
+	_chatPanel = new ChatPanel ( );
+	_chatPanel->Init ( g_hWnd);
 
 	CreateMapButtons ( );
 	Super::Init ( );
@@ -74,6 +80,21 @@ void DevScene::Update ( )
 
 	Super::Update ( );
 
+	// 채팅창 열려있으면 게임 로직 입력 처리 건너뜀
+	if ( _chatPanel && _chatPanel->IsVisible ( ) )
+	{
+		_chatPanel->Tick ( );
+
+		// 채팅창 닫기
+		if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( VK_ESCAPE ) ) )
+		{
+			_chatPanel->SetVisible ( false );
+			GET_SINGLE ( InputManager )->SetInputLocked ( false );
+			::SetWindowText ( _chatPanel->GetEditHandle ( ) , L"" );
+		}
+		return;
+	}
+
 	float deltaTime = GET_SINGLE ( TimeManager )->GetDeltaTime ( );
 
 	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::I ) )
@@ -88,6 +109,21 @@ void DevScene::Update ( )
 		_partyPanel->Tick ( );
 	if ( _partyInvitePanel )
 		_partyInvitePanel->Tick ( );
+	if ( _chatPanel )
+	{
+		// Enter 키로 채팅창 토글
+		if ( GET_SINGLE ( InputManager )->GetButtonDown ( static_cast< KeyType >( VK_RETURN ) ) )
+		{
+			if ( _chatPanel->IsVisible ( ) == false )
+			{
+				_chatPanel->SetVisible ( true );
+				GET_SINGLE ( InputManager )->SetInputLocked ( true );
+				if ( _chatPanel->GetEditHandle ( ) )
+					::SetFocus ( _chatPanel->GetEditHandle ( ) );
+			}
+		}
+		_chatPanel->Tick ( );
+	}
 	HandlePartyInput ( );
 }
 
@@ -108,6 +144,8 @@ void DevScene::Render ( HDC hdc )
 		_partyPanel->Render ( hdc );
 	if ( _partyInvitePanel )
 		_partyInvitePanel->Render ( hdc );
+	if ( _chatPanel )
+		_chatPanel->Render ( hdc );
 }
 
 void DevScene::AddActor ( Actor* actor )
@@ -655,6 +693,15 @@ void DevScene::CreateSceneSprites ( )
 void DevScene::LoadSceneSounds ( )
 {
 	DevSceneResourceLoader::LoadSceneSounds ( );
+}
+
+void DevScene::AddChatMessage ( const wstring& sender , const wstring& msg )
+{
+	if ( _chatPanel )
+	{
+		_chatPanel->SetVisible ( true );
+		_chatPanel->AddMessage ( sender, msg );
+	}
 }
 
 void DevScene::LoadMap ( )

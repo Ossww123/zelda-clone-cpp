@@ -154,6 +154,7 @@
     <ClInclude Include="Arrow.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="CameraComponent.h" />
+    <ClInclude Include="ChatPanel.h" />
     <ClInclude Include="ClientPacketHandler.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Creature.h" />
@@ -209,6 +210,7 @@
     <ClCompile Include="Arrow.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
+    <ClCompile Include="ChatPanel.cpp" />
     <ClCompile Include="ClientPacketHandler.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Creature.cpp" />

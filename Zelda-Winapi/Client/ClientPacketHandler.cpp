@@ -750,6 +750,26 @@ void ClientPacketHandler::Handle_S_PartyLeave ( ServerSessionRef session , BYTE*
 
 void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	Protocol::S_Chat pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , len - sizeof ( PacketHeader ) );
+
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene == nullptr )
+		return;
+
+	// UTF-8 → UTF-16 변환
+	auto toWstring = [ ] ( const string& utf8 ) -> wstring {
+		int32 size = ::MultiByteToWideChar ( CP_UTF8 , 0 , utf8.c_str ( ) , -1 , nullptr , 0 );
+		wstring result ( size - 1 , 0 );
+		::MultiByteToWideChar ( CP_UTF8 , 0 , utf8.c_str ( ) , -1 , &result[ 0 ] , size );
+		return result;
+		};
+
+	wstring sender = toWstring ( pkt.sender ( ) );
+	wstring msg = toWstring ( pkt.msg ( ) );
+
+	scene->AddChatMessage ( sender , msg );
 }
 
 SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( uint64 targetId )
@@ -780,7 +800,7 @@ SendBufferRef ClientPacketHandler::Make_C_Login ( const string& username )
 	return MakeSendBuffer ( pkt , C_Login );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Chat ( const Protocol::CHAT_TYPE& type , const string& msg , const string& target )
+SendBufferRef ClientPacketHandler::Make_C_Chat ( const Protocol::C_Chat& pkt )
 {
-	return SendBufferRef ( );
+	return MakeSendBuffer ( pkt , C_Chat );
 }

@@ -49,6 +49,9 @@ void MyPlayer::Render ( HDC hdc )
 
 void MyPlayer::TickInput ( )
 {
+	if ( GET_SINGLE ( InputManager )->IsInputLocked ( ) )
+		return;
+
 	_keyPressed = true;
 
 	if ( GET_SINGLE ( InputManager )->GetButton ( KeyType::W ) )

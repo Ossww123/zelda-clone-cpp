@@ -83,7 +83,7 @@ public:
 	static SendBufferRef Make_C_PartyAnswer ( uint64 inviterId , bool accept );
 	static SendBufferRef Make_C_PartyLeave ( );
 	static SendBufferRef Make_C_Login ( const string& username );
-	static SendBufferRef Make_C_Chat ( const Protocol::CHAT_TYPE& type , const string& msg , const string& target );
+	static SendBufferRef Make_C_Chat ( const Protocol::C_Chat& pkt );
 
 	// [AUTO-GEN DECLS BEGIN]
 
