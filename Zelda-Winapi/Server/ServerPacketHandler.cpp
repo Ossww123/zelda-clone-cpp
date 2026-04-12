@@ -819,12 +819,31 @@ void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, in
 	}
 	case Protocol::CHAT_TYPE_PARTY:
 	{
-		// TODO: 파티 채팅 구현
+		uint64 partyId = GPartyManager.GetPartyIdByPlayer(player->info.objectid());
+		if (partyId == 0)
+			break;
+
+		Protocol::SS_RelayChat relay;
+		relay.set_sender(sender);
+		relay.set_type(Protocol::CHAT_TYPE_PARTY);
+		relay.set_msg(pkt.msg());
+		relay.set_partyid(partyId);
+
+		GChatConnector.Send(MakeSendBuffer(relay, SS_RelayChat));
 		break;
 	}
 	case Protocol::CHAT_TYPE_WHISPER:
 	{
-		// TODO: 귓속말 구현
+		if (pkt.target().empty())
+			break;
+
+		Protocol::SS_RelayChat relay;
+		relay.set_sender(sender);
+		relay.set_type(Protocol::CHAT_TYPE_WHISPER);
+		relay.set_msg(pkt.msg());
+		relay.set_target(pkt.target());
+
+		GChatConnector.Send(MakeSendBuffer(relay, SS_RelayChat));
 		break;
 	}
 	default:

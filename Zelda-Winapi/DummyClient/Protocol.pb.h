@@ -5978,6 +5978,8 @@ class SS_BroadcastChat final :
   enum : int {
     kSenderFieldNumber = 1,
     kMsgFieldNumber = 3,
+    kTargetFieldNumber = 4,
+    kPartyIdFieldNumber = 5,
     kTypeFieldNumber = 2,
   };
   // string sender = 1;
@@ -6008,6 +6010,29 @@ class SS_BroadcastChat final :
   std::string* _internal_mutable_msg();
   public:
 
+  // string target = 4;
+  void clear_target();
+  const std::string& target() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_target(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_target();
+  PROTOBUF_NODISCARD std::string* release_target();
+  void set_allocated_target(std::string* target);
+  private:
+  const std::string& _internal_target() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_target(const std::string& value);
+  std::string* _internal_mutable_target();
+  public:
+
+  // uint64 partyId = 5;
+  void clear_partyid();
+  uint64_t partyid() const;
+  void set_partyid(uint64_t value);
+  private:
+  uint64_t _internal_partyid() const;
+  void _internal_set_partyid(uint64_t value);
+  public:
+
   // .Protocol.CHAT_TYPE type = 2;
   void clear_type();
   ::Protocol::CHAT_TYPE type() const;
@@ -6027,6 +6052,8 @@ class SS_BroadcastChat final :
   struct Impl_ {
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_;
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr msg_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr target_;
+    uint64_t partyid_;
     int type_;
     mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   };
@@ -8673,6 +8700,76 @@ inline void SS_BroadcastChat::set_allocated_msg(std::string* msg) {
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:Protocol.SS_BroadcastChat.msg)
+}
+
+// string target = 4;
+inline void SS_BroadcastChat::clear_target() {
+  _impl_.target_.ClearToEmpty();
+}
+inline const std::string& SS_BroadcastChat::target() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_BroadcastChat.target)
+  return _internal_target();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void SS_BroadcastChat::set_target(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.target_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.SS_BroadcastChat.target)
+}
+inline std::string* SS_BroadcastChat::mutable_target() {
+  std::string* _s = _internal_mutable_target();
+  // @@protoc_insertion_point(field_mutable:Protocol.SS_BroadcastChat.target)
+  return _s;
+}
+inline const std::string& SS_BroadcastChat::_internal_target() const {
+  return _impl_.target_.Get();
+}
+inline void SS_BroadcastChat::_internal_set_target(const std::string& value) {
+  
+  _impl_.target_.Set(value, GetArenaForAllocation());
+}
+inline std::string* SS_BroadcastChat::_internal_mutable_target() {
+  
+  return _impl_.target_.Mutable(GetArenaForAllocation());
+}
+inline std::string* SS_BroadcastChat::release_target() {
+  // @@protoc_insertion_point(field_release:Protocol.SS_BroadcastChat.target)
+  return _impl_.target_.Release();
+}
+inline void SS_BroadcastChat::set_allocated_target(std::string* target) {
+  if (target != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.target_.SetAllocated(target, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.target_.IsDefault()) {
+    _impl_.target_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.SS_BroadcastChat.target)
+}
+
+// uint64 partyId = 5;
+inline void SS_BroadcastChat::clear_partyid() {
+  _impl_.partyid_ = uint64_t{0u};
+}
+inline uint64_t SS_BroadcastChat::_internal_partyid() const {
+  return _impl_.partyid_;
+}
+inline uint64_t SS_BroadcastChat::partyid() const {
+  // @@protoc_insertion_point(field_get:Protocol.SS_BroadcastChat.partyId)
+  return _internal_partyid();
+}
+inline void SS_BroadcastChat::_internal_set_partyid(uint64_t value) {
+  
+  _impl_.partyid_ = value;
+}
+inline void SS_BroadcastChat::set_partyid(uint64_t value) {
+  _internal_set_partyid(value);
+  // @@protoc_insertion_point(field_set:Protocol.SS_BroadcastChat.partyId)
 }
 
 #ifdef __GNUC__

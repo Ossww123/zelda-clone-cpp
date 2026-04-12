@@ -228,4 +228,6 @@ message SS_BroadcastChat
     string sender = 1;
     CHAT_TYPE type = 2;
     string msg = 3;
+    string target = 4;
+    uint64 partyId = 5;
 }

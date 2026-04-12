@@ -37,6 +37,8 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     broadcast.set_sender(pkt.sender());
     broadcast.set_type(pkt.type());
     broadcast.set_msg(pkt.msg());
+    broadcast.set_target(pkt.target());
+    broadcast.set_partyid(pkt.partyid());
 
     SendBufferRef sendBuffer = Make_SS_BroadcastChat(broadcast);
     GChatSessionManager.BroadcastAll(sendBuffer);

@@ -769,6 +769,15 @@ void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffe
 	wstring sender = toWstring ( pkt.sender ( ) );
 	wstring msg = toWstring ( pkt.msg ( ) );
 
+	wstring prefix;
+	switch ( pkt.type ( ) )
+	{
+		case Protocol::CHAT_TYPE_GLOBAL:  prefix = L"[전체] "; break;
+		case Protocol::CHAT_TYPE_PARTY:   prefix = L"[파티] "; break;
+		case Protocol::CHAT_TYPE_WHISPER: prefix = L"[귓말] "; break;
+		default: break;
+	}
+
 	scene->AddChatMessage ( sender , msg );
 }
 

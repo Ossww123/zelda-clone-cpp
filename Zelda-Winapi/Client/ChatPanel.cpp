@@ -156,10 +156,28 @@ void ChatPanel::SendChat ( )
     string msg ( size - 1 , 0 );
     ::WideCharToMultiByte ( CP_UTF8 , 0 , text.c_str ( ) , -1 , &msg[ 0 ] , size , nullptr , nullptr );
 
+    Protocol::CHAT_TYPE chatType = Protocol::CHAT_TYPE_GLOBAL;
+    string target = "";
+
+    if ( msg.size ( ) > 3 && msg.substr ( 0 , 3 ) == "/p " )
+    {
+        chatType = Protocol::CHAT_TYPE_PARTY;
+        msg = msg.substr ( 3 );
+    }
+    else if ( msg.size ( ) > 3 && msg.substr ( 0 , 3 ) == "/w " )
+    {
+        chatType = Protocol::CHAT_TYPE_WHISPER;
+        size_t space = msg.find ( ' ' , 3 );
+        if ( space == string::npos )
+            return;  // "/w 이름" 만 있고 메시지 없는 경우
+        target = msg.substr ( 3 , space - 3 );
+        msg = msg.substr ( space + 1 );
+    }
+
     Protocol::C_Chat pkt;
-    pkt.set_type ( Protocol::CHAT_TYPE_GLOBAL );
+    pkt.set_type ( chatType );
     pkt.set_msg ( msg );
-    pkt.set_target ( "" );
+    pkt.set_target ( target );
 
     SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Chat ( pkt );
     GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
