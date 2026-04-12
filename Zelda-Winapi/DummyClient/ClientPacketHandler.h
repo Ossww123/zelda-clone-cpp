@@ -59,9 +59,9 @@ public:
     static void Handle_S_Turn(BYTE* buffer, int32 len);
 
     // send
-    static SendBufferRef Make_C_Login(const std::string& username);
-    static SendBufferRef Make_C_Move(Protocol::DIR_TYPE dir);
-    static SendBufferRef Make_C_Attack(Protocol::DIR_TYPE dir, Protocol::WEAPON_TYPE weaponType);
+    static SendBufferRef Make_C_Login(const Protocol::C_Login& pkt);
+    static SendBufferRef Make_C_Move(const Protocol::C_Move& pkt);
+    static SendBufferRef Make_C_Attack(const Protocol::C_Attack& pkt);
 
     // stats
     static DummyClientStats ConsumeStats();

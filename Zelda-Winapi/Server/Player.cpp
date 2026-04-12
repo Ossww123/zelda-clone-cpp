@@ -190,7 +190,7 @@ bool Player::AddItem(int32 itemId, int32 count)
 				pkt.set_slot(i);
 				pkt.set_count(_storage[i].count);
 				if (session)
-					session->Send(ServerPacketHandler::Make_S_AddItem(pkt.itemid(), pkt.slot(), pkt.count()));
+					session->Send(ServerPacketHandler::Make_S_AddItem(pkt));
 
 				cout << "[Player] " << info.name() << " acquired " << tmpl->name << " (slot " << i << ", count " << _storage[i].count << ")" << endl;
 				return true;
@@ -211,7 +211,7 @@ bool Player::AddItem(int32 itemId, int32 count)
 	pkt.set_slot(slot);
 	pkt.set_count(count);
 	if (session)
-		session->Send(ServerPacketHandler::Make_S_AddItem(pkt.itemid(), pkt.slot(), pkt.count()));
+		session->Send(ServerPacketHandler::Make_S_AddItem(pkt));
 
 	cout << "[Player] " << info.name() << " acquired " << tmpl->name << " (slot " << slot << ")" << endl;
 	return true;
@@ -259,16 +259,16 @@ void Player::EquipItem(int32 slot)
 	// S_EquipItem 전송
 	if (session)
 	{
-		session->Send(ServerPacketHandler::Make_S_EquipItem(
-			equipType,
-			slot,
-			_storage[slot].itemId,
-			_storage[slot].count,
-			equipSlot->itemId,
-			equipSlot->count,
-			info.attack(),
-			info.defence()
-		));
+		Protocol::S_EquipItem equipPkt;
+		equipPkt.set_equiptype(equipType);
+		equipPkt.set_storageslot(slot);
+		equipPkt.set_storageitemid(_storage[slot].itemId);
+		equipPkt.set_storageitemcount(_storage[slot].count);
+		equipPkt.set_equipitemid(equipSlot->itemId);
+		equipPkt.set_equipitemcount(equipSlot->count);
+		equipPkt.set_attack(info.attack());
+		equipPkt.set_defence(info.defence());
+		session->Send(ServerPacketHandler::Make_S_EquipItem(equipPkt));
 	}
 }
 
@@ -300,12 +300,12 @@ void Player::UnequipItem(int32 equipType)
 
 	if (session)
 	{
-		session->Send(ServerPacketHandler::Make_S_UnequipItem(
-			equipType,
-			slot,
-			info.attack(),
-			info.defence()
-		));
+		Protocol::S_UnequipItem unequipPkt;
+		unequipPkt.set_equiptype(equipType);
+		unequipPkt.set_storageslot(slot);
+		unequipPkt.set_attack(info.attack());
+		unequipPkt.set_defence(info.defence());
+		session->Send(ServerPacketHandler::Make_S_UnequipItem(unequipPkt));
 	}
 }
 
@@ -348,11 +348,11 @@ void Player::UseItem(int32 slot)
 
 	if (session)
 	{
-		session->Send(ServerPacketHandler::Make_S_UseItem(
-			equipType,
-			targetSlot->count,
-			newHp
-		));
+		Protocol::S_UseItem useItemPkt;
+		useItemPkt.set_equiptype(equipType);
+		useItemPkt.set_remaincount(targetSlot->count);
+		useItemPkt.set_newhp(newHp);
+		session->Send(ServerPacketHandler::Make_S_UseItem(useItemPkt));
 	}
 }
 
@@ -389,7 +389,7 @@ void Player::SendInventoryData()
 		p->set_count(_equipPotion.count);
 	}
 
-	session->Send(ServerPacketHandler::MakeSendBuffer(pkt, S_InventoryData));
+	session->Send(ServerPacketHandler::Make_S_InventoryData(pkt));
 }
 
 void Player::ApplyFromSaveData(const PlayerSaveData& data)

@@ -46,7 +46,9 @@ public:
         _running.store(true);
 
         string username = "bot_" + to_string(_botId);
-        SendBufferRef login = ClientPacketHandler::Make_C_Login(username);
+        Protocol::C_Login loginPkt;
+        loginPkt.set_username(username);
+        SendBufferRef login = ClientPacketHandler::Make_C_Login(loginPkt);
         Send(login);
 
         _nextMoveAt = chrono::steady_clock::now();
@@ -93,7 +95,9 @@ private:
             if (now >= _nextMoveAt)
             {
                 Protocol::DIR_TYPE dir = static_cast<Protocol::DIR_TYPE>(_dirDist(_rng));
-                SendBufferRef movePkt = ClientPacketHandler::Make_C_Move(dir);
+                Protocol::C_Move movePktData;
+                movePktData.set_dir(dir);
+                SendBufferRef movePkt = ClientPacketHandler::Make_C_Move(movePktData);
                 Send(movePkt);
                 _nextMoveAt = now + chrono::milliseconds(GMoveIntervalMs);
             }
@@ -101,7 +105,10 @@ private:
             if (now >= _nextAttackAt)
             {
                 Protocol::DIR_TYPE dir = static_cast<Protocol::DIR_TYPE>(_dirDist(_rng));
-                SendBufferRef atkPkt = ClientPacketHandler::Make_C_Attack(dir, Protocol::WEAPON_TYPE_SWORD);
+                Protocol::C_Attack attackPkt;
+                attackPkt.set_dir(dir);
+                attackPkt.set_weapontype(Protocol::WEAPON_TYPE_SWORD);
+                SendBufferRef atkPkt = ClientPacketHandler::Make_C_Attack(attackPkt);
                 Send(atkPkt);
                 _nextAttackAt = now + chrono::milliseconds(GAttackIntervalMs);
             }

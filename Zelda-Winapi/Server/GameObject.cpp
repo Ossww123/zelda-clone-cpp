@@ -124,7 +124,9 @@ void GameObject::BroadcastMove()
 {
 	if (room)
 	{
-		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(info);
+		Protocol::S_Move movePkt;
+		*movePkt.mutable_info() = info;
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(movePkt);
 		room->Broadcast(sendBuffer);
 	}
 }

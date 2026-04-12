@@ -151,7 +151,9 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 	player->StopMove();
 
 	{
-		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_MyPlayer(player->info);
+		Protocol::S_MyPlayer myPlayerPkt;
+		*myPlayerPkt.mutable_info() = player->info;
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_MyPlayer(myPlayerPkt);
 		session->Send(sendBuffer);
 	}
 
@@ -307,7 +309,9 @@ void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt
 	if (!CanGo(nextPos))
 	{
 		player->info.set_state(IDLE);
-		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(player->info);
+		Protocol::S_Move movePkt;
+		*movePkt.mutable_info() = player->info;
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(movePkt);
 		Broadcast(sendBuffer);
 		return;
 	}
@@ -321,7 +325,9 @@ void GameRoom::Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt
 	uint64 now = GetTickCount64();
 	player->StartMove(now, kMoveDurationMs);
 
-	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(player->info);
+	Protocol::S_Move movePkt;
+	*movePkt.mutable_info() = player->info;
+	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Move(movePkt);
 	Broadcast(sendBuffer);
 }
 

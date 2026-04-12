@@ -451,37 +451,23 @@ void ClientPacketHandler::Handle_S_Turn ( ServerSessionRef session , BYTE* buffe
 
 // **** MAKE ****
 
-SendBufferRef ClientPacketHandler::Make_C_Move ( Protocol::DIR_TYPE dir )
+SendBufferRef ClientPacketHandler::Make_C_Move ( const Protocol::C_Move& pkt )
 {
-	Protocol::C_Move pkt;
-	pkt.set_dir ( dir );
-
 	return MakeSendBuffer ( pkt , C_Move );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon )
+SendBufferRef ClientPacketHandler::Make_C_Attack ( const Protocol::C_Attack& pkt )
 {
-	Protocol::C_Attack pkt;
-	pkt.set_dir ( dir );
-	pkt.set_weapontype ( weapon );
-
 	return MakeSendBuffer ( pkt , C_Attack );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel )
+SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::C_ChangeMap& pkt )
 {
-	Protocol::C_ChangeMap pkt;
-	pkt.set_mapid ( mapId );
-	pkt.set_channel ( channel );
-
 	return MakeSendBuffer ( pkt , C_ChangeMap );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Turn ( const Protocol::DIR_TYPE& dir )
+SendBufferRef ClientPacketHandler::Make_C_Turn ( const Protocol::C_Turn& pkt )
 {
-	Protocol::C_Turn pkt;
-	pkt.set_dir ( dir );
-
 	return MakeSendBuffer ( pkt , C_Turn );
 }
 
@@ -645,24 +631,18 @@ void ClientPacketHandler::Handle_S_UseItem ( ServerSessionRef session , BYTE* bu
 	myPlayer->info.set_hp ( pkt.newhp ( ) );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_EquipItem ( int32 slot )
+SendBufferRef ClientPacketHandler::Make_C_EquipItem ( const Protocol::C_EquipItem& pkt )
 {
-	Protocol::C_EquipItem pkt;
-	pkt.set_slot ( slot );
 	return MakeSendBuffer ( pkt , C_EquipItem );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_UnequipItem ( int32 equipType )
+SendBufferRef ClientPacketHandler::Make_C_UnequipItem ( const Protocol::C_UnequipItem& pkt )
 {
-	Protocol::C_UnequipItem pkt;
-	pkt.set_equiptype ( equipType );
 	return MakeSendBuffer ( pkt , C_UnequipItem );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_UseItem ( int32 slot )
+SendBufferRef ClientPacketHandler::Make_C_UseItem ( const Protocol::C_UseItem& pkt )
 {
-	Protocol::C_UseItem pkt;
-	pkt.set_slot ( slot );
 	return MakeSendBuffer ( pkt , C_UseItem );
 }
 
@@ -781,18 +761,13 @@ void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffe
 	scene->AddChatMessage ( sender , msg );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( uint64 targetId )
+SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( const Protocol::C_PartyInvite& pkt )
 {
-	Protocol::C_PartyInvite pkt;
-	pkt.set_targetid ( targetId );
 	return MakeSendBuffer ( pkt , C_PartyInvite );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_PartyAnswer ( uint64 inviterId , bool accept )
+SendBufferRef ClientPacketHandler::Make_C_PartyAnswer ( const Protocol::C_PartyAnswer& pkt )
 {
-	Protocol::C_PartyAnswer pkt;
-	pkt.set_inviterid ( inviterId );
-	pkt.set_accept ( accept );
 	return MakeSendBuffer ( pkt , C_PartyAnswer );
 }
 
@@ -802,10 +777,8 @@ SendBufferRef ClientPacketHandler::Make_C_PartyLeave ( )
 	return MakeSendBuffer ( pkt , C_PartyLeave );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Login ( const string& username )
+SendBufferRef ClientPacketHandler::Make_C_Login ( const Protocol::C_Login& pkt )
 {
-	Protocol::C_Login pkt;
-	pkt.set_username ( username );
 	return MakeSendBuffer ( pkt , C_Login );
 }
 

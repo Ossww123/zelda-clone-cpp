@@ -120,7 +120,9 @@ void MyPlayer::TryMove ( )
 	// 방향이 다르면 Turn
 	if ( currentDir != wantedDir )
 	{
-		SendBufferRef sb = ClientPacketHandler::Make_C_Turn ( wantedDir );
+		Protocol::C_Turn turnPkt;
+		turnPkt.set_dir ( wantedDir );
+		SendBufferRef sb = ClientPacketHandler::Make_C_Turn ( turnPkt );
 		GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 
 		_keyPressed = false;
@@ -136,7 +138,9 @@ void MyPlayer::TryMove ( )
 	_hasLastMoveRequest = true;
 
 	// 방향이 같으면 Move
-	SendBufferRef sb = ClientPacketHandler::Make_C_Move ( currentDir );
+	Protocol::C_Move movePkt;
+	movePkt.set_dir ( currentDir );
+	SendBufferRef sb = ClientPacketHandler::Make_C_Move ( movePkt );
 	GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 
 	_keyPressed = false;
@@ -147,7 +151,10 @@ void MyPlayer::TryMove ( )
 void MyPlayer::TrySkill ( )
 {
 	Protocol::WEAPON_TYPE weapon = ToProtoWeaponType(GetWeaponType ( ));
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Attack ( info.dir ( ) , weapon );
+	Protocol::C_Attack attackPkt;
+	attackPkt.set_dir ( info.dir ( ) );
+	attackPkt.set_weapontype ( weapon );
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Attack ( attackPkt );
 	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }
 

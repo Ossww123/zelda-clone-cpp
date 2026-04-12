@@ -264,34 +264,6 @@ void ServerPacketHandler::Handle_C_Turn(GameSessionRef session, BYTE* buffer, in
 }
 
 
-SendBufferRef ServerPacketHandler::Make_S_TEST(uint64 id, uint32 hp, uint16 attack, vector<BuffData> buffs)
-{
-	Protocol::S_TEST pkt;
-
-	pkt.set_id(10);
-	pkt.set_hp(100);
-	pkt.set_attack(10);
-
-	{
-		Protocol::BuffData* data = pkt.add_buffs();
-		data->set_buffid(100);
-		data->set_remaintime(1.2f);
-		{
-			data->add_victims(10);
-		}
-	}
-	{
-		Protocol::BuffData* data = pkt.add_buffs();
-		data->set_buffid(200);
-		data->set_remaintime(2.2f);
-		{
-			data->add_victims(20);
-		}
-	}
-
-	return MakeSendBuffer(pkt, S_TEST);
-}
-
 
 SendBufferRef ServerPacketHandler::Make_S_EnterGame()
 {
@@ -303,13 +275,8 @@ SendBufferRef ServerPacketHandler::Make_S_EnterGame()
 	return MakeSendBuffer(pkt, S_EnterGame);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_MyPlayer(const Protocol::ObjectInfo info)
+SendBufferRef ServerPacketHandler::Make_S_MyPlayer(const Protocol::S_MyPlayer& pkt)
 {
-	Protocol::S_MyPlayer pkt;
-
-	Protocol::ObjectInfo* objectInfo = pkt.mutable_info();
-	*objectInfo = info;
-
 	return MakeSendBuffer(pkt, S_MyPlayer);
 }
 
@@ -323,13 +290,8 @@ SendBufferRef ServerPacketHandler::Make_S_RemoveObject(const Protocol::S_RemoveO
 	return MakeSendBuffer(pkt, S_RemoveObject);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_Move(const Protocol::ObjectInfo& info)
+SendBufferRef ServerPacketHandler::Make_S_Move(const Protocol::S_Move& pkt)
 {
-	Protocol::S_Move pkt;
-
-	Protocol::ObjectInfo* objectInfo = pkt.mutable_info();
-	*objectInfo = info;
-
 	return MakeSendBuffer(pkt, S_Move);
 }
 
@@ -423,56 +385,28 @@ void ServerPacketHandler::Handle_C_UseItem(GameSessionRef session, BYTE* buffer,
 		});
 }
 
-SendBufferRef ServerPacketHandler::Make_S_InventoryData(const vector<Protocol::ItemInfo>& items, const Protocol::ItemInfo& equippedWeapon, const Protocol::ItemInfo& equippedArmor, const Protocol::ItemInfo& equippedPotion)
+SendBufferRef ServerPacketHandler::Make_S_InventoryData(const Protocol::S_InventoryData& pkt)
 {
-	Protocol::S_InventoryData pkt;
-	for (const auto& item : items)
-		*pkt.add_items() = item;
-	*pkt.mutable_equippedweapon() = equippedWeapon;
-	*pkt.mutable_equippedarmor() = equippedArmor;
-	*pkt.mutable_equippedpotion() = equippedPotion;
 	return MakeSendBuffer(pkt, S_InventoryData);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_AddItem(int32 itemId, int32 slot, int32 count)
+SendBufferRef ServerPacketHandler::Make_S_AddItem(const Protocol::S_AddItem& pkt)
 {
-	Protocol::S_AddItem pkt;
-	pkt.set_itemid(itemId);
-	pkt.set_slot(slot);
-	pkt.set_count(count);
 	return MakeSendBuffer(pkt, S_AddItem);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_EquipItem(int32 equipType, int32 storageSlot, int32 storageItemId, int32 storageItemCount, int32 equipItemId, int32 equipItemCount, int32 attack, int32 defence)
+SendBufferRef ServerPacketHandler::Make_S_EquipItem(const Protocol::S_EquipItem& pkt)
 {
-	Protocol::S_EquipItem pkt;
-	pkt.set_equiptype(equipType);
-	pkt.set_storageslot(storageSlot);
-	pkt.set_storageitemid(storageItemId);
-	pkt.set_storageitemcount(storageItemCount);
-	pkt.set_equipitemid(equipItemId);
-	pkt.set_equipitemcount(equipItemCount);
-	pkt.set_attack(attack);
-	pkt.set_defence(defence);
 	return MakeSendBuffer(pkt, S_EquipItem);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_UnequipItem(int32 equipType, int32 storageSlot, int32 attack, int32 defence)
+SendBufferRef ServerPacketHandler::Make_S_UnequipItem(const Protocol::S_UnequipItem& pkt)
 {
-	Protocol::S_UnequipItem pkt;
-	pkt.set_equiptype(equipType);
-	pkt.set_storageslot(storageSlot);
-	pkt.set_attack(attack);
-	pkt.set_defence(defence);
 	return MakeSendBuffer(pkt, S_UnequipItem);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_UseItem(int32 equipType, int32 remainCount, int32 newHp)
+SendBufferRef ServerPacketHandler::Make_S_UseItem(const Protocol::S_UseItem& pkt)
 {
-	Protocol::S_UseItem pkt;
-	pkt.set_equiptype(equipType);
-	pkt.set_remaincount(remainCount);
-	pkt.set_newhp(newHp);
 	return MakeSendBuffer(pkt, S_UseItem);
 }
 
@@ -704,19 +638,13 @@ void ServerPacketHandler::Handle_C_PartyLeave(GameSessionRef session, BYTE* buff
 		});
 }
 
-SendBufferRef ServerPacketHandler::Make_S_PartyInvite(uint64 inviterId, const string& inviterName)
+SendBufferRef ServerPacketHandler::Make_S_PartyInvite(const Protocol::S_PartyInvite& pkt)
 {
-	Protocol::S_PartyInvite pkt;
-	pkt.set_inviterid(inviterId);
-	pkt.set_invitername(inviterName);
 	return MakeSendBuffer(pkt, S_PartyInvite);
 }
 
-SendBufferRef ServerPacketHandler::Make_S_PartyUpdate(const vector<Protocol::PartyMemberInfo>& members)
+SendBufferRef ServerPacketHandler::Make_S_PartyUpdate(const Protocol::S_PartyUpdate& pkt)
 {
-	Protocol::S_PartyUpdate pkt;
-	for (const auto& m : members)
-		*pkt.add_members() = m;
 	return MakeSendBuffer(pkt, S_PartyUpdate);
 }
 

@@ -193,7 +193,9 @@ void InventoryPanel::HandleInventoryClick ( )
 	{
 		if ( myPlayer->_equipWeapon.itemId > 0 )
 		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 0 );
+			Protocol::C_UnequipItem unequipPkt;
+			unequipPkt.set_equiptype ( 0 );
+			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( unequipPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 		}
 		return;
@@ -202,7 +204,9 @@ void InventoryPanel::HandleInventoryClick ( )
 	{
 		if ( myPlayer->_equipArmor.itemId > 0 )
 		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( 1 );
+			Protocol::C_UnequipItem unequipPkt;
+			unequipPkt.set_equiptype ( 1 );
+			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( unequipPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 		}
 		return;
@@ -211,7 +215,9 @@ void InventoryPanel::HandleInventoryClick ( )
 	{
 		if ( myPlayer->_equipPotion.itemId > 0 )
 		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_UseItem ( -1 );
+			Protocol::C_UseItem useItemPkt;
+			useItemPkt.set_slot ( -1 );
+			SendBufferRef sb = ClientPacketHandler::Make_C_UseItem ( useItemPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 		}
 		return;
@@ -228,7 +234,9 @@ void InventoryPanel::HandleInventoryClick ( )
 		{
 			if ( myPlayer->_storage[ i ].itemId > 0 )
 			{
-				SendBufferRef sb = ClientPacketHandler::Make_C_EquipItem ( i );
+				Protocol::C_EquipItem equipPkt;
+				equipPkt.set_slot ( i );
+				SendBufferRef sb = ClientPacketHandler::Make_C_EquipItem ( equipPkt );
 				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 			}
 			return;

@@ -72,17 +72,17 @@ public:
 	static void Handle_S_Chat ( ServerSessionRef session , BYTE* buffer , int32 len );
 
 	// 보내기
-	static SendBufferRef Make_C_Move ( Protocol::DIR_TYPE dir );
-	static SendBufferRef Make_C_Attack ( Protocol::DIR_TYPE dir , Protocol::WEAPON_TYPE weapon );
-	static SendBufferRef Make_C_ChangeMap ( const Protocol::MAP_ID& mapId , int32 channel );
-	static SendBufferRef Make_C_Turn ( const Protocol::DIR_TYPE& dir );
-	static SendBufferRef Make_C_EquipItem ( int32 slot );
-	static SendBufferRef Make_C_UnequipItem ( int32 equipType );
-	static SendBufferRef Make_C_UseItem ( int32 slot );
-	static SendBufferRef Make_C_PartyInvite ( uint64 targetId );
-	static SendBufferRef Make_C_PartyAnswer ( uint64 inviterId , bool accept );
+	static SendBufferRef Make_C_Move ( const Protocol::C_Move& pkt );
+	static SendBufferRef Make_C_Attack ( const Protocol::C_Attack& pkt );
+	static SendBufferRef Make_C_ChangeMap ( const Protocol::C_ChangeMap& pkt );
+	static SendBufferRef Make_C_Turn ( const Protocol::C_Turn& pkt );
+	static SendBufferRef Make_C_EquipItem ( const Protocol::C_EquipItem& pkt );
+	static SendBufferRef Make_C_UnequipItem ( const Protocol::C_UnequipItem& pkt );
+	static SendBufferRef Make_C_UseItem ( const Protocol::C_UseItem& pkt );
+	static SendBufferRef Make_C_PartyInvite ( const Protocol::C_PartyInvite& pkt );
+	static SendBufferRef Make_C_PartyAnswer ( const Protocol::C_PartyAnswer& pkt );
 	static SendBufferRef Make_C_PartyLeave ( );
-	static SendBufferRef Make_C_Login ( const string& username );
+	static SendBufferRef Make_C_Login ( const Protocol::C_Login& pkt );
 	static SendBufferRef Make_C_Chat ( const Protocol::C_Chat& pkt );
 
 	// [AUTO-GEN DECLS BEGIN]

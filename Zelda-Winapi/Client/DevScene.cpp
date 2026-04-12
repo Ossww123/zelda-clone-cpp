@@ -373,7 +373,9 @@ void DevScene::UpdateLogin ( )
 		{
 			// wstring -> string
 			string username ( _loginText.begin ( ) , _loginText.end ( ) );
-			SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Login ( username );
+			Protocol::C_Login loginPkt;
+			loginPkt.set_username ( username );
+			SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Login ( loginPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 		}
 	}
@@ -580,19 +582,28 @@ void DevScene::CreateMapButtons ( )
 
 void DevScene::OnClickTown1 ( )
 {
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 1 );
+	Protocol::C_ChangeMap changeMapPkt;
+	changeMapPkt.set_mapid ( Protocol::MAP_ID_TOWN );
+	changeMapPkt.set_channel ( 1 );
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( changeMapPkt );
 	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }
 
 void DevScene::OnClickTown2 ( )
 {
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_TOWN , 2 );
+	Protocol::C_ChangeMap changeMapPkt;
+	changeMapPkt.set_mapid ( Protocol::MAP_ID_TOWN );
+	changeMapPkt.set_channel ( 2 );
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( changeMapPkt );
 	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }
 
 void DevScene::OnClickDungeon ( )
 {
-	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( Protocol::MAP_ID_DUNGEON , 0 );
+	Protocol::C_ChangeMap changeMapPkt;
+	changeMapPkt.set_mapid ( Protocol::MAP_ID_DUNGEON );
+	changeMapPkt.set_channel ( 0 );
+	SendBufferRef sendBuffer = ClientPacketHandler::Make_C_ChangeMap ( changeMapPkt );
 	GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 }
 
@@ -607,7 +618,10 @@ void DevScene::HandlePartyInput ( )
 	{
 		if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::Y ) )
 		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , true );
+			Protocol::C_PartyAnswer answerPkt;
+			answerPkt.set_inviterid ( myPlayer->_pendingInviteFrom );
+			answerPkt.set_accept ( true );
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( answerPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 			myPlayer->_pendingInviteFrom = 0;
 			myPlayer->_pendingInviterName.clear ( );
@@ -615,7 +629,10 @@ void DevScene::HandlePartyInput ( )
 		}
 		else if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::N ) )
 		{
-			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( myPlayer->_pendingInviteFrom , false );
+			Protocol::C_PartyAnswer answerPkt;
+			answerPkt.set_inviterid ( myPlayer->_pendingInviteFrom );
+			answerPkt.set_accept ( false );
+			SendBufferRef sb = ClientPacketHandler::Make_C_PartyAnswer ( answerPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 			myPlayer->_pendingInviteFrom = 0;
 			myPlayer->_pendingInviterName.clear ( );
@@ -670,7 +687,9 @@ void DevScene::HandlePartyInput ( )
 			// 클릭 범위: 플레이어 중심에서 50px 이내
 			if ( dx * dx + dy * dy < 50.f * 50.f )
 			{
-				SendBufferRef sb = ClientPacketHandler::Make_C_PartyInvite ( player->info.objectid ( ) );
+				Protocol::C_PartyInvite invitePkt;
+				invitePkt.set_targetid ( player->info.objectid ( ) );
+				SendBufferRef sb = ClientPacketHandler::Make_C_PartyInvite ( invitePkt );
 				GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 				break;
 			}

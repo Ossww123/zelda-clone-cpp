@@ -99,25 +99,18 @@ void ClientPacketHandler::Handle_S_Turn(BYTE* buffer, int32 len)
         GRecvTurn.fetch_add(1);
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Login(const std::string& username)
+SendBufferRef ClientPacketHandler::Make_C_Login(const Protocol::C_Login& pkt)
 {
-    Protocol::C_Login pkt;
-    pkt.set_username(username);
     return MakeSendBuffer(pkt, C_Login);
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Move(Protocol::DIR_TYPE dir)
+SendBufferRef ClientPacketHandler::Make_C_Move(const Protocol::C_Move& pkt)
 {
-    Protocol::C_Move pkt;
-    pkt.set_dir(dir);
     return MakeSendBuffer(pkt, C_Move);
 }
 
-SendBufferRef ClientPacketHandler::Make_C_Attack(Protocol::DIR_TYPE dir, Protocol::WEAPON_TYPE weaponType)
+SendBufferRef ClientPacketHandler::Make_C_Attack(const Protocol::C_Attack& pkt)
 {
-    Protocol::C_Attack pkt;
-    pkt.set_dir(dir);
-    pkt.set_weapontype(weaponType);
     return MakeSendBuffer(pkt, C_Attack);
 }
 
