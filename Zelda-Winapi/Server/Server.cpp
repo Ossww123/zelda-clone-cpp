@@ -22,6 +22,8 @@ using namespace std;
 #include "GameRoomManager.h"
 #include "DBManager.h"
 #include "ChatConnector.h"
+#include "RedisClient.h"
+#include "RedisSubscriber.h"
 
 static bool IsMultiMode(int argc, char* argv[])
 {
@@ -50,6 +52,9 @@ int main(int argc, char* argv[])
 	SocketUtils::Init();
 	GDBManager.Init("game.db");
 	GRoomManager.Init();
+
+	GRedisClient.Connect();
+	GRedisSubscriber.Start();
 
 	ServerServiceRef service = make_shared<ServerService>(
 	NetAddress(L"127.0.0.1", 7777),

@@ -38,6 +38,9 @@
     <Filter Include="Source Files\DB">
       <UniqueIdentifier>{1d81ac93-69a0-4b46-a7b6-bedf782d34b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Redis">
+      <UniqueIdentifier>{e777d007-516b-4532-834f-d5f766dde5fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Server.cpp">
@@ -106,6 +109,12 @@
     <ClCompile Include="ChatConnector.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
+    <ClCompile Include="RedisClient.cpp">
+      <Filter>Source Files\Redis</Filter>
+    </ClCompile>
+    <ClCompile Include="RedisSubscriber.cpp">
+      <Filter>Source Files\Redis</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -173,6 +182,12 @@
     </ClInclude>
     <ClInclude Include="ChatConnector.h">
       <Filter>Source Files\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RedisClient.h">
+      <Filter>Source Files\Redis</Filter>
+    </ClInclude>
+    <ClInclude Include="RedisSubscriber.h">
+      <Filter>Source Files\Redis</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

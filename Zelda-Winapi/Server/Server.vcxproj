@@ -176,6 +176,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="RedisClient.cpp" />
+    <ClCompile Include="RedisSubscriber.cpp" />
     <ClCompile Include="RoomDataManager.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="ServerPacketHandler.cpp" />
@@ -206,6 +208,8 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="Protocol.pb.h" />
+    <ClInclude Include="RedisClient.h" />
+    <ClInclude Include="RedisSubscriber.h" />
     <ClInclude Include="RoomConfig.h" />
     <ClInclude Include="RoomDataManager.h" />
     <ClInclude Include="ServerPacketHandler.h" />
