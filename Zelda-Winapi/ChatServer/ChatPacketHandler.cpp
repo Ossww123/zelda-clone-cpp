@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ChatPacketHandler.h"
 #include "ChatSessionManager.h"
+#include "RedisClient.h"
 
 enum
 {
@@ -41,7 +42,24 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     broadcast.set_partyid(pkt.partyid());
 
     SendBufferRef sendBuffer = Make_SS_BroadcastChat(broadcast);
-    GChatSessionManager.BroadcastAll(sendBuffer);
+    // GChatSessionManager.BroadcastAll(sendBuffer);
+
+    std::string payload;
+    broadcast.SerializeToString(&payload);
+
+    if (pkt.type() == Protocol::CHAT_TYPE_GLOBAL)
+    {
+        GRedisClient.Get().publish("chat:global", payload);
+    }
+    else if (pkt.type() == Protocol::CHAT_TYPE_WHISPER)
+    {
+        // TODO: 지금은 일단 BroadcastAll 유지
+        GChatSessionManager.BroadcastAll(sendBuffer);
+    }
+    else
+    {
+        GChatSessionManager.BroadcastAll(sendBuffer);
+    }
 }
 
 SendBufferRef ChatPacketHandler::Make_SS_BroadcastChat(const Protocol::SS_BroadcastChat& pkt)
