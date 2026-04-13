@@ -9,6 +9,7 @@
 #include "PartyManager.h"
 #include "DBManager.h"
 #include "ChatConnector.h"
+#include "RedisClient.h"
 
 static atomic<uint64> GRecvMovePerSec = 0;
 static atomic<uint64> GRecvAttackPerSec = 0;
@@ -716,6 +717,9 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 			});
 	}
 
+	GRedisClient.Get().set("player:loc:" + username, "127.0.0.1:7777");
+
+	cout << "[Login] " << username << " logged in" << endl;
 	cout << "[Login] " << username << " logged in (accountId=" << accountId << ")" << endl;
 }
 

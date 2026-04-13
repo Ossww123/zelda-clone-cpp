@@ -758,7 +758,7 @@ void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffe
 		default: break;
 	}
 
-	scene->AddChatMessage ( sender , msg );
+	scene->AddChatMessage ( prefix + sender , msg );
 }
 
 SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( const Protocol::C_PartyInvite& pkt )

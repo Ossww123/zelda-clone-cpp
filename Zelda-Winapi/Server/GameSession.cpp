@@ -7,6 +7,7 @@
 #include "PartyManager.h"
 #include "Player.h"
 #include "DBManager.h"
+#include "RedisClient.h"
 
 void GameSession::OnConnected()
 {
@@ -65,6 +66,11 @@ void GameSession::OnDisconnected()
 				// DisbandParty에서 _playerToParty를 지우므로 여기선 별도 처리 불필요
 			}
 		}
+	}
+
+	if (p)
+	{
+		GRedisClient.Get().del("player:loc:" + p->info.name());
 	}
 
 	// 방 퇴장

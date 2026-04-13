@@ -51,10 +51,30 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     {
         GRedisClient.Get().publish("chat:global", payload);
     }
-    else if (pkt.type() == Protocol::CHAT_TYPE_WHISPER)
-    {
-        // TODO: 지금은 일단 BroadcastAll 유지
-        GChatSessionManager.BroadcastAll(sendBuffer);
+    else if (pkt.type() == Protocol::CHAT_TYPE_WHISPER) {
+        auto val = GRedisClient.Get().get("player:loc:" + pkt.target());
+        if (val)
+        {
+            // 대상 서버 채널로 PUBLISH
+            string channel = "chat:whisper:" + *val;
+            GRedisClient.Get().publish(channel, payload);
+        }
+        else
+        {
+            // 대상 없음 → sender 서버에 에러 메시지 PUBLISH
+            Protocol::SS_BroadcastChat errPkt;
+            errPkt.set_sender("System");
+            errPkt.set_type(Protocol::CHAT_TYPE_WHISPER);
+            errPkt.set_msg("[System] 대상 플레이어를 찾을 수 없습니다.");
+            errPkt.set_target(pkt.sender());
+
+            string errPayload;
+            errPkt.SerializeToString(&errPayload);
+
+            auto senderLoc = GRedisClient.Get().get("player:loc:" + pkt.sender());
+            if (senderLoc)
+                GRedisClient.Get().publish("chat:whisper:" + *senderLoc, errPayload);
+        }
     }
     else
     {

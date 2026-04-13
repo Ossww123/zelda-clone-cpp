@@ -31,6 +31,7 @@ void RedisSubscriber::Start()
                 });
 
             sub.subscribe("chat:global");
+            sub.subscribe("chat:whisper:127.0.0.1:7777");
 
             while (true)
             {
