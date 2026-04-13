@@ -22,6 +22,9 @@
     <Filter Include="Source Files\Chat">
       <UniqueIdentifier>{51730c6c-da60-4fed-a1d5-3fa37ede87a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Redis">
+      <UniqueIdentifier>{af153b8d-b2b1-4308-8a57-861842285eee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChatServer.cpp">
@@ -48,6 +51,9 @@
     <ClCompile Include="Struct.pb.cc">
       <Filter>Source Files\Protocol</Filter>
     </ClCompile>
+    <ClCompile Include="RedisClient.cpp">
+      <Filter>Source Files\Redis</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -70,6 +76,9 @@
     </ClInclude>
     <ClInclude Include="Struct.pb.h">
       <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="RedisClient.h">
+      <Filter>Source Files\Redis</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
