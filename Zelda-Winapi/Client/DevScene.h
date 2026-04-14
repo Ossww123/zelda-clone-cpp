@@ -11,6 +11,7 @@ class InventoryPanel;
 class PartyPanel;
 class PartyInvitePanel;
 class ChatPanel;
+class RankingPanel;
 
 class DevScene : public Scene
 {
@@ -66,6 +67,7 @@ public:
 	void SetLoggedIn ( bool value ) { _loggedIn = value; }
 
 	void AddChatMessage ( const wstring& sender , const wstring& msg );
+	void SetRankingData ( const vector<pair<wstring, int32>>& entries );
 
 private:
 	void LoadMap ( );
@@ -103,6 +105,7 @@ private:
 	PartyPanel* _partyPanel = nullptr;
 	PartyInvitePanel* _partyInvitePanel = nullptr;
 	ChatPanel* _chatPanel = nullptr;
+	RankingPanel* _rankingPanel = nullptr;
 
 	class TilemapActor* _tilemapActor = nullptr;
 	SpriteActor* _background = nullptr;

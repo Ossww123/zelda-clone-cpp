@@ -30,6 +30,7 @@
 #include "PartyPanel.h"
 #include "PartyInvitePanel.h"
 #include "ChatPanel.h"
+#include "RankingPanel.h"
 #include "DevSceneResourceLoader.h"
 
 DevScene::DevScene ( )
@@ -42,6 +43,7 @@ DevScene::~DevScene ( )
 	SAFE_DELETE ( _partyPanel );
 	SAFE_DELETE ( _partyInvitePanel );
 	SAFE_DELETE ( _chatPanel );
+	SAFE_DELETE ( _rankingPanel );
 }
 
 void DevScene::Init ( )
@@ -64,6 +66,7 @@ void DevScene::Init ( )
 	_partyPanel = new PartyPanel ( );
 	_partyInvitePanel = new PartyInvitePanel ( );
 	_chatPanel = new ChatPanel ( );
+	_rankingPanel = new RankingPanel ( );
 	_chatPanel->Init ( g_hWnd);
 
 	CreateMapButtons ( );
@@ -103,8 +106,24 @@ void DevScene::Update ( )
 			_inventoryPanel->SetVisible ( !_inventoryPanel->IsVisible ( ) );
 		GET_SINGLE ( SoundManager )->Play ( L"UISound" );
 	}
+	if ( GET_SINGLE ( InputManager )->GetButtonDown ( KeyType::R ) )
+	{
+		if ( _rankingPanel )
+		{
+			bool opening = !_rankingPanel->IsVisible ( );
+			_rankingPanel->SetVisible ( opening );
+			if ( opening )
+			{
+				// 서버에 랭킹 요청
+				SendBufferRef sendBuffer = ClientPacketHandler::Make_C_GetRanking ( );
+				GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
+			}
+		}
+	}
 	if ( _inventoryPanel )
 		_inventoryPanel->Tick ( );
+	if ( _rankingPanel )
+		_rankingPanel->Tick ( );
 	if ( _partyPanel )
 		_partyPanel->Tick ( );
 	if ( _partyInvitePanel )
@@ -140,6 +159,8 @@ void DevScene::Render ( HDC hdc )
 
 	if ( _inventoryPanel )
 		_inventoryPanel->Render ( hdc );
+	if ( _rankingPanel )
+		_rankingPanel->Render ( hdc );
 	if ( _partyPanel )
 		_partyPanel->Render ( hdc );
 	if ( _partyInvitePanel )
@@ -721,6 +742,12 @@ void DevScene::AddChatMessage ( const wstring& sender , const wstring& msg )
 		_chatPanel->SetVisible ( true );
 		_chatPanel->AddMessage ( sender, msg );
 	}
+}
+
+void DevScene::SetRankingData ( const vector<pair<wstring, int32>>& entries )
+{
+	if ( _rankingPanel )
+		_rankingPanel->SetData ( entries );
 }
 
 void DevScene::LoadMap ( )

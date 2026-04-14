@@ -81,6 +81,9 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	case S_Chat:
 		Handle_S_Chat ( session , buffer , len );
 		break;
+	case S_Ranking:
+		Handle_S_Ranking ( session , buffer , len );
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
 
 	// [AUTO-GEN SWITCH END]
@@ -785,4 +788,32 @@ SendBufferRef ClientPacketHandler::Make_C_Login ( const Protocol::C_Login& pkt )
 SendBufferRef ClientPacketHandler::Make_C_Chat ( const Protocol::C_Chat& pkt )
 {
 	return MakeSendBuffer ( pkt , C_Chat );
+}
+
+void ClientPacketHandler::Handle_S_Ranking ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	Protocol::S_Ranking pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , len - sizeof ( PacketHeader ) );
+
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene == nullptr )
+		return;
+
+	vector<pair<wstring, int32>> entries;
+	for ( const auto& e : pkt.entries ( ) )
+	{
+		int32 size = ::MultiByteToWideChar ( CP_UTF8 , 0 , e.playername ( ).c_str ( ) , -1 , nullptr , 0 );
+		wstring name ( size - 1 , 0 );
+		::MultiByteToWideChar ( CP_UTF8 , 0 , e.playername ( ).c_str ( ) , -1 , &name[ 0 ] , size );
+		entries.push_back ( { name, e.level ( ) } );
+	}
+
+	scene->SetRankingData ( entries );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_GetRanking ( )
+{
+	Protocol::C_GetRanking pkt;
+	return MakeSendBuffer ( pkt , C_GetRanking );
 }

@@ -58,3 +58,9 @@ message PartyMemberInfo
 	int32 maxHp = 5;
 	bool isLeader = 6;
 }
+
+message RankEntry
+{
+	string playerName = 1;
+	int32  level      = 2;
+}

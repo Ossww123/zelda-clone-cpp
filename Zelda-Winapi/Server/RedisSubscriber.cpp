@@ -14,7 +14,12 @@ void RedisSubscriber::Start()
 {
     thread([this]()
         {
-            auto sub = GRedisClient.Get().subscriber();
+            // 구독 전용 독립 Redis 연결 (GRedisClient 풀과 분리)
+            sw::redis::ConnectionOptions opts;
+            opts.host = "127.0.0.1";
+            opts.port = 6379;
+            sw::redis::Redis subRedis(opts);
+            auto sub = subRedis.subscriber();
             sub.on_message([](string channel, string payload)
                 {
                     Protocol::SS_BroadcastChat broadcast;

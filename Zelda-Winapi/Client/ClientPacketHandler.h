@@ -14,6 +14,7 @@ enum
 	C_PartyLeave = 110 ,
 	C_Login = 111 ,
 	C_Chat = 112 ,
+	C_GetRanking = 113 ,
 
 	S_TEST = 201 ,
 	S_EnterGame = 202 ,
@@ -36,6 +37,7 @@ enum
 	S_PartyLeave = 220 ,
 	S_PartyUpdate = 219 ,
 	S_Chat = 221 ,
+	S_Ranking = 222 ,
 	// [AUTO-GEN ENUM BEGIN]
 
 
@@ -70,6 +72,7 @@ public:
 	static void Handle_S_PartyUpdate ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_PartyLeave ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_Chat ( ServerSessionRef session , BYTE* buffer , int32 len );
+	static void Handle_S_Ranking ( ServerSessionRef session , BYTE* buffer , int32 len );
 
 	// 보내기
 	static SendBufferRef Make_C_Move ( const Protocol::C_Move& pkt );
@@ -84,6 +87,7 @@ public:
 	static SendBufferRef Make_C_PartyLeave ( );
 	static SendBufferRef Make_C_Login ( const Protocol::C_Login& pkt );
 	static SendBufferRef Make_C_Chat ( const Protocol::C_Chat& pkt );
+	static SendBufferRef Make_C_GetRanking ( );
 
 	// [AUTO-GEN DECLS BEGIN]
 

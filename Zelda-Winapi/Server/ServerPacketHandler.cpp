@@ -70,6 +70,9 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	case C_Chat:
 		Handle_C_Chat(session, buffer, len);
 		break;
+	case C_GetRanking:
+		Handle_C_GetRanking(session, buffer, len);
+		break;
 	// [AUTO-GEN SWITCH BEGIN]
 
 	// [AUTO-GEN SWITCH END]
@@ -660,6 +663,11 @@ SendBufferRef ServerPacketHandler::Make_S_Chat(const Protocol::S_Chat& pkt)
 	return MakeSendBuffer(pkt, S_Chat);
 }
 
+SendBufferRef ServerPacketHandler::Make_S_Ranking(const Protocol::S_Ranking& pkt)
+{
+	return MakeSendBuffer(pkt, S_Ranking);
+}
+
 // ---- Login ----
 
 void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, int32 len)
@@ -718,6 +726,7 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 	}
 
 	GRedisClient.Get().set("player:loc:" + username, "127.0.0.1:7777");
+	GRedisClient.Get().zadd("rank:level", username, static_cast<double>(player->GetLevel()));
 
 	cout << "[Login] " << username << " logged in" << endl;
 	cout << "[Login] " << username << " logged in (accountId=" << accountId << ")" << endl;
@@ -781,4 +790,36 @@ void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, in
 	default:
 		break;
 	}
+}
+
+void ServerPacketHandler::Handle_C_GetRanking(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	Protocol::S_Ranking pkt;
+
+	// zrevrange + back_inserter: _score_command 템플릿 경로 크래시
+	// command() raw API로 우회하되, ReplyDeleter::freeReplyObject도 크래시 발생.
+	// reply.release()로 unique_ptr 소유권을 포기하여 freeReplyObject 호출 차단.
+	// (redisReply 메모리 leak 감수 — R키 호출 빈도상 데모 허용 범위)
+	// WITHSCORES로 score도 함께 수신하여 zscore 추가 호출 불필요.
+	auto reply = GRedisClient.Get().command("ZREVRANGE", "rank:level", "0", "9", "WITHSCORES");
+	if (reply && reply->type == REDIS_REPLY_ARRAY)
+	{
+		for (size_t i = 0; i + 1 < reply->elements; i += 2)
+		{
+			auto* nameElem  = reply->element[i];
+			auto* scoreElem = reply->element[i + 1];
+			if (nameElem->type != REDIS_REPLY_STRING || scoreElem->type != REDIS_REPLY_STRING)
+				continue;
+
+			string memberName(nameElem->str, nameElem->len);
+			int32 level = static_cast<int32>(stod(string(scoreElem->str, scoreElem->len)));
+
+			auto* entry = pkt.add_entries();
+			entry->set_playername(memberName);
+			entry->set_level(level);
+		}
+	}
+	reply.release(); // freeReplyObject 크래시 회피 (메모리 leak 허용)
+
+	session->Send(Make_S_Ranking(pkt));
 }

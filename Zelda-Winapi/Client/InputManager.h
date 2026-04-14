@@ -22,6 +22,7 @@ enum class KeyType
 	Q = 'Q',
 	E = 'E',
 	I = 'I',
+	R = 'R',
 	Y = 'Y',
 	N = 'N',
 	P = 'P'
