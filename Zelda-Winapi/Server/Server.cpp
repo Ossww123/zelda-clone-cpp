@@ -96,6 +96,8 @@ int main(int argc, char* argv[])
 			uint64 now = GetTickCount64();
 			GRoomManager.Update(now);
 			reportPerfIfDue(now, lastReportAt);
+			if (!GChatConnector.IsConnected())
+				GChatConnector.TryReconnect(now);
 			Sleep(1);
 		}
 	}
@@ -126,6 +128,8 @@ int main(int argc, char* argv[])
 					uint64 now = GetTickCount64();
 					GRoomManager.Update(now);
 					reportPerfIfDue(now, lastReportAt);
+					if (!GChatConnector.IsConnected())
+						GChatConnector.TryReconnect(now);
 					Sleep(1);
 				}
 			});

@@ -7,7 +7,7 @@ enum
     SS_BroadcastChat = 302,
 };
 
-// GameServer Ãø¿¡¼­ ChatServer·Î ¿¬°áÇÏ´Â ¼¼¼Ç
+// GameServer ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ChatServerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½
 class ChatRelaySession : public PacketSession
 {
 public:
@@ -17,17 +17,21 @@ public:
     virtual void OnSend(int32 len) override {}
 };
 
-// ChatServer ¿¬°á °ü¸® ½Ì±ÛÅæ
+// ChatServer ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì±ï¿½ï¿½ï¿½
 class ChatConnector
 {
 public:
     void Connect(IocpCoreRef iocpCore);
+    void TryReconnect(uint64 now);
     void Send(SendBufferRef sendBuffer);
     bool IsConnected() const { return _session && _session->IsConnected(); }
 
 private:
+    IocpCoreRef _iocpCore;
     ClientServiceRef _service;
     shared_ptr<ChatRelaySession> _session;
+    uint64 _lastTryAt = 0;
+    static constexpr uint64 kReconnectIntervalMs = 5000;
 };
 
 extern ChatConnector GChatConnector;
