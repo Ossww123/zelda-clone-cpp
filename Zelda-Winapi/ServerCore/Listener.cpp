@@ -86,7 +86,7 @@ void Listener::RegisterAccept(IocpEvent* acceptEvent)
 		const int32 errorCode = ::WSAGetLastError();
 		if (errorCode != WSA_IO_PENDING)
 		{
-			// ÀÏ´Ü ´Ù½Ã Accept °É¾îÁØ´Ù
+			// ï¿½Ï´ï¿½ ï¿½Ù½ï¿½ Accept ï¿½É¾ï¿½ï¿½Ø´ï¿½
 			RegisterAccept(acceptEvent);
 		}
 	}
@@ -112,7 +112,7 @@ void Listener::ProcessAccept(IocpEvent* acceptEvent)
 
 	session->SetNetAddress(NetAddress(sockAddress));
 
-	cout << "Client Connected!" << endl;
+	cout << "[ServerCore] Client Connected!" << endl;
 
 	// TODO
 	session->ProcessConnect();

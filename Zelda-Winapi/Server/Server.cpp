@@ -95,9 +95,8 @@ int main(int argc, char* argv[])
 
 			if (false)
 			{
-				cout << "[Perf][1s] recv_move=" << s.recvMove
-					<< " recv_attack=" << s.recvAttack
-					<< " recv_turn=" << s.recvTurn << endl;
+				LOG_INFO("Perf", "[1s] recv_move=%d recv_attack=%d recv_turn=%d",
+					s.recvMove, s.recvAttack, s.recvTurn);
 			}
 			lastReportAt = now;
 		};

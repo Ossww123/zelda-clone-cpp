@@ -363,23 +363,6 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack&
 	if (!attacker)
 		return;
 
-	//cout << "[CombatAuth][Recv] room=" << _roomIdStr
-	//	<< " attacker=" << attacker->info.objectid()
-	//	<< " weapon=" << ToWeaponName(pkt.weapontype())
-	//	<< " dir=" << ToDirName(pkt.dir())
-	//	<< endl;
-
-	//if (!CanUseSkill())
-	//{
-	//	cout << "[CombatAuth][Reject] room=" << _roomIdStr
-	//		<< " attacker=" << attacker->info.objectid()
-	//		<< " reason=SkillDisabledInThisRoom" << endl;
-	//	return;
-	//}
-
-	//cout << "[CombatAuth][Accept] attacker=" << attacker->info.objectid()
-	//	<< " server_authoritative=true" << endl;
-
 	BroadcastAttack(attacker, pkt);
 
 	switch (pkt.weapontype())
@@ -737,9 +720,6 @@ void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& 
 
 	if (!target)
 	{
-		/*cout << "[CombatAuth][Result] weapon=Sword attacker=" << attacker->info.objectid()
-			<< " result=Miss reason=NoTargetAtFrontCell"
-			<< " front=(" << frontPos.x << "," << frontPos.y << ")" << endl;*/
 		return;
 	}
 
@@ -747,11 +727,6 @@ void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& 
 	int32 damage = max(1, attacker->info.attack() - target->info.defence());
 	target->OnDamaged(damage);
 	int32 afterHp = target->info.hp();
-
-	/*cout << "[CombatAuth][Result] weapon=Sword attacker=" << attacker->info.objectid()
-		<< " target=" << target->info.objectid()
-		<< " damage=" << damage
-		<< " hp=" << beforeHp << "->" << afterHp << endl;*/
 
 	BroadcastDamaged(attacker, target, damage);
 
@@ -779,11 +754,6 @@ void GameRoom::Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pk
 	arrow->SetOwner(attacker->info.objectid());
 
 	AddObject(arrow);
-
-	/*cout << "[CombatAuth][Result] weapon=Bow attacker=" << attacker->info.objectid()
-		<< " result=SpawnProjectile projectile=" << arrow->info.objectid()
-		<< " pos=(" << start.x << "," << start.y << ")"
-		<< " dir=" << ToDirName(pkt.dir()) << endl;*/
 }
 
 void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)

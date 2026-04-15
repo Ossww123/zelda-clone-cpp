@@ -48,7 +48,7 @@ void Session::Disconnect(const WCHAR* cause)
 		return;
 
 	// TEMP
-	wcout << "Disconnect : " << cause << endl;
+	wcout << L"[ServerCore] Disconnect : " << cause << endl;
 
 	OnDisconnected(); // ������ �ڵ忡�� ������
 	GetService()->ReleaseSession(GetSessionRef());
@@ -314,7 +314,7 @@ void Session::HandleError(int32 errorCode)
 		break;
 	default:
 		// TODO : Log
-		cout << "Handle Error : " << errorCode << endl;
+		cout << "[ServerCore] Handle Error : " << errorCode << endl;
 		break;
 	}
 }
