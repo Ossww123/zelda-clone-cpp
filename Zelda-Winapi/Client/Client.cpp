@@ -26,8 +26,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
+    // Client.exe [port]  ex) Client.exe 7778
+    uint16 serverPort = 7777;
+    if (lpCmdLine && lpCmdLine[0] != L'\0')
+    {
+        int parsed = _wtoi(lpCmdLine);
+        if (parsed > 0)
+            serverPort = static_cast<uint16>(parsed);
+    }
+
     Game game;
-    game.Init ( g_hWnd);
+    game.Init ( g_hWnd, serverPort);
 
     MSG msg = {};
     uint64 prevTick = 0;

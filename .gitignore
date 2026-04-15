@@ -43,3 +43,10 @@ Zelda-Winapi/Intermediate/
 
 # Generated logs
 Zelda-Winapi/Common/protoc-21.12-win64/bin/*.log
+
+# Redis
+dump.rdb
+appendonly.aof
+
+# Docker
+.env

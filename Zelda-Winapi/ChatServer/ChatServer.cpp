@@ -3,11 +3,13 @@
 #include "SocketUtils.h"
 #include "Service.h"
 #include "ChatSession.h"
+#include "RedisClient.h"
 
 int main()
 {
     SetConsoleOutputCP(CP_UTF8);
     SocketUtils::Init();
+    GRedisClient.Connect();
 
     ServerServiceRef service = make_shared<ServerService>(
         NetAddress(L"127.0.0.1", 8888),

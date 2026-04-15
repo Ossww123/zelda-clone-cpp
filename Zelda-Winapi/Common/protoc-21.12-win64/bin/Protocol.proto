@@ -231,3 +231,12 @@ message SS_BroadcastChat
     string target = 4;
     uint64 partyId = 5;
 }
+
+message C_GetRanking
+{
+}
+
+message S_Ranking
+{
+    repeated RankEntry entries = 1;
+}

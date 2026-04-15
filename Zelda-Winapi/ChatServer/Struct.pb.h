@@ -64,6 +64,9 @@ extern PartyMemberInfoDefaultTypeInternal _PartyMemberInfo_default_instance_;
 class PlayerExtra;
 struct PlayerExtraDefaultTypeInternal;
 extern PlayerExtraDefaultTypeInternal _PlayerExtra_default_instance_;
+class RankEntry;
+struct RankEntryDefaultTypeInternal;
+extern RankEntryDefaultTypeInternal _RankEntry_default_instance_;
 }  // namespace Protocol
 PROTOBUF_NAMESPACE_OPEN
 template<> ::Protocol::BuffData* Arena::CreateMaybeMessage<::Protocol::BuffData>(Arena*);
@@ -72,6 +75,7 @@ template<> ::Protocol::MonsterExtra* Arena::CreateMaybeMessage<::Protocol::Monst
 template<> ::Protocol::ObjectInfo* Arena::CreateMaybeMessage<::Protocol::ObjectInfo>(Arena*);
 template<> ::Protocol::PartyMemberInfo* Arena::CreateMaybeMessage<::Protocol::PartyMemberInfo>(Arena*);
 template<> ::Protocol::PlayerExtra* Arena::CreateMaybeMessage<::Protocol::PlayerExtra>(Arena*);
+template<> ::Protocol::RankEntry* Arena::CreateMaybeMessage<::Protocol::RankEntry>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace Protocol {
 
@@ -1277,6 +1281,170 @@ class PartyMemberInfo final :
   union { Impl_ _impl_; };
   friend struct ::TableStruct_Struct_2eproto;
 };
+// -------------------------------------------------------------------
+
+class RankEntry final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.RankEntry) */ {
+ public:
+  inline RankEntry() : RankEntry(nullptr) {}
+  ~RankEntry() override;
+  explicit PROTOBUF_CONSTEXPR RankEntry(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RankEntry(const RankEntry& from);
+  RankEntry(RankEntry&& from) noexcept
+    : RankEntry() {
+    *this = ::std::move(from);
+  }
+
+  inline RankEntry& operator=(const RankEntry& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RankEntry& operator=(RankEntry&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const RankEntry& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RankEntry* internal_default_instance() {
+    return reinterpret_cast<const RankEntry*>(
+               &_RankEntry_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(RankEntry& a, RankEntry& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RankEntry* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RankEntry* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  RankEntry* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<RankEntry>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const RankEntry& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const RankEntry& from) {
+    RankEntry::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RankEntry* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.RankEntry";
+  }
+  protected:
+  explicit RankEntry(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPlayerNameFieldNumber = 1,
+    kLevelFieldNumber = 2,
+  };
+  // string playerName = 1;
+  void clear_playername();
+  const std::string& playername() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_playername(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_playername();
+  PROTOBUF_NODISCARD std::string* release_playername();
+  void set_allocated_playername(std::string* playername);
+  private:
+  const std::string& _internal_playername() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_playername(const std::string& value);
+  std::string* _internal_mutable_playername();
+  public:
+
+  // int32 level = 2;
+  void clear_level();
+  int32_t level() const;
+  void set_level(int32_t value);
+  private:
+  int32_t _internal_level() const;
+  void _internal_set_level(int32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:Protocol.RankEntry)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr playername_;
+    int32_t level_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Struct_2eproto;
+};
 // ===================================================================
 
 
@@ -2092,9 +2260,85 @@ inline void PartyMemberInfo::set_isleader(bool value) {
   // @@protoc_insertion_point(field_set:Protocol.PartyMemberInfo.isLeader)
 }
 
+// -------------------------------------------------------------------
+
+// RankEntry
+
+// string playerName = 1;
+inline void RankEntry::clear_playername() {
+  _impl_.playername_.ClearToEmpty();
+}
+inline const std::string& RankEntry::playername() const {
+  // @@protoc_insertion_point(field_get:Protocol.RankEntry.playerName)
+  return _internal_playername();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void RankEntry::set_playername(ArgT0&& arg0, ArgT... args) {
+ 
+ _impl_.playername_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:Protocol.RankEntry.playerName)
+}
+inline std::string* RankEntry::mutable_playername() {
+  std::string* _s = _internal_mutable_playername();
+  // @@protoc_insertion_point(field_mutable:Protocol.RankEntry.playerName)
+  return _s;
+}
+inline const std::string& RankEntry::_internal_playername() const {
+  return _impl_.playername_.Get();
+}
+inline void RankEntry::_internal_set_playername(const std::string& value) {
+  
+  _impl_.playername_.Set(value, GetArenaForAllocation());
+}
+inline std::string* RankEntry::_internal_mutable_playername() {
+  
+  return _impl_.playername_.Mutable(GetArenaForAllocation());
+}
+inline std::string* RankEntry::release_playername() {
+  // @@protoc_insertion_point(field_release:Protocol.RankEntry.playerName)
+  return _impl_.playername_.Release();
+}
+inline void RankEntry::set_allocated_playername(std::string* playername) {
+  if (playername != nullptr) {
+    
+  } else {
+    
+  }
+  _impl_.playername_.SetAllocated(playername, GetArenaForAllocation());
+#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (_impl_.playername_.IsDefault()) {
+    _impl_.playername_.Set("", GetArenaForAllocation());
+  }
+#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:Protocol.RankEntry.playerName)
+}
+
+// int32 level = 2;
+inline void RankEntry::clear_level() {
+  _impl_.level_ = 0;
+}
+inline int32_t RankEntry::_internal_level() const {
+  return _impl_.level_;
+}
+inline int32_t RankEntry::level() const {
+  // @@protoc_insertion_point(field_get:Protocol.RankEntry.level)
+  return _internal_level();
+}
+inline void RankEntry::_internal_set_level(int32_t value) {
+  
+  _impl_.level_ = value;
+}
+inline void RankEntry::set_level(int32_t value) {
+  _internal_set_level(value);
+  // @@protoc_insertion_point(field_set:Protocol.RankEntry.level)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -22,6 +22,8 @@ using namespace std;
 #include "GameRoomManager.h"
 #include "DBManager.h"
 #include "ChatConnector.h"
+#include "RedisClient.h"
+#include "RedisSubscriber.h"
 
 static bool IsMultiMode(int argc, char* argv[])
 {
@@ -33,7 +35,7 @@ static bool IsMultiMode(int argc, char* argv[])
 
 static int32 ResolveWorkerCount(int argc, char* argv[])
 {
-	// server.exe multi [workerCount]
+	// server.exe multi [workerCount] [port]
 	if (argc >= 3)
 	{
 		int32 parsed = static_cast<int32>(atoi(argv[2]));
@@ -45,14 +47,35 @@ static int32 ResolveWorkerCount(int argc, char* argv[])
 	return static_cast<int32>(max(1u, hw));
 }
 
+static uint16 ResolvePort(int argc, char* argv[])
+{
+	// server.exe multi [workerCount] [port]
+	if (argc >= 4)
+	{
+		int parsed = atoi(argv[3]);
+		if (parsed > 0)
+			return static_cast<uint16>(parsed);
+	}
+	return 7777;
+}
+
+string GServerAddr;
+
 int main(int argc, char* argv[])
 {
 	SocketUtils::Init();
 	GDBManager.Init("game.db");
 	GRoomManager.Init();
 
+	GRedisClient.Connect();
+	GRedisSubscriber.Start();
+
+	const uint16 port = ResolvePort(argc, argv);
+	GServerAddr = "127.0.0.1:" + to_string(port);
+	cout << "[Server] Addr=" << GServerAddr << endl;
+
 	ServerServiceRef service = make_shared<ServerService>(
-	NetAddress(L"127.0.0.1", 7777),
+	NetAddress(L"127.0.0.1", port),
 		make_shared<IocpCore>(),
 		[]() { return make_shared<GameSession>(); },
 		100); 
@@ -91,6 +114,8 @@ int main(int argc, char* argv[])
 			uint64 now = GetTickCount64();
 			GRoomManager.Update(now);
 			reportPerfIfDue(now, lastReportAt);
+			if (!GChatConnector.IsConnected())
+				GChatConnector.TryReconnect(now);
 			Sleep(1);
 		}
 	}
@@ -121,6 +146,8 @@ int main(int argc, char* argv[])
 					uint64 now = GetTickCount64();
 					GRoomManager.Update(now);
 					reportPerfIfDue(now, lastReportAt);
+					if (!GChatConnector.IsConnected())
+						GChatConnector.TryReconnect(now);
 					Sleep(1);
 				}
 			});

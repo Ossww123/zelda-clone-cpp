@@ -59,11 +59,11 @@ void ChatRelaySession::OnRecvPacket(BYTE* buffer, int32 len)
             }
             else
             {
-                // ´ë»óÀÌ ¾øÀ¸¸é sender¿¡°Ô ¿¡·¯ ¸Þ½ÃÁö
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ senderï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½
                 Protocol::S_Chat errPkt;
                 errPkt.set_sender("System");
                 errPkt.set_type(Protocol::CHAT_TYPE_WHISPER);
-                errPkt.set_msg("[System] ´ë»ó ÇÃ·¹ÀÌ¾î¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+                errPkt.set_msg("[System] ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
                 SendBufferRef errBuffer = ServerPacketHandler::Make_S_Chat(errPkt);
                 GameSessionRef senderSession = GSessionManager.FindByPlayerName(pkt.sender());
                 if (senderSession)
@@ -80,11 +80,12 @@ void ChatRelaySession::OnRecvPacket(BYTE* buffer, int32 len)
 
 void ChatConnector::Connect(IocpCoreRef iocpCore)
 {
+    _iocpCore = iocpCore;
     _session = make_shared<ChatRelaySession>();
 
     _service = make_shared<ClientService>(
         NetAddress(L"127.0.0.1", 8888),
-        iocpCore,
+        _iocpCore,
         [this]() { return _session; },
         1
     );
@@ -92,6 +93,28 @@ void ChatConnector::Connect(IocpCoreRef iocpCore)
     if (!_service->Start())
     {
         cout << "[Server] Failed to connect to ChatServer" << endl;
+    }
+}
+
+void ChatConnector::TryReconnect(uint64 now)
+{
+    if (now - _lastTryAt < kReconnectIntervalMs)
+        return;
+
+    _lastTryAt = now;
+    cout << "[Server] ChatServer disconnected. Trying to reconnect..." << endl;
+
+    _session = make_shared<ChatRelaySession>();
+    _service = make_shared<ClientService>(
+        NetAddress(L"127.0.0.1", 8888),
+        _iocpCore,
+        [this]() { return _session; },
+        1
+    );
+
+    if (!_service->Start())
+    {
+        cout << "[Server] Reconnect failed, will retry in 5s" << endl;
     }
 }
 

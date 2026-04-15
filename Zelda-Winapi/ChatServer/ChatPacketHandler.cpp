@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "ChatPacketHandler.h"
 #include "ChatSessionManager.h"
+#include "ChatSession.h"
+#include "RedisClient.h"
 
 enum
 {
@@ -29,7 +31,11 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     Protocol::SS_RelayChat pkt;
     pkt.ParseFromArray(&header[1], len - sizeof(PacketHeader));
 
+    NetAddress fromAddr = session->GetAddress();
+    string fromServer = to_string(fromAddr.GetPort());
+
     cout << "[ChatServer] RelayChat from=" << pkt.sender()
+        << " server=:" << fromServer
         << " type=" << pkt.type()
         << " msg=" << pkt.msg() << endl;
 
@@ -41,7 +47,52 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     broadcast.set_partyid(pkt.partyid());
 
     SendBufferRef sendBuffer = Make_SS_BroadcastChat(broadcast);
-    GChatSessionManager.BroadcastAll(sendBuffer);
+    // GChatSessionManager.BroadcastAll(sendBuffer);
+
+    std::string payload;
+    broadcast.SerializeToString(&payload);
+
+    if (!GRedisClient.IsConnected())
+    {
+        GChatSessionManager.BroadcastAll(sendBuffer);
+        return;
+    }
+
+    if (pkt.type() == Protocol::CHAT_TYPE_GLOBAL)
+    {
+        cout << "[ChatServer] PUBLISH chat:global" << endl;
+        GRedisClient.Get().publish("chat:global", payload);
+    }
+    else if (pkt.type() == Protocol::CHAT_TYPE_WHISPER) {
+        auto val = GRedisClient.Get().get("player:loc:" + pkt.target());
+        if (val)
+        {
+            // 대상 서버 채널로 PUBLISH
+            string channel = "chat:whisper:" + *val;
+            cout << "[ChatServer] PUBLISH " << channel << " (to=" << pkt.target() << ")" << endl;
+            GRedisClient.Get().publish(channel, payload);
+        }
+        else
+        {
+            // 대상 없음 → sender 서버에 에러 메시지 PUBLISH
+            Protocol::SS_BroadcastChat errPkt;
+            errPkt.set_sender("System");
+            errPkt.set_type(Protocol::CHAT_TYPE_WHISPER);
+            errPkt.set_msg("[System] 대상 플레이어를 찾을 수 없습니다.");
+            errPkt.set_target(pkt.sender());
+
+            string errPayload;
+            errPkt.SerializeToString(&errPayload);
+
+            auto senderLoc = GRedisClient.Get().get("player:loc:" + pkt.sender());
+            if (senderLoc)
+                GRedisClient.Get().publish("chat:whisper:" + *senderLoc, errPayload);
+        }
+    }
+    else
+    {
+        GChatSessionManager.BroadcastAll(sendBuffer);
+    }
 }
 
 SendBufferRef ChatPacketHandler::Make_SS_BroadcastChat(const Protocol::SS_BroadcastChat& pkt)

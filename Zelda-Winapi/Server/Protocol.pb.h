@@ -60,6 +60,9 @@ extern C_ChatDefaultTypeInternal _C_Chat_default_instance_;
 class C_EquipItem;
 struct C_EquipItemDefaultTypeInternal;
 extern C_EquipItemDefaultTypeInternal _C_EquipItem_default_instance_;
+class C_GetRanking;
+struct C_GetRankingDefaultTypeInternal;
+extern C_GetRankingDefaultTypeInternal _C_GetRanking_default_instance_;
 class C_Login;
 struct C_LoginDefaultTypeInternal;
 extern C_LoginDefaultTypeInternal _C_Login_default_instance_;
@@ -138,6 +141,9 @@ extern S_PartyLeaveDefaultTypeInternal _S_PartyLeave_default_instance_;
 class S_PartyUpdate;
 struct S_PartyUpdateDefaultTypeInternal;
 extern S_PartyUpdateDefaultTypeInternal _S_PartyUpdate_default_instance_;
+class S_Ranking;
+struct S_RankingDefaultTypeInternal;
+extern S_RankingDefaultTypeInternal _S_Ranking_default_instance_;
 class S_RemoveObject;
 struct S_RemoveObjectDefaultTypeInternal;
 extern S_RemoveObjectDefaultTypeInternal _S_RemoveObject_default_instance_;
@@ -159,6 +165,7 @@ template<> ::Protocol::C_Attack* Arena::CreateMaybeMessage<::Protocol::C_Attack>
 template<> ::Protocol::C_ChangeMap* Arena::CreateMaybeMessage<::Protocol::C_ChangeMap>(Arena*);
 template<> ::Protocol::C_Chat* Arena::CreateMaybeMessage<::Protocol::C_Chat>(Arena*);
 template<> ::Protocol::C_EquipItem* Arena::CreateMaybeMessage<::Protocol::C_EquipItem>(Arena*);
+template<> ::Protocol::C_GetRanking* Arena::CreateMaybeMessage<::Protocol::C_GetRanking>(Arena*);
 template<> ::Protocol::C_Login* Arena::CreateMaybeMessage<::Protocol::C_Login>(Arena*);
 template<> ::Protocol::C_Move* Arena::CreateMaybeMessage<::Protocol::C_Move>(Arena*);
 template<> ::Protocol::C_PartyAnswer* Arena::CreateMaybeMessage<::Protocol::C_PartyAnswer>(Arena*);
@@ -185,6 +192,7 @@ template<> ::Protocol::S_MyPlayer* Arena::CreateMaybeMessage<::Protocol::S_MyPla
 template<> ::Protocol::S_PartyInvite* Arena::CreateMaybeMessage<::Protocol::S_PartyInvite>(Arena*);
 template<> ::Protocol::S_PartyLeave* Arena::CreateMaybeMessage<::Protocol::S_PartyLeave>(Arena*);
 template<> ::Protocol::S_PartyUpdate* Arena::CreateMaybeMessage<::Protocol::S_PartyUpdate>(Arena*);
+template<> ::Protocol::S_Ranking* Arena::CreateMaybeMessage<::Protocol::S_Ranking>(Arena*);
 template<> ::Protocol::S_RemoveObject* Arena::CreateMaybeMessage<::Protocol::S_RemoveObject>(Arena*);
 template<> ::Protocol::S_TEST* Arena::CreateMaybeMessage<::Protocol::S_TEST>(Arena*);
 template<> ::Protocol::S_Turn* Arena::CreateMaybeMessage<::Protocol::S_Turn>(Arena*);
@@ -6060,6 +6068,281 @@ class SS_BroadcastChat final :
   union { Impl_ _impl_; };
   friend struct ::TableStruct_Protocol_2eproto;
 };
+// -------------------------------------------------------------------
+
+class C_GetRanking final :
+    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:Protocol.C_GetRanking) */ {
+ public:
+  inline C_GetRanking() : C_GetRanking(nullptr) {}
+  explicit PROTOBUF_CONSTEXPR C_GetRanking(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  C_GetRanking(const C_GetRanking& from);
+  C_GetRanking(C_GetRanking&& from) noexcept
+    : C_GetRanking() {
+    *this = ::std::move(from);
+  }
+
+  inline C_GetRanking& operator=(const C_GetRanking& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline C_GetRanking& operator=(C_GetRanking&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const C_GetRanking& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const C_GetRanking* internal_default_instance() {
+    return reinterpret_cast<const C_GetRanking*>(
+               &_C_GetRanking_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    35;
+
+  friend void swap(C_GetRanking& a, C_GetRanking& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(C_GetRanking* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(C_GetRanking* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  C_GetRanking* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<C_GetRanking>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
+  inline void CopyFrom(const C_GetRanking& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(*this, from);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
+  void MergeFrom(const C_GetRanking& from) {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(*this, from);
+  }
+  public:
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.C_GetRanking";
+  }
+  protected:
+  explicit C_GetRanking(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Protocol.C_GetRanking)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+  };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
+// -------------------------------------------------------------------
+
+class S_Ranking final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:Protocol.S_Ranking) */ {
+ public:
+  inline S_Ranking() : S_Ranking(nullptr) {}
+  ~S_Ranking() override;
+  explicit PROTOBUF_CONSTEXPR S_Ranking(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  S_Ranking(const S_Ranking& from);
+  S_Ranking(S_Ranking&& from) noexcept
+    : S_Ranking() {
+    *this = ::std::move(from);
+  }
+
+  inline S_Ranking& operator=(const S_Ranking& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_Ranking& operator=(S_Ranking&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_Ranking& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_Ranking* internal_default_instance() {
+    return reinterpret_cast<const S_Ranking*>(
+               &_S_Ranking_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    36;
+
+  friend void swap(S_Ranking& a, S_Ranking& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(S_Ranking* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_Ranking* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_Ranking* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<S_Ranking>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const S_Ranking& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const S_Ranking& from) {
+    S_Ranking::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(S_Ranking* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "Protocol.S_Ranking";
+  }
+  protected:
+  explicit S_Ranking(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEntriesFieldNumber = 1,
+  };
+  // repeated .Protocol.RankEntry entries = 1;
+  int entries_size() const;
+  private:
+  int _internal_entries_size() const;
+  public:
+  void clear_entries();
+  ::Protocol::RankEntry* mutable_entries(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Protocol::RankEntry >*
+      mutable_entries();
+  private:
+  const ::Protocol::RankEntry& _internal_entries(int index) const;
+  ::Protocol::RankEntry* _internal_add_entries();
+  public:
+  const ::Protocol::RankEntry& entries(int index) const;
+  ::Protocol::RankEntry* add_entries();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Protocol::RankEntry >&
+      entries() const;
+
+  // @@protoc_insertion_point(class_scope:Protocol.S_Ranking)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Protocol::RankEntry > entries_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Protocol_2eproto;
+};
 // ===================================================================
 
 
@@ -8772,9 +9055,58 @@ inline void SS_BroadcastChat::set_partyid(uint64_t value) {
   // @@protoc_insertion_point(field_set:Protocol.SS_BroadcastChat.partyId)
 }
 
+// -------------------------------------------------------------------
+
+// C_GetRanking
+
+// -------------------------------------------------------------------
+
+// S_Ranking
+
+// repeated .Protocol.RankEntry entries = 1;
+inline int S_Ranking::_internal_entries_size() const {
+  return _impl_.entries_.size();
+}
+inline int S_Ranking::entries_size() const {
+  return _internal_entries_size();
+}
+inline ::Protocol::RankEntry* S_Ranking::mutable_entries(int index) {
+  // @@protoc_insertion_point(field_mutable:Protocol.S_Ranking.entries)
+  return _impl_.entries_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Protocol::RankEntry >*
+S_Ranking::mutable_entries() {
+  // @@protoc_insertion_point(field_mutable_list:Protocol.S_Ranking.entries)
+  return &_impl_.entries_;
+}
+inline const ::Protocol::RankEntry& S_Ranking::_internal_entries(int index) const {
+  return _impl_.entries_.Get(index);
+}
+inline const ::Protocol::RankEntry& S_Ranking::entries(int index) const {
+  // @@protoc_insertion_point(field_get:Protocol.S_Ranking.entries)
+  return _internal_entries(index);
+}
+inline ::Protocol::RankEntry* S_Ranking::_internal_add_entries() {
+  return _impl_.entries_.Add();
+}
+inline ::Protocol::RankEntry* S_Ranking::add_entries() {
+  ::Protocol::RankEntry* _add = _internal_add_entries();
+  // @@protoc_insertion_point(field_add:Protocol.S_Ranking.entries)
+  return _add;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::Protocol::RankEntry >&
+S_Ranking::entries() const {
+  // @@protoc_insertion_point(field_list:Protocol.S_Ranking.entries)
+  return _impl_.entries_;
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

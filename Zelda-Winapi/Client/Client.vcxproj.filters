@@ -142,6 +142,9 @@
     <ClCompile Include="ChatPanel.cpp">
       <Filter>Source Files\06. UI\Panel</Filter>
     </ClCompile>
+    <ClCompile Include="RankingPanel.cpp">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -304,6 +307,9 @@
       <Filter>Source Files\06. UI\Panel</Filter>
     </ClInclude>
     <ClInclude Include="ChatPanel.h">
+      <Filter>Source Files\06. UI\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="RankingPanel.h">
       <Filter>Source Files\06. UI\Panel</Filter>
     </ClInclude>
   </ItemGroup>

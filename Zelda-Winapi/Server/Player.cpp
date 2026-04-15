@@ -5,6 +5,7 @@
 #include "GameSession.h"
 #include "ServerPacketHandler.h"
 #include "DBManager.h"
+#include "RedisClient.h"
 
 Player::Player()
 {
@@ -108,6 +109,8 @@ void Player::ProcessLevelUp()
 	extra->set_level(_level);
 	extra->set_exp(_exp);
 	extra->set_maxexp(GetMaxExp());
+
+	GRedisClient.Get().zadd("rank:level", info.name(), static_cast<double>(_level));
 
 	cout << "[Player] Level Up! " << info.name() << " -> Lv." << _level
 		<< " (HP:" << info.maxhp() << " ATK:" << info.attack() << " DEF:" << info.defence() << ")" << endl;
