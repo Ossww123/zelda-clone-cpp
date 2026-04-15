@@ -20,7 +20,7 @@ int main()
 
     assert(service->Start());
 
-    cout << "[ChatServer] Started on port 8888" << endl;
+    LOG_INFO("Server", "Started on port 8888");
 
     const int32 workerCount = max(1, (int32)thread::hardware_concurrency());
 

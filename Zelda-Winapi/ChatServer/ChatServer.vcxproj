@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClCompile Include="ChatPacketHandler.cpp" />
     <ClCompile Include="ChatServer.cpp" />
+    <ClCompile Include="ChatServerLogger.cpp" />
     <ClCompile Include="ChatSession.cpp" />
     <ClCompile Include="ChatSessionManager.cpp" />
     <ClCompile Include="Enum.pb.cc">
@@ -165,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatPacketHandler.h" />
+    <ClInclude Include="ChatServerLogger.h" />
     <ClInclude Include="ChatSession.h" />
     <ClInclude Include="ChatSessionManager.h" />
     <ClInclude Include="Enum.pb.h" />

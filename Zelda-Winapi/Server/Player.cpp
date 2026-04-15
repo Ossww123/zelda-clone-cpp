@@ -112,8 +112,8 @@ void Player::ProcessLevelUp()
 
 	GRedisClient.Get().zadd("rank:level", info.name(), static_cast<double>(_level));
 
-	cout << "[Player] Level Up! " << info.name() << " -> Lv." << _level
-		<< " (HP:" << info.maxhp() << " ATK:" << info.attack() << " DEF:" << info.defence() << ")" << endl;
+	LOG_INFO("Player", "Level Up! %s -> Lv.%d (HP:%d ATK:%d DEF:%d)",
+		info.name().c_str(), _level, info.maxhp(), info.attack(), info.defence());
 
 	// S_LevelUp 브로드캐스트
 	{
@@ -195,7 +195,8 @@ bool Player::AddItem(int32 itemId, int32 count)
 				if (session)
 					session->Send(ServerPacketHandler::Make_S_AddItem(pkt));
 
-				cout << "[Player] " << info.name() << " acquired " << tmpl->name << " (slot " << i << ", count " << _storage[i].count << ")" << endl;
+				LOG_INFO("Player", "%s acquired %s (slot %d, count %d)",
+					info.name().c_str(), tmpl->name.c_str(), i, _storage[i].count);
 				return true;
 			}
 		}
@@ -216,7 +217,7 @@ bool Player::AddItem(int32 itemId, int32 count)
 	if (session)
 		session->Send(ServerPacketHandler::Make_S_AddItem(pkt));
 
-	cout << "[Player] " << info.name() << " acquired " << tmpl->name << " (slot " << slot << ")" << endl;
+	LOG_INFO("Player", "%s acquired %s (slot %d)", info.name().c_str(), tmpl->name.c_str(), slot);
 	return true;
 }
 
@@ -430,7 +431,7 @@ void Player::ApplyFromSaveData(const PlayerSaveData& data)
 	extra->set_exp(_exp);
 	extra->set_maxexp(GetMaxExp());
 
-	cout << "[Player] Applied save data: " << data.name << " Lv." << _level << endl;
+	LOG_INFO("Player", "Applied save data: %s Lv.%d", data.name.c_str(), _level);
 }
 
 PlayerSaveData Player::ToSaveData() const

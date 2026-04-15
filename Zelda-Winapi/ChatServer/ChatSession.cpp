@@ -5,13 +5,13 @@
 
 void ChatSession::OnConnected()
 {
-    cout << "[ChatServer] GameServer connected" << endl;
+    LOG_INFO("Session", "GameServer connected");
     GChatSessionManager.Add(GetSessionRef());
 }
 
 void ChatSession::OnDisconnected()
 {
-    cout << "[ChatServer] GameServer disconnected" << endl;
+    LOG_INFO("Session", "GameServer disconnected");
     GChatSessionManager.Remove(GetSessionRef());
 }
 

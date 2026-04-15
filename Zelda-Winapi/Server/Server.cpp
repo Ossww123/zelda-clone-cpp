@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
 	const uint16 port = ResolvePort(argc, argv);
 	GServerAddr = "127.0.0.1:" + to_string(port);
-	cout << "[Server] Addr=" << GServerAddr << endl;
+	LOG_INFO("Server", "Addr=%s", GServerAddr.c_str());
 
 	ServerServiceRef service = make_shared<ServerService>(
 	NetAddress(L"127.0.0.1", port),
@@ -95,9 +95,8 @@ int main(int argc, char* argv[])
 
 			if (false)
 			{
-				cout << "[Perf][1s] recv_move=" << s.recvMove
-					<< " recv_attack=" << s.recvAttack
-					<< " recv_turn=" << s.recvTurn << endl;
+				LOG_INFO("Perf", "[1s] recv_move=%d recv_attack=%d recv_turn=%d",
+					s.recvMove, s.recvAttack, s.recvTurn);
 			}
 			lastReportAt = now;
 		};
@@ -105,7 +104,7 @@ int main(int argc, char* argv[])
 	const bool multiMode = IsMultiMode(argc, argv);
 	if (!multiMode)
 	{
-		cout << "[Server] Mode=single" << endl;
+		LOG_INFO("Server", "Mode=single");
 		uint64 lastReportAt = 0;
 
 		while (true)
@@ -122,7 +121,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		const int32 workerCount = ResolveWorkerCount(argc, argv);
-		cout << "[Server] Mode=multi, IOCP workers=" << workerCount << endl;
+		LOG_INFO("Server", "Mode=multi, IOCP workers=%d", workerCount);
 
 		constexpr uint32 kIocpDispatchTimeoutMs = 10;
 		for (int32 i = 0; i < workerCount; ++i)

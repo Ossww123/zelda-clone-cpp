@@ -18,13 +18,13 @@ void RedisClient::Connect(const std::string& host, int port)
         _redis = std::make_unique<sw::redis::Redis>(opts);
 
         auto pong = _redis->ping();
-        std::cout << "[Redis] ping: " << pong << std::endl;
+        LOG_INFO("Redis", "ping: %s", pong.c_str());
 
         _connected = true;
     }
     catch (const std::exception& e)
     {
-        std::cout << "[Redis] Connect failed: " << e.what() << " — running without Redis" << std::endl;
+        LOG_WARN("Redis", "Connect failed: %s — running without Redis", e.what());
         _connected = false;
     }
 }

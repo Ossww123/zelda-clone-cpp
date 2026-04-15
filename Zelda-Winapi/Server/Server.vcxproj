@@ -182,6 +182,7 @@
     <ClCompile Include="RedisSubscriber.cpp" />
     <ClCompile Include="RoomDataManager.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="ServerLogger.cpp" />
     <ClCompile Include="ServerPacketHandler.cpp" />
     <ClCompile Include="sqlite3.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -214,6 +215,7 @@
     <ClInclude Include="RedisSubscriber.h" />
     <ClInclude Include="RoomConfig.h" />
     <ClInclude Include="RoomDataManager.h" />
+    <ClInclude Include="ServerLogger.h" />
     <ClInclude Include="ServerPacketHandler.h" />
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="Struct.pb.h" />

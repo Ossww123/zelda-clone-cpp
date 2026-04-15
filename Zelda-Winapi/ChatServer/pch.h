@@ -16,3 +16,4 @@ using ChatSessionRef = shared_ptr<class ChatSession>;
 #endif
 
 #include "ChatPacketHandler.h"
+#include "ChatServerLogger.h"

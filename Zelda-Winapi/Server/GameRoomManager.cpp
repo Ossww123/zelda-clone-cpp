@@ -17,7 +17,7 @@ void GameRoomManager::Init()
 {
     if (!GRoomDataManager.LoadAllData())
     {
-        cout << "[GameRoomManager] ERROR: Failed to load room data!" << endl;
+        LOG_ERROR("RoomMgr", "Failed to load room data!");
         return;
     }
 
@@ -41,7 +41,7 @@ void GameRoomManager::Init()
         _staticRooms[{FieldId::Town, 2}] = room;
     }
 
-    cout << "[GameRoomManager] Initialized " << _staticRooms.size() << " static rooms" << endl;
+    LOG_INFO("RoomMgr", "Initialized %zu static rooms", _staticRooms.size());
 }
 
 void GameRoomManager::Update(uint64 now)
@@ -93,7 +93,7 @@ uint64 GameRoomManager::CreateDungeonInstance(const string& roomId)
 
     _dungeonInstances[instanceId] = room;
 
-    cout << "[GameRoomManager] Created dungeon instance: " << roomId << " (ID=" << instanceId << ")" << endl;
+    LOG_INFO("RoomMgr", "Created dungeon instance: %s (ID=%llu)", roomId.c_str(), instanceId);
 
     return instanceId;
 }
@@ -113,11 +113,11 @@ void GameRoomManager::RemoveDungeonInstance(uint64 instanceId)
     if (it != _dungeonInstances.end())
     {
         _dungeonInstances.erase(instanceId);
-        cout << "[GameRoomManager] Dungeon instance removed: " << instanceId << endl;
+        LOG_INFO("RoomMgr", "Dungeon instance removed: %llu", instanceId);
     }
     else
     {
-        cout << "[GameRoomManager] WARNING: Dungeon instance not found: " << instanceId << endl;
+        LOG_WARN("RoomMgr", "Dungeon instance not found: %llu", instanceId);
     }
 }
 

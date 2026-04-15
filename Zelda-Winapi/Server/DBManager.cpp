@@ -13,7 +13,7 @@ bool DBManager::Init(const string& dbPath)
 	int rc = sqlite3_open(dbPath.c_str(), &_db);
 	if (rc != SQLITE_OK)
 	{
-		cout << "[DB] Failed to open database: " << sqlite3_errmsg(_db) << endl;
+		LOG_ERROR("DB", "Failed to open database: %s", sqlite3_errmsg(_db));
 		return false;
 	}
 
@@ -22,7 +22,7 @@ bool DBManager::Init(const string& dbPath)
 
 	CreateTables();
 
-	cout << "[DB] Database initialized: " << dbPath << endl;
+	LOG_INFO("DB", "Database initialized: %s", dbPath.c_str());
 	return true;
 }
 
@@ -32,7 +32,7 @@ void DBManager::Close()
 	{
 		sqlite3_close(_db);
 		_db = nullptr;
-		cout << "[DB] Database closed" << endl;
+		LOG_INFO("DB", "Database closed");
 	}
 }
 
@@ -75,7 +75,7 @@ void DBManager::CreateTables()
 	int rc = sqlite3_exec(_db, sql, nullptr, nullptr, &errMsg);
 	if (rc != SQLITE_OK)
 	{
-		cout << "[DB] CreateTables error: " << errMsg << endl;
+		LOG_ERROR("DB", "CreateTables error: %s", errMsg);
 		sqlite3_free(errMsg);
 	}
 }
@@ -93,7 +93,7 @@ int64 DBManager::FindOrCreateAccount(const string& username)
 			{
 				int64 id = sqlite3_column_int64(stmt, 0);
 				sqlite3_finalize(stmt);
-				cout << "[DB] Account found: " << username << " (id=" << id << ")" << endl;
+				LOG_INFO("DB", "Account found: %s (id=%lld)", username.c_str(), id);
 				return id;
 			}
 			sqlite3_finalize(stmt);
@@ -111,7 +111,7 @@ int64 DBManager::FindOrCreateAccount(const string& username)
 			{
 				int64 id = sqlite3_last_insert_rowid(_db);
 				sqlite3_finalize(stmt);
-				cout << "[DB] Account created: " << username << " (id=" << id << ")" << endl;
+				LOG_INFO("DB", "Account created: %s (id=%lld)", username.c_str(), id);
 				return id;
 			}
 			sqlite3_finalize(stmt);
@@ -210,7 +210,7 @@ bool DBManager::LoadPlayerData(int64 accountId, PlayerSaveData& outData)
 		}
 	}
 
-	cout << "[DB] Loaded player: " << outData.name << " (Lv." << outData.level << ")" << endl;
+	LOG_INFO("DB", "Loaded player: %s (Lv.%d)", outData.name.c_str(), outData.level);
 	return true;
 }
 
@@ -299,6 +299,6 @@ bool DBManager::SavePlayerData(int64 accountId, const PlayerSaveData& data)
 
 	sqlite3_exec(_db, "COMMIT;", nullptr, nullptr, nullptr);
 
-	cout << "[DB] Saved player: " << data.name << " (Lv." << data.level << ", Exp=" << data.exp << ")" << endl;
+	LOG_INFO("DB", "Saved player: %s (Lv.%d, Exp=%d)", data.name.c_str(), data.level, data.exp);
 	return true;
 }
