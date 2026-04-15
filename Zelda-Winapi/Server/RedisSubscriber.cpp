@@ -15,6 +15,12 @@ void RedisSubscriber::Start()
 {
     thread([this]()
         {
+            if (!GRedisClient.IsConnected())
+            {
+                cout << "[RedisSubscriber] Redis unavailable, subscriber not started" << endl;
+                return;
+            }
+
             // 구독 전용 독립 Redis 연결 (GRedisClient 풀과 분리)
             sw::redis::ConnectionOptions opts;
             opts.host = "127.0.0.1";

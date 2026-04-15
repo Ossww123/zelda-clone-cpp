@@ -52,6 +52,12 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     std::string payload;
     broadcast.SerializeToString(&payload);
 
+    if (!GRedisClient.IsConnected())
+    {
+        GChatSessionManager.BroadcastAll(sendBuffer);
+        return;
+    }
+
     if (pkt.type() == Protocol::CHAT_TYPE_GLOBAL)
     {
         cout << "[ChatServer] PUBLISH chat:global" << endl;

@@ -68,7 +68,7 @@ void GameSession::OnDisconnected()
 		}
 	}
 
-	if (p)
+	if (p && GRedisClient.IsConnected())
 	{
 		GRedisClient.Get().del("player:loc:" + p->info.name());
 	}

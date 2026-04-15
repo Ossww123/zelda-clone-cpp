@@ -725,8 +725,11 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 			});
 	}
 
-	GRedisClient.Get().set("player:loc:" + username, GServerAddr);
-	GRedisClient.Get().zadd("rank:level", username, static_cast<double>(player->GetLevel()));
+	if (GRedisClient.IsConnected())
+	{
+		GRedisClient.Get().set("player:loc:" + username, GServerAddr);
+		GRedisClient.Get().zadd("rank:level", username, static_cast<double>(player->GetLevel()));
+	}
 
 	cout << "[Login] " << username << " logged in" << endl;
 	cout << "[Login] " << username << " logged in (accountId=" << accountId << ")" << endl;
@@ -801,25 +804,28 @@ void ServerPacketHandler::Handle_C_GetRanking(GameSessionRef session, BYTE* buff
 	// reply.release()로 unique_ptr 소유권을 포기하여 freeReplyObject 호출 차단.
 	// (redisReply 메모리 leak 감수 — R키 호출 빈도상 데모 허용 범위)
 	// WITHSCORES로 score도 함께 수신하여 zscore 추가 호출 불필요.
-	auto reply = GRedisClient.Get().command("ZREVRANGE", "rank:level", "0", "9", "WITHSCORES");
-	if (reply && reply->type == REDIS_REPLY_ARRAY)
+	if (GRedisClient.IsConnected())
 	{
-		for (size_t i = 0; i + 1 < reply->elements; i += 2)
+		auto reply = GRedisClient.Get().command("ZREVRANGE", "rank:level", "0", "9", "WITHSCORES");
+		if (reply && reply->type == REDIS_REPLY_ARRAY)
 		{
-			auto* nameElem  = reply->element[i];
-			auto* scoreElem = reply->element[i + 1];
-			if (nameElem->type != REDIS_REPLY_STRING || scoreElem->type != REDIS_REPLY_STRING)
-				continue;
+			for (size_t i = 0; i + 1 < reply->elements; i += 2)
+			{
+				auto* nameElem  = reply->element[i];
+				auto* scoreElem = reply->element[i + 1];
+				if (nameElem->type != REDIS_REPLY_STRING || scoreElem->type != REDIS_REPLY_STRING)
+					continue;
 
-			string memberName(nameElem->str, nameElem->len);
-			int32 level = static_cast<int32>(stod(string(scoreElem->str, scoreElem->len)));
+				string memberName(nameElem->str, nameElem->len);
+				int32 level = static_cast<int32>(stod(string(scoreElem->str, scoreElem->len)));
 
-			auto* entry = pkt.add_entries();
-			entry->set_playername(memberName);
-			entry->set_level(level);
+				auto* entry = pkt.add_entries();
+				entry->set_playername(memberName);
+				entry->set_level(level);
+			}
 		}
+		reply.release(); // freeReplyObject 크래시 회피 (메모리 leak 허용)
 	}
-	reply.release(); // freeReplyObject 크래시 회피 (메모리 leak 허용)
 
 	session->Send(Make_S_Ranking(pkt));
 }
