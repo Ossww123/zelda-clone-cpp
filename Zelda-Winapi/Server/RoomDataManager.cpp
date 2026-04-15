@@ -44,17 +44,13 @@ bool RoomDataManager::LoadAllData()
 
 	if (success)
 	{
-		cout << "[RoomDataManager] Successfully loaded all data:" << endl;
-		cout << "  - Room Configs: " << _roomConfigs.size() << endl;
-		cout << "  - Monster Templates: " << _monsterTemplates.size() << endl;
-		cout << "  - Spawn Configs: " << _spawnConfigs.size() << endl;
-		cout << "  - Level Data: " << _levelData.size() << endl;
-		cout << "  - Item Templates: " << _itemTemplates.size() << endl;
-		cout << "  - Monster Drops: " << _monsterDrops.size() << " monster types" << endl;
+		LOG_INFO("RoomDM", "Successfully loaded all data: RoomConfigs=%zu MonsterTemplates=%zu SpawnConfigs=%zu LevelData=%zu ItemTemplates=%zu MonsterDrops=%zu",
+			_roomConfigs.size(), _monsterTemplates.size(), _spawnConfigs.size(),
+			_levelData.size(), _itemTemplates.size(), _monsterDrops.size());
 	}
 	else
 	{
-		cout << "[RoomDataManager] ERROR: Failed to load some data files!" << endl;
+		LOG_ERROR("RoomDM", "Failed to load some data files!");
 	}
 
 	return success;
@@ -65,7 +61,7 @@ bool RoomDataManager::LoadRoomConfigs(const string& csvPath)
 	ifstream file(csvPath);
 	if (!file.is_open())
 	{
-		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		LOG_ERROR("RoomDM", "Failed to open %s", csvPath.c_str());
 		return false;
 	}
 
@@ -113,7 +109,7 @@ bool RoomDataManager::LoadRoomConfigs(const string& csvPath)
 		_roomConfigs[data.roomId] = data;
 	}
 
-	cout << "[RoomDataManager] Loaded " << _roomConfigs.size() << " room configs" << endl;
+	LOG_INFO("RoomDM", "Loaded %zu room configs", _roomConfigs.size());
 	return true;
 }
 
@@ -122,7 +118,7 @@ bool RoomDataManager::LoadMonsterTemplates(const string& csvPath)
 	ifstream file(csvPath);
 	if (!file.is_open())
 	{
-		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		LOG_ERROR("RoomDM", "Failed to open %s", csvPath.c_str());
 		return false;
 	}
 
@@ -163,7 +159,7 @@ bool RoomDataManager::LoadMonsterTemplates(const string& csvPath)
 		_monsterTemplates[data.templateId] = data;
 	}
 
-	cout << "[RoomDataManager] Loaded " << _monsterTemplates.size() << " monster templates" << endl;
+	LOG_INFO("RoomDM", "Loaded %zu monster templates", _monsterTemplates.size());
 	return true;
 }
 
@@ -172,7 +168,7 @@ bool RoomDataManager::LoadMonsterSpawns(const string& jsonPath)
 	ifstream file(jsonPath);
 	if (!file.is_open())
 	{
-		cout << "[RoomDataManager] ERROR: Failed to open " << jsonPath << endl;
+		LOG_ERROR("RoomDM", "Failed to open %s", jsonPath.c_str());
 		return false;
 	}
 
@@ -184,16 +180,16 @@ bool RoomDataManager::LoadMonsterSpawns(const string& jsonPath)
 
 	if (success)
 	{
-		cout << "[RoomDataManager] Loaded " << _spawnConfigs.size() << " spawn configs" << endl;
+		LOG_INFO("RoomDM", "Loaded %zu spawn configs", _spawnConfigs.size());
 
 		for (const auto& [roomId, config] : _spawnConfigs)
 		{
-			cout << "  - Room: " << roomId << ", Spawn groups: " << config.spawns.size() << endl;
+			LOG_INFO("RoomDM", "  - Room: %s, Spawn groups: %zu", roomId.c_str(), config.spawns.size());
 		}
 	}
 	else
 	{
-		cout << "[RoomDataManager] ERROR: Failed to parse MonsterSpawn.json" << endl;
+		LOG_ERROR("RoomDM", "Failed to parse MonsterSpawn.json");
 	}
 
 	return success;
@@ -230,14 +226,14 @@ bool RoomDataManager::ParseMonsterSpawnJson(const string& json)
 				continue;
 			}
 
-			cout << "[RoomDataManager] Parsing room: " << roomId << endl;
+			LOG_INFO("RoomDM", "Parsing room: %s", roomId.c_str());
 
 			RoomSpawnConfig config;
 			config.roomId = roomId;
 
 			// spawns 배열 안의 모든 spawn group 객체 추출
 			vector<string> spawnGroupObjects = GetObjectsInArray(json, "spawns", roomObjStart);
-			cout << "[RoomDataManager] Found " << spawnGroupObjects.size() << " spawn groups" << endl;
+			LOG_INFO("RoomDM", "Found %zu spawn groups", spawnGroupObjects.size());
 
 			for (const string& groupJson : spawnGroupObjects)
 			{
@@ -270,7 +266,7 @@ bool RoomDataManager::ParseMonsterSpawnJson(const string& json)
 							arrayEnd++;
 						}
 
-						cout << "[RoomDataManager] Parsing offsets array" << endl;
+						LOG_INFO("RoomDM", "Parsing offsets array");
 
 						size_t currentPos = arrayStart + 1;
 						while (currentPos < arrayEnd)
@@ -324,19 +320,19 @@ bool RoomDataManager::ParseMonsterSpawnJson(const string& json)
 							if (pair.size() >= 2)
 							{
 								spawnData.offsets.push_back(Vec2Int{ pair[0], pair[1] });
-								cout << "[RoomDataManager]   - offset: (" << pair[0] << ", " << pair[1] << ")" << endl;
+								LOG_INFO("RoomDM", "  - offset: (%d, %d)", pair[0], pair[1]);
 							}
 
 							currentPos = pairEnd + 1;
 						}
 
-						cout << "[RoomDataManager] Total offsets parsed: " << spawnData.offsets.size() << endl;
+						LOG_INFO("RoomDM", "Total offsets parsed: %zu", spawnData.offsets.size());
 					}
 				}
 
 				// monsters 배열
 				vector<string> monsterObjects = GetObjectsInArray(groupJson, "monsters", 0);
-				cout << "[RoomDataManager] Found " << monsterObjects.size() << " monster types in group" << endl;
+				LOG_INFO("RoomDM", "Found %zu monster types in group", monsterObjects.size());
 
 				for (const string& monsterJson : monsterObjects)
 				{
@@ -348,8 +344,7 @@ bool RoomDataManager::ParseMonsterSpawnJson(const string& json)
 					monsterInfo.aggroRange = GetIntValue(monsterJson, "aggroRange", 0);
 					monsterInfo.leashRange = GetIntValue(monsterJson, "leashRange", 0);
 
-					cout << "[RoomDataManager]   - templateId=" << monsterInfo.templateId
-						<< ", count=" << monsterInfo.count << endl;
+					LOG_INFO("RoomDM", "  - templateId=%d, count=%d", monsterInfo.templateId, monsterInfo.count);
 
 					spawnData.monsters.push_back(monsterInfo);
 				}
@@ -367,12 +362,12 @@ bool RoomDataManager::ParseMonsterSpawnJson(const string& json)
 	}
 	catch (const exception& e)
 	{
-		cout << "[RoomDataManager] ERROR: Failed to parse MonsterSpawn.json: " << e.what() << endl;
+		LOG_ERROR("RoomDM", "Failed to parse MonsterSpawn.json: %s", e.what());
 		return false;
 	}
 	catch (...)
 	{
-		cout << "[RoomDataManager] ERROR: Failed to parse MonsterSpawn.json (unknown error)" << endl;
+		LOG_ERROR("RoomDM", "Failed to parse MonsterSpawn.json (unknown error)");
 		return false;
 	}
 }
@@ -512,7 +507,7 @@ vector<string> RoomDataManager::GetObjectsInArray(const string& json, const stri
 	size_t keyPos = FindKey(json, arrayKey, startPos);
 	if (keyPos == string::npos)
 	{
-		cout << "[RoomDataManager] GetObjectsInArray: Key not found: " << arrayKey << endl;
+		LOG_WARN("RoomDM", "GetObjectsInArray: Key not found: %s", arrayKey.c_str());
 		return result;
 	}
 
@@ -536,7 +531,7 @@ vector<string> RoomDataManager::GetObjectsInArray(const string& json, const stri
 		arrayEnd++;
 	}
 
-	cout << "[RoomDataManager] GetObjectsInArray: Array range [" << arrayStart << ", " << arrayEnd << "]" << endl;
+	LOG_INFO("RoomDM", "GetObjectsInArray: Array range [%zu, %zu]", arrayStart, arrayEnd);
 
 	size_t pos = arrayStart + 1;
 	int objCount = 0;
@@ -554,18 +549,18 @@ vector<string> RoomDataManager::GetObjectsInArray(const string& json, const stri
 
 		if (objBlock.empty())
 		{
-			cout << "[RoomDataManager] GetObjectsInArray: Empty object block at pos " << pos << endl;
+			LOG_WARN("RoomDM", "GetObjectsInArray: Empty object block at pos %zu", pos);
 			break;
 		}
 
 		objCount++;
-		cout << "[RoomDataManager] GetObjectsInArray: Found object #" << objCount << " (size=" << objBlock.size() << ")" << endl;
+		LOG_INFO("RoomDM", "GetObjectsInArray: Found object #%d (size=%zu)", objCount, objBlock.size());
 
 		result.push_back(objBlock);
 		pos = endPos;
 	}
 
-	cout << "[RoomDataManager] GetObjectsInArray: Total objects found: " << result.size() << endl;
+	LOG_INFO("RoomDM", "GetObjectsInArray: Total objects found: %zu", result.size());
 
 	return result;
 }
@@ -604,7 +599,7 @@ bool RoomDataManager::LoadLevelData(const string& csvPath)
 	ifstream file(csvPath);
 	if (!file.is_open())
 	{
-		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		LOG_ERROR("RoomDM", "Failed to open %s", csvPath.c_str());
 		return false;
 	}
 
@@ -642,7 +637,7 @@ bool RoomDataManager::LoadLevelData(const string& csvPath)
 		_levelData[data.level] = data;
 	}
 
-	cout << "[RoomDataManager] Loaded " << _levelData.size() << " level data entries" << endl;
+	LOG_INFO("RoomDM", "Loaded %zu level data entries", _levelData.size());
 	return true;
 }
 
@@ -697,7 +692,7 @@ bool RoomDataManager::LoadItemTemplates(const string& csvPath)
 	ifstream file(csvPath);
 	if (!file.is_open())
 	{
-		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		LOG_ERROR("RoomDM", "Failed to open %s", csvPath.c_str());
 		return false;
 	}
 
@@ -728,7 +723,7 @@ bool RoomDataManager::LoadItemTemplates(const string& csvPath)
 		_itemTemplates[data.itemId] = data;
 	}
 
-	cout << "[RoomDataManager] Loaded " << _itemTemplates.size() << " item templates" << endl;
+	LOG_INFO("RoomDM", "Loaded %zu item templates", _itemTemplates.size());
 	return true;
 }
 
@@ -737,7 +732,7 @@ bool RoomDataManager::LoadMonsterDrops(const string& csvPath)
 	ifstream file(csvPath);
 	if (!file.is_open())
 	{
-		cout << "[RoomDataManager] ERROR: Failed to open " << csvPath << endl;
+		LOG_ERROR("RoomDM", "Failed to open %s", csvPath.c_str());
 		return false;
 	}
 
@@ -764,7 +759,7 @@ bool RoomDataManager::LoadMonsterDrops(const string& csvPath)
 		_monsterDrops[data.templateId].push_back(data);
 	}
 
-	cout << "[RoomDataManager] Loaded monster drops for " << _monsterDrops.size() << " monster types" << endl;
+	LOG_INFO("RoomDM", "Loaded monster drops for %zu monster types", _monsterDrops.size());
 	return true;
 }
 

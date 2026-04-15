@@ -20,7 +20,7 @@ void ChatPacketHandler::HandlePacket(ChatSessionRef session, BYTE* buffer, int32
         Handle_SS_RelayChat(session, buffer, len);
         break;
     default:
-        cout << "[ChatServer] Unknown packet id: " << header->id << endl;
+        LOG_WARN("Packet", "Unknown packet id: %d", header->id);
         break;
     }
 }
@@ -34,10 +34,8 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     NetAddress fromAddr = session->GetAddress();
     string fromServer = to_string(fromAddr.GetPort());
 
-    cout << "[ChatServer] RelayChat from=" << pkt.sender()
-        << " server=:" << fromServer
-        << " type=" << pkt.type()
-        << " msg=" << pkt.msg() << endl;
+    LOG_INFO("Relay", "RelayChat from=%s server=:%s type=%d msg=%s",
+        pkt.sender().c_str(), fromServer.c_str(), pkt.type(), pkt.msg().c_str());
 
     Protocol::SS_BroadcastChat broadcast;
     broadcast.set_sender(pkt.sender());
@@ -60,25 +58,25 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
 
     if (pkt.type() == Protocol::CHAT_TYPE_GLOBAL)
     {
-        cout << "[ChatServer] PUBLISH chat:global" << endl;
+        LOG_CHAT(pkt.sender(), "GLOBAL", "", pkt.msg());
         GRedisClient.Get().publish("chat:global", payload);
     }
     else if (pkt.type() == Protocol::CHAT_TYPE_WHISPER) {
         auto val = GRedisClient.Get().get("player:loc:" + pkt.target());
         if (val)
         {
-            // ´ë»ó ¼­¹ö Ã¤³Î·Î PUBLISH
+            // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½Î·ï¿½ PUBLISH
             string channel = "chat:whisper:" + *val;
-            cout << "[ChatServer] PUBLISH " << channel << " (to=" << pkt.target() << ")" << endl;
+            LOG_CHAT(pkt.sender(), "WHISPER", pkt.target(), pkt.msg());
             GRedisClient.Get().publish(channel, payload);
         }
         else
         {
-            // ´ë»ó ¾øÀ½ ¡æ sender ¼­¹ö¿¡ ¿¡·¯ ¸Þ½ÃÁö PUBLISH
+            // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ sender ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ PUBLISH
             Protocol::SS_BroadcastChat errPkt;
             errPkt.set_sender("System");
             errPkt.set_type(Protocol::CHAT_TYPE_WHISPER);
-            errPkt.set_msg("[System] ´ë»ó ÇÃ·¹ÀÌ¾î¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            errPkt.set_msg("[System] ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
             errPkt.set_target(pkt.sender());
 
             string errPayload;

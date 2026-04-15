@@ -54,6 +54,9 @@
     <ClCompile Include="RedisClient.cpp">
       <Filter>Source Files\Redis</Filter>
     </ClCompile>
+    <ClCompile Include="ChatServerLogger.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -79,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="RedisClient.h">
       <Filter>Source Files\Redis</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatServerLogger.h">
+      <Filter>Source Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

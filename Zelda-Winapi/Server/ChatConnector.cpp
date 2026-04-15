@@ -10,12 +10,12 @@ ChatConnector GChatConnector;
 
 void ChatRelaySession::OnConnected()
 {
-    cout << "[Server] Connected to ChatServer" << endl;
+    LOG_INFO("Chat", "Connected to ChatServer");
 }
 
 void ChatRelaySession::OnDisconnected()
 {
-    cout << "[Server] Disconnected from ChatServer" << endl;
+    LOG_INFO("Chat", "Disconnected from ChatServer");
 }
 
 void ChatRelaySession::OnRecvPacket(BYTE* buffer, int32 len)
@@ -92,7 +92,7 @@ void ChatConnector::Connect(IocpCoreRef iocpCore)
 
     if (!_service->Start())
     {
-        cout << "[Server] Failed to connect to ChatServer" << endl;
+        LOG_WARN("Chat", "Failed to connect to ChatServer");
     }
 }
 
@@ -102,7 +102,7 @@ void ChatConnector::TryReconnect(uint64 now)
         return;
 
     _lastTryAt = now;
-    cout << "[Server] ChatServer disconnected. Trying to reconnect..." << endl;
+    LOG_WARN("Chat", "ChatServer disconnected. Trying to reconnect...");
 
     _session = make_shared<ChatRelaySession>();
     _service = make_shared<ClientService>(
@@ -114,7 +114,7 @@ void ChatConnector::TryReconnect(uint64 now)
 
     if (!_service->Start())
     {
-        cout << "[Server] Reconnect failed, will retry in 5s" << endl;
+        LOG_WARN("Chat", "Reconnect failed, will retry in 5s");
     }
 }
 
@@ -122,7 +122,7 @@ void ChatConnector::Send(SendBufferRef sendBuffer)
 {
     if (!IsConnected())
     {
-        cout << "[Server] ChatServer not connected, dropping packet" << endl;
+        LOG_WARN("Chat", "ChatServer not connected, dropping packet");
         return;
     }
 

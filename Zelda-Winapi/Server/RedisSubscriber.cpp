@@ -17,7 +17,7 @@ void RedisSubscriber::Start()
         {
             if (!GRedisClient.IsConnected())
             {
-                cout << "[RedisSubscriber] Redis unavailable, subscriber not started" << endl;
+                LOG_WARN("Redis", "Redis unavailable, subscriber not started");
                 return;
             }
 

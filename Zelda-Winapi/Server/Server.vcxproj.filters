@@ -115,6 +115,9 @@
     <ClCompile Include="RedisSubscriber.cpp">
       <Filter>Source Files\Redis</Filter>
     </ClCompile>
+    <ClCompile Include="ServerLogger.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSession.h">
@@ -188,6 +191,9 @@
     </ClInclude>
     <ClInclude Include="RedisSubscriber.h">
       <Filter>Source Files\Redis</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerLogger.h">
+      <Filter>Source Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

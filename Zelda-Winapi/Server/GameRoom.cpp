@@ -52,7 +52,7 @@ void GameRoom::InitFromConfig(const string& roomId)
 
 	if (!_config)
 	{
-		cout << "[GameRoom] ERROR: Room config not found for: " << roomId << endl;
+		LOG_ERROR("Room", "Room config not found for: %s", roomId.c_str());
 		return;
 	}
 
@@ -65,8 +65,8 @@ void GameRoom::InitFromConfig(const string& roomId)
 		SpawnMonstersFromData();
 	}
 
-	cout << "[GameRoom] Initialized room: " << roomId << " (SkillEnabled=" << _config->skillEnabled
-		<< ", MonsterSpawn=" << _config->monsterSpawnEnabled << ")" << endl;
+	LOG_INFO("Room", "Initialized room: %s (SkillEnabled=%d, MonsterSpawn=%d)",
+		roomId.c_str(), _config->skillEnabled, _config->monsterSpawnEnabled);
 }
 
 void GameRoom::Init()
@@ -248,7 +248,7 @@ void GameRoom::LeaveRoom(GameSessionRef session)
 		if (instanceId != 0)
 		{
 			GRoomManager.RequestRemoveDungeonInstance(instanceId);
-			cout << "[GameRoom] Requested removal of empty dungeon instance: " << instanceId << endl;
+			LOG_INFO("Room", "Requested removal of empty dungeon instance: %llu", instanceId);
 		}
 	}
 }
@@ -918,32 +918,31 @@ void GameRoom::SpawnMonstersFromData()
 {
 	if (!_spawnConfig)
 	{
-		cout << "[GameRoom] ERROR: _spawnConfig is null! Cannot spawn monsters." << endl;
+		LOG_ERROR("Room", "_spawnConfig is null! Cannot spawn monsters.");
 		return;
 	}
 
-	cout << "[GameRoom] Starting monster spawn. Spawn groups: " << _spawnConfig->spawns.size() << endl;
+	LOG_INFO("Room", "Starting monster spawn. Spawn groups: %zu", _spawnConfig->spawns.size());
 
 	for (const auto& spawnGroup : _spawnConfig->spawns)
 	{
-		cout << "[GameRoom] Processing spawn group: " << spawnGroup.groupId
-			<< " at (" << spawnGroup.anchor.x << ", " << spawnGroup.anchor.y << ")" << endl;
+		LOG_INFO("Room", "Processing spawn group: %s at (%d, %d)",
+			spawnGroup.groupId.c_str(), spawnGroup.anchor.x, spawnGroup.anchor.y);
 
 		Vec2Int anchor = spawnGroup.anchor;
 		int offsetIndex = 0;
 
-		cout << "[GameRoom] Monster types in this group: " << spawnGroup.monsters.size() << endl;
+		LOG_INFO("Room", "Monster types in this group: %zu", spawnGroup.monsters.size());
 
 		for (const auto& monsterInfo : spawnGroup.monsters)
 		{
-			cout << "[GameRoom] Monster templateId=" << monsterInfo.templateId
-				<< ", count=" << monsterInfo.count << endl;
+			LOG_INFO("Room", "Monster templateId=%d, count=%d", monsterInfo.templateId, monsterInfo.count);
 
 			// MonsterTemplate에서 스탯 로드
 			const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(monsterInfo.templateId);
 			if (!templateData)
 			{
-				cout << "[GameRoom] ERROR: MonsterTemplate not found: " << monsterInfo.templateId << endl;
+				LOG_ERROR("Room", "MonsterTemplate not found: %d", monsterInfo.templateId);
 				continue;
 			}
 
@@ -951,7 +950,7 @@ void GameRoom::SpawnMonstersFromData()
 			{
 				if (offsetIndex >= spawnGroup.offsets.size())
 				{
-					cout << "[GameRoom] WARNING: Not enough offsets for monster count in group: " << spawnGroup.groupId << endl;
+					LOG_WARN("Room", "Not enough offsets for monster count in group: %s", spawnGroup.groupId.c_str());
 					break;
 				}
 
@@ -980,7 +979,7 @@ void GameRoom::SpawnMonstersFromData()
 		}
 	}
 
-	cout << "[GameRoom] Spawned " << _monsters.size() << " monsters from data" << endl;
+	LOG_INFO("Room", "Spawned %zu monsters from data", _monsters.size());
 }
 
 // 데이터 기반 리스폰 처리

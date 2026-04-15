@@ -18,7 +18,7 @@ uint64 PartyManager::CreateParty(uint64 leaderId)
 	_parties[partyId] = party;
 	_playerToParty[leaderId] = partyId;
 
-	cout << "[Party] Created party " << partyId << " (leader=" << leaderId << ")" << endl;
+	LOG_INFO("Party", "Created party %llu (leader=%llu)", partyId, leaderId);
 	return partyId;
 }
 
@@ -33,7 +33,7 @@ void PartyManager::DisbandParty(uint64 partyId)
 
 	_parties.erase(it);
 
-	cout << "[Party] Disbanded party " << partyId << endl;
+	LOG_INFO("Party", "Disbanded party %llu", partyId);
 }
 
 bool PartyManager::AddMember(uint64 partyId, uint64 playerId)
@@ -51,7 +51,7 @@ bool PartyManager::AddMember(uint64 partyId, uint64 playerId)
 	party->memberIds.push_back(playerId);
 	_playerToParty[playerId] = partyId;
 
-	cout << "[Party] Player " << playerId << " joined party " << partyId << endl;
+	LOG_INFO("Party", "Player %llu joined party %llu", playerId, partyId);
 	return true;
 }
 
@@ -66,7 +66,7 @@ void PartyManager::RemoveMember(uint64 partyId, uint64 playerId)
 	party->memberNames.erase(playerId);
 	_playerToParty.erase(playerId);
 
-	cout << "[Party] Player " << playerId << " left party " << partyId << endl;
+	LOG_INFO("Party", "Player %llu left party %llu", playerId, partyId);
 
 	if (members.size() <= 1)
 	{
@@ -79,7 +79,7 @@ void PartyManager::RemoveMember(uint64 partyId, uint64 playerId)
 	if (party->leaderId == playerId)
 	{
 		party->leaderId = members[0];
-		cout << "[Party] New leader: " << party->leaderId << endl;
+		LOG_INFO("Party", "New leader: %llu", party->leaderId);
 	}
 }
 

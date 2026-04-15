@@ -38,6 +38,7 @@ using ObjectState = Protocol::OBJECT_STATE_TYPE;
 #endif
 
 #include "ServerPacketHandler.h"
+#include "ServerLogger.h"
 
 
 struct VectorInt

@@ -518,7 +518,7 @@ void ServerPacketHandler::Handle_C_PartyInvite(GameSessionRef session, BYTE* buf
 			SendBufferRef sendBuffer = MakeSendBuffer(sendPkt, S_PartyInvite);
 			target->session->Send(sendBuffer);
 
-			cout << "[Party] " << inviter->info.name() << " invited player " << targetId << endl;
+			LOG_INFO("Party", "%s invited player %llu", inviter->info.name().c_str(), targetId);
 		});
 }
 
@@ -731,8 +731,7 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 		GRedisClient.Get().zadd("rank:level", username, static_cast<double>(player->GetLevel()));
 	}
 
-	cout << "[Login] " << username << " logged in" << endl;
-	cout << "[Login] " << username << " logged in (accountId=" << accountId << ")" << endl;
+	LOG_INFO("Login", "%s logged in (accountId=%d)", username.c_str(), accountId);
 }
 
 void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len) {
