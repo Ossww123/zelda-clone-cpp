@@ -20,7 +20,7 @@ Game::~Game ( )
 	_CrtDumpMemoryLeaks ( );
 }
 
-void Game::Init ( HWND hwnd )
+void Game::Init ( HWND hwnd, uint16 port )
 {
 	_hwnd = hwnd;
 	_hdc = ::GetDC ( hwnd );
@@ -48,7 +48,7 @@ void Game::Init ( HWND hwnd )
 	GET_SINGLE ( ResourceManager )->Init ( hwnd , resourcePath );
 	GET_SINGLE ( SoundManager )->Init ( hwnd );
 	GET_SINGLE ( SceneManager )->ChangeScene ( SceneType::DevScene );
-	GET_SINGLE ( NetworkManager )->Init ( );
+	GET_SINGLE ( NetworkManager )->Init ( port );
 }
 
 void Game::Update ( )

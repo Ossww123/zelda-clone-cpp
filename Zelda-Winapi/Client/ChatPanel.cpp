@@ -182,6 +182,18 @@ void ChatPanel::SendChat ( )
     SendBufferRef sendBuffer = ClientPacketHandler::Make_C_Chat ( pkt );
     GET_SINGLE ( NetworkManager )->SendPacket ( sendBuffer );
 
+    if ( chatType == Protocol::CHAT_TYPE_WHISPER )
+    {
+        auto toWstr = []( const string& s ) -> wstring {
+            int32 len = ::MultiByteToWideChar ( CP_UTF8, 0, s.c_str(), -1, nullptr, 0 );
+            wstring ws( len - 1, 0 );
+            ::MultiByteToWideChar ( CP_UTF8, 0, s.c_str(), -1, &ws[0], len );
+            return ws;
+        };
+        wstring label = L"[귓말->" + toWstr ( target ) + L"]";
+        AddMessage ( label, toWstr ( msg ) );
+    }
+
     ::SetWindowText ( _hEdit , L"" );
 }
 

@@ -7,7 +7,7 @@ public:
 	~Game ( );
 
 public:
-	void Init (HWND hwnd);
+	void Init (HWND hwnd, uint16 port = 7777);
 	void Update ( );
 	void Render ( );
 

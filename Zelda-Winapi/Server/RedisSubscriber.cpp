@@ -2,6 +2,7 @@
 #include "RedisSubscriber.h"
 #include "RedisClient.h"
 #include "GameSessionManager.h"
+#include "GameSession.h"
 #include "ServerPacketHandler.h"
 
 RedisSubscriber& RedisSubscriber::GetInstance()
@@ -32,11 +33,21 @@ void RedisSubscriber::Start()
                     chat.set_msg(broadcast.msg());
 
                     SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Chat(chat);
-                    GSessionManager.Broadcast(sendBuffer);
+
+                    if (broadcast.type() == Protocol::CHAT_TYPE_WHISPER)
+                    {
+                        GameSessionRef target = GSessionManager.FindByPlayerName(broadcast.target());
+                        if (target)
+                            target->Send(sendBuffer);
+                    }
+                    else
+                    {
+                        GSessionManager.Broadcast(sendBuffer);
+                    }
                 });
 
             sub.subscribe("chat:global");
-            sub.subscribe("chat:whisper:127.0.0.1:7777");
+            sub.subscribe("chat:whisper:" + GServerAddr);
 
             while (true)
             {

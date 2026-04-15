@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ChatPacketHandler.h"
 #include "ChatSessionManager.h"
+#include "ChatSession.h"
 #include "RedisClient.h"
 
 enum
@@ -30,7 +31,11 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     Protocol::SS_RelayChat pkt;
     pkt.ParseFromArray(&header[1], len - sizeof(PacketHeader));
 
+    NetAddress fromAddr = session->GetAddress();
+    string fromServer = to_string(fromAddr.GetPort());
+
     cout << "[ChatServer] RelayChat from=" << pkt.sender()
+        << " server=:" << fromServer
         << " type=" << pkt.type()
         << " msg=" << pkt.msg() << endl;
 
@@ -49,6 +54,7 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
 
     if (pkt.type() == Protocol::CHAT_TYPE_GLOBAL)
     {
+        cout << "[ChatServer] PUBLISH chat:global" << endl;
         GRedisClient.Get().publish("chat:global", payload);
     }
     else if (pkt.type() == Protocol::CHAT_TYPE_WHISPER) {
@@ -57,6 +63,7 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
         {
             // 대상 서버 채널로 PUBLISH
             string channel = "chat:whisper:" + *val;
+            cout << "[ChatServer] PUBLISH " << channel << " (to=" << pkt.target() << ")" << endl;
             GRedisClient.Get().publish(channel, payload);
         }
         else

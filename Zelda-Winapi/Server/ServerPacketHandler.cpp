@@ -725,7 +725,7 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 			});
 	}
 
-	GRedisClient.Get().set("player:loc:" + username, "127.0.0.1:7777");
+	GRedisClient.Get().set("player:loc:" + username, GServerAddr);
 	GRedisClient.Get().zadd("rank:level", username, static_cast<double>(player->GetLevel()));
 
 	cout << "[Login] " << username << " logged in" << endl;

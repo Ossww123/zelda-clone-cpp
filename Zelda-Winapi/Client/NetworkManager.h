@@ -7,7 +7,7 @@ class NetworkManager
 	DECLARE_SINGLE(NetworkManager )
 
 public:
-	void Init ( );
+	void Init ( uint16 port = 7777 );
 	void Update ( );
 
 	ServerSessionRef CreateSession ( );
