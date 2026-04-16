@@ -25,6 +25,8 @@
     { "id": "Armor_B", "texture": "Items", "x": 32, "y": 32, "w": 32, "h": 32 },
     { "id": "Armor_C", "texture": "Items", "x": 64, "y": 32, "w": 32, "h": 32 },
     { "id": "Potion_A", "texture": "Items", "x": 0, "y": 64, "w": 32, "h": 32 },
-    { "id": "Inventory", "texture": "Inventory", "x": 0, "y": 0, "w": 0, "h": 0 }
+    { "id": "Inventory", "texture": "Inventory", "x": 0, "y": 0, "w": 0, "h": 0 },
+    { "id": "RankingPanel", "texture": "RankingPanel", "x": 0, "y": 0, "w": 0, "h": 0 },
+    { "id": "ChatPanel", "texture": "ChatPanel", "x": 0, "y": 0, "w": 0, "h": 0 }
   ]
 }

@@ -4,6 +4,8 @@
 #include "InputManager.h"
 #include "NetworkManager.h"
 #include "ClientPacketHandler.h"
+#include "ResourceManager.h"
+#include "Sprite.h"
 
 ChatPanel::ChatPanel ( )
 {
@@ -72,19 +74,24 @@ void ChatPanel::Render ( HDC hdc )
 
     RECT rect = GetRect ( );
 
-    // 로그 영역 배경
-    HBRUSH bgBrush = ::CreateSolidBrush ( RGB ( 20 , 20 , 20 ) );
+    // 배경
     RECT logRect = { rect.left, rect.top, rect.right, rect.bottom - INPUT_H - 2 };
-    ::FillRect ( hdc , &logRect , bgBrush );
-    ::DeleteObject ( bgBrush );
-
-    // 입력창 배경
-    if ( false )
+    Sprite* bg = GET_SINGLE ( ResourceManager )->GetSprite ( L"ChatPanel" );
+    if ( bg )
     {
-        HBRUSH inputBrush = ::CreateSolidBrush ( RGB ( 40 , 40 , 40 ) );
-        RECT inputRect = { rect.left, rect.bottom - INPUT_H - 2, rect.right, rect.bottom };
-        ::FillRect ( hdc , &inputRect , inputBrush );
-        ::DeleteObject ( inputBrush );
+        ::TransparentBlt ( hdc,
+            rect.left, rect.top,
+            PANEL_W, PANEL_H,
+            bg->GetDC ( ),
+            bg->GetPos ( ).x, bg->GetPos ( ).y,
+            bg->GetSize ( ).x, bg->GetSize ( ).y,
+            bg->GetTransparent ( ) );
+    }
+    else
+    {
+        HBRUSH bgBrush = ::CreateSolidBrush ( RGB ( 20, 20, 20 ) );
+        ::FillRect ( hdc, &logRect, bgBrush );
+        ::DeleteObject ( bgBrush );
     }
 
     // 채팅 메시지 출력
@@ -110,7 +117,7 @@ void ChatPanel::Render ( HDC hdc )
             break;
 
         wstring line = _messages[ i ].sender + L": " + _messages[ i ].msg;
-        RECT lineRect = { rect.left + 4, startY, rect.right - 4, startY + lineH };
+        RECT lineRect = { rect.left + 10, startY, rect.right - 10, startY + lineH };
         ::DrawText ( hdc , line.c_str ( ) , ( int32 ) line.length ( ) , &lineRect , DT_LEFT | DT_SINGLELINE | DT_VCENTER |
 DT_END_ELLIPSIS );
 

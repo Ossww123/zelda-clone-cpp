@@ -17,6 +17,8 @@
     { "id": "HUD", "path": "Sprite/UI/Health_Energy_EXP_Bars.bmp", "colorkey": [188, 255, 235] },
     { "id": "LoginPanel", "path": "Sprite/UI/LoginPanel.bmp", "colorkey": [0, 0, 0] },
     { "id": "PartyInvite", "path": "Sprite/UI/PartyInvite.bmp", "colorkey": [0, 0, 0] },
-    { "id": "PartyStatus", "path": "Sprite/UI/PartyStatus.bmp", "colorkey": [0, 0, 0] }
+    { "id": "PartyStatus", "path": "Sprite/UI/PartyStatus.bmp", "colorkey": [0, 0, 0] },
+    { "id": "RankingPanel", "path": "Sprite/UI/RankingPanel.bmp", "colorkey": [255, 0, 255] },
+    { "id": "ChatPanel", "path": "Sprite/UI/ChatPanel.bmp", "colorkey": [255, 0, 255] }
   ]
 }

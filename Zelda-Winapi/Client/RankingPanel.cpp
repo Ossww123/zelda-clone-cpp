@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "RankingPanel.h"
 #include "InputManager.h"
+#include "ResourceManager.h"
+#include "Sprite.h"
 
 static const int32 PANEL_W = 220;
 static const int32 PANEL_H = 260;
@@ -12,7 +14,7 @@ RankingPanel::RankingPanel ( )
 	SetDraggable ( true );
 	SetDragHandleHeight ( 30 );
 	SetSize ( { PANEL_W, PANEL_H } );
-	SetPos ( { 300.f, 200.f } );
+	SetPos ( { (float)( GWinSizeX - PANEL_W / 2 - 10 ), (float)( GWinSizeY / 2 ) + 40.f } );
 }
 
 RankingPanel::~RankingPanel ( )
@@ -42,29 +44,35 @@ void RankingPanel::Render ( HDC hdc )
 	int32 y = rect.top;
 
 	// 배경
-	HBRUSH bgBrush = ::CreateSolidBrush ( RGB ( 20, 20, 40 ) );
-	HBRUSH oldBrush = ( HBRUSH ) ::SelectObject ( hdc, bgBrush );
-	HPEN bgPen = ::CreatePen ( PS_SOLID, 2, RGB ( 180, 160, 80 ) );
-	HPEN oldPen = ( HPEN ) ::SelectObject ( hdc, bgPen );
-	::Rectangle ( hdc, x, y, x + PANEL_W, y + PANEL_H );
-	::SelectObject ( hdc, oldBrush );
-	::SelectObject ( hdc, oldPen );
-	::DeleteObject ( bgBrush );
-	::DeleteObject ( bgPen );
+	Sprite* bg = GET_SINGLE ( ResourceManager )->GetSprite ( L"RankingPanel" );
+	if ( bg )
+	{
+		::TransparentBlt ( hdc,
+			x, y,
+			PANEL_W, PANEL_H,
+			bg->GetDC ( ),
+			bg->GetPos ( ).x, bg->GetPos ( ).y,
+			bg->GetSize ( ).x, bg->GetSize ( ).y,
+			bg->GetTransparent ( ) );
+	}
+	else
+	{
+		HBRUSH bgBrush = ::CreateSolidBrush ( RGB ( 20, 20, 40 ) );
+		HBRUSH oldBrush = ( HBRUSH ) ::SelectObject ( hdc, bgBrush );
+		HPEN bgPen = ::CreatePen ( PS_SOLID, 2, RGB ( 180, 160, 80 ) );
+		HPEN oldPen = ( HPEN ) ::SelectObject ( hdc, bgPen );
+		::Rectangle ( hdc, x, y, x + PANEL_W, y + PANEL_H );
+		::SelectObject ( hdc, oldBrush );
+		::SelectObject ( hdc, oldPen );
+		::DeleteObject ( bgBrush );
+		::DeleteObject ( bgPen );
+	}
 
 	// 타이틀
 	::SetBkMode ( hdc, TRANSPARENT );
 	::SetTextColor ( hdc, RGB ( 255, 220, 80 ) );
 	RECT titleRect = { x, y + 6, x + PANEL_W, y + 30 };
 	::DrawText ( hdc, L"  레벨 랭킹 TOP 10", -1, &titleRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE );
-
-	// 구분선
-	HPEN linePen = ::CreatePen ( PS_SOLID, 1, RGB ( 120, 100, 60 ) );
-	HPEN oldLinePen = ( HPEN ) ::SelectObject ( hdc, linePen );
-	::MoveToEx ( hdc, x + 8, y + 30, nullptr );
-	::LineTo ( hdc, x + PANEL_W - 8, y + 30 );
-	::SelectObject ( hdc, oldLinePen );
-	::DeleteObject ( linePen );
 
 	// 항목
 	::SetTextColor ( hdc, RGB ( 220, 220, 220 ) );
