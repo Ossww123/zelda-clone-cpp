@@ -1,13 +1,8 @@
-﻿#include "pch.h"
-#include <iostream>
-#include <random>
-#include <atomic>
-#include <chrono>
-#include <algorithm>
+#include "pch.h"
 #include "ThreadManager.h"
 #include "Service.h"
-#include "Session.h"
 #include "ClientPacketHandler.h"
+#include "ServerSession.h"
 
 using namespace std;
 
@@ -28,114 +23,6 @@ static void ParseArgs(int argc, char* argv[])
         GAttackIntervalMs = (std::max)(50, atoi(argv[4]));
 }
 
-class ServerSession : public PacketSession
-{
-public:
-    explicit ServerSession(int32 botId) : _botId(botId)
-    {
-        _rng.seed(static_cast<uint32>(GetTickCount64()) + static_cast<uint32>(_botId));
-    }
-
-    ~ServerSession()
-    {
-        StopBotLoop();
-    }
-
-    virtual void OnConnected() override
-    {
-        _running.store(true);
-
-        string username = "bot_" + to_string(_botId);
-        Protocol::C_Login loginPkt;
-        loginPkt.set_username(username);
-        SendBufferRef login = ClientPacketHandler::Make_C_Login(loginPkt);
-        Send(login);
-
-        _nextMoveAt = chrono::steady_clock::now();
-        _nextAttackAt = chrono::steady_clock::now();
-
-        _botThread = thread([this]() { BotLoop(); });
-    }
-
-    virtual void OnRecvPacket(BYTE* buffer, int32 len) override
-    {
-        PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
-        if (header->id == S_EnterGame)
-        {
-            Protocol::S_EnterGame pkt;
-            if (pkt.ParseFromArray(&header[1], header->size - sizeof(PacketHeader)) && pkt.success())
-                _loggedIn.store(true);
-        }
-
-        ClientPacketHandler::HandlePacket(buffer, len);
-    }
-
-    virtual void OnSend(int32 len) override
-    {
-    }
-
-    virtual void OnDisconnected() override
-    {
-        StopBotLoop();
-    }
-
-private:
-    void BotLoop()
-    {
-        while (_running.load())
-        {
-            if (!_loggedIn.load())
-            {
-                this_thread::sleep_for(chrono::milliseconds(10));
-                continue;
-            }
-
-            const auto now = chrono::steady_clock::now();
-
-            if (now >= _nextMoveAt)
-            {
-                Protocol::DIR_TYPE dir = static_cast<Protocol::DIR_TYPE>(_dirDist(_rng));
-                Protocol::C_Move movePktData;
-                movePktData.set_dir(dir);
-                SendBufferRef movePkt = ClientPacketHandler::Make_C_Move(movePktData);
-                Send(movePkt);
-                _nextMoveAt = now + chrono::milliseconds(GMoveIntervalMs);
-            }
-
-            if (now >= _nextAttackAt)
-            {
-                Protocol::DIR_TYPE dir = static_cast<Protocol::DIR_TYPE>(_dirDist(_rng));
-                Protocol::C_Attack attackPkt;
-                attackPkt.set_dir(dir);
-                attackPkt.set_weapontype(Protocol::WEAPON_TYPE_SWORD);
-                SendBufferRef atkPkt = ClientPacketHandler::Make_C_Attack(attackPkt);
-                Send(atkPkt);
-                _nextAttackAt = now + chrono::milliseconds(GAttackIntervalMs);
-            }
-
-            this_thread::sleep_for(chrono::milliseconds(1));
-        }
-    }
-
-    void StopBotLoop()
-    {
-        _running.store(false);
-
-        if (_botThread.joinable())
-            _botThread.join();
-    }
-
-private:
-    int32 _botId = 0;
-    atomic<bool> _running{ false };
-    atomic<bool> _loggedIn{ false };
-    thread _botThread;
-    mt19937 _rng;
-    uniform_int_distribution<int32> _dirDist{ 0, 3 };
-    chrono::steady_clock::time_point _nextMoveAt;
-    chrono::steady_clock::time_point _nextAttackAt;
-};
-
 int main(int argc, char* argv[])
 {
     ParseArgs(argc, argv);
@@ -145,15 +32,22 @@ int main(int argc, char* argv[])
         << " moveMs=" << GMoveIntervalMs
         << " attackMs=" << GAttackIntervalMs << endl;
 
-    this_thread::sleep_for(chrono::seconds(1));
+    this_thread::sleep_for(chrono::seconds(1)); // 서버 기동 대기
 
     SocketUtils::Init();
+
+    vector<shared_ptr<ServerSession>> bots;
+    bots.reserve(GBotCount);
 
     atomic<int32> botIdGen = 1;
     ClientServiceRef service = make_shared<ClientService>(
         NetAddress(L"127.0.0.1", 7777),
         make_shared<IocpCore>(),
-        [&botIdGen]() { return make_shared<ServerSession>(botIdGen.fetch_add(1)); },
+        [&botIdGen, &bots]() {
+            auto session = make_shared<ServerSession>(botIdGen.fetch_add(1), GMoveIntervalMs, GAttackIntervalMs);
+            bots.push_back(session);
+            return session;
+        },
         GBotCount);
 
     assert(service->Start());
@@ -167,17 +61,28 @@ int main(int argc, char* argv[])
             });
     }
 
+    auto lastStatTime = chrono::steady_clock::now();
+
     while (true)
     {
-        this_thread::sleep_for(chrono::seconds(1));
+        const auto now = chrono::steady_clock::now();
 
-        DummyClientStats s = ClientPacketHandler::ConsumeStats();
-        cout << "[DummyClient][1s]"
-            << " S_EnterGame=" << s.recvEnterGame
-            << " S_Move=" << s.recvMove
-            << " S_Attack=" << s.recvAttack
-            << " S_Damaged=" << s.recvDamaged
-            << " S_Turn=" << s.recvTurn
-            << endl;
+        for (auto& bot : bots)
+            bot->Tick(now);
+
+        if (now - lastStatTime >= chrono::seconds(1))
+        {
+            DummyClientStats s = ClientPacketHandler::ConsumeStats();
+            cout << "[DummyClient][1s]"
+                << " S_EnterGame=" << s.recvEnterGame
+                << " S_Move=" << s.recvMove
+                << " S_Attack=" << s.recvAttack
+                << " S_Damaged=" << s.recvDamaged
+                << " S_Turn=" << s.recvTurn
+                << endl;
+            lastStatTime = now;
+        }
+
+        this_thread::sleep_for(chrono::milliseconds(1));
     }
 }

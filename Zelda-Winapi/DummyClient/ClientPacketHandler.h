@@ -51,7 +51,6 @@ public:
     static void HandlePacket(BYTE* buffer, int32 len);
 
     // receive
-    static void Handle_S_TEST(BYTE* buffer, int32 len);
     static void Handle_S_EnterGame(BYTE* buffer, int32 len);
     static void Handle_S_Move(BYTE* buffer, int32 len);
     static void Handle_S_Attack(BYTE* buffer, int32 len);

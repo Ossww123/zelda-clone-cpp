@@ -31,6 +31,9 @@
     <ClCompile Include="Struct.pb.cc">
       <Filter>Source Files\Protocol</Filter>
     </ClCompile>
+    <ClCompile Include="ServerSession.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientPacketHandler.h">
@@ -47,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="Struct.pb.h">
       <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerSession.h">
+      <Filter>Source Files\Main</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

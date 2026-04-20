@@ -17,9 +17,6 @@ void ClientPacketHandler::HandlePacket(BYTE* buffer, int32 len)
 
     switch (header.id)
     {
-    case S_TEST:
-        Handle_S_TEST(buffer, len);
-        break;
     case S_EnterGame:
         Handle_S_EnterGame(buffer, len);
         break;
@@ -38,15 +35,6 @@ void ClientPacketHandler::HandlePacket(BYTE* buffer, int32 len)
     default:
         break;
     }
-}
-
-void ClientPacketHandler::Handle_S_TEST(BYTE* buffer, int32 len)
-{
-    PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
-    uint16 size = header->size;
-
-    Protocol::S_TEST pkt;
-    pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
 }
 
 void ClientPacketHandler::Handle_S_EnterGame(BYTE* buffer, int32 len)
