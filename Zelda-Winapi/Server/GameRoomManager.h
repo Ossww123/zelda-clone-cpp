@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class GameRoom;
 using RoomKey = std::pair<FieldId, int32>;

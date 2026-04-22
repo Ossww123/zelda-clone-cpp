@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 
 class SoundManager
@@ -15,6 +15,6 @@ public:
 	LPDIRECTSOUND GetSoundDevice() { return _soundDevice; }
 
 private:
-	LPDIRECTSOUND _soundDevice = nullptr; // »ç¿îµå Ä«µå
+	LPDIRECTSOUND _soundDevice = nullptr; // ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½
 };
 

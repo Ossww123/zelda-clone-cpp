@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 class RedisSubscriber
 {
 public:
     static RedisSubscriber& GetInstance();
-    void Start();   // ±¸µ¶ ½º·¹µå ½ÃÀÛ
+    void Start();   // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 private:
     RedisSubscriber() = default;

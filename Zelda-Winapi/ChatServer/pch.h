@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CorePch.h"                                  t
 
 using ChatSessionRef = shared_ptr<class ChatSession>;

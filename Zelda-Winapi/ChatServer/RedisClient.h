@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <sw/redis++/redis++.h>
 
 class RedisClient

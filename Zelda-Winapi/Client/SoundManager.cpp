@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "SoundManager.h"
 #include "ResourceManager.h"
 #include "Sound.h"
@@ -11,17 +11,17 @@ SoundManager::~SoundManager()
 
 void SoundManager::Init(HWND hwnd)
 {
-	// »ç¿îµå µð¹ÙÀÌ½º »ý¼º
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (FAILED(::DirectSoundCreate(NULL, &_soundDevice, NULL)))
 	{
-		::MessageBox(NULL, L"»ç¿îµåµð¹ÙÀÌ½º»ý¼º½ÇÆÐ", L"SYSTEM ERROR", MB_OK);
+		::MessageBox(NULL, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½", L"SYSTEM ERROR", MB_OK);
 		return;
 	}
 
-	// »ç¿îµå µð¹ÙÀÌ½º ÇùÁ¶·¹º§ ¼³Á¤
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (FAILED(_soundDevice->SetCooperativeLevel(hwnd, DSSCL_PRIORITY)))
 	{
-		::MessageBox(NULL, L"»ç¿îµåµð¹ÙÀÌ½º ÇùÁ¶·¹º§ ¼³Á¤", L"SYSTEM ERROR", MB_OK);
+		::MessageBox(NULL, L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½", L"SYSTEM ERROR", MB_OK);
 		return;
 	}
 }

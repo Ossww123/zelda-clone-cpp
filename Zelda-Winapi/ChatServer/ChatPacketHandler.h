@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 class ChatPacketHandler
 {
 public:
     static void HandlePacket(ChatSessionRef session, BYTE* buffer, int32 len);
 
-    // ¹Þ±â
+    // ï¿½Þ±ï¿½
     static void Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer, int32 len);
 
-    // º¸³»±â
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     static SendBufferRef Make_SS_BroadcastChat(const Protocol::SS_BroadcastChat& pkt);
 
     template<typename T>
