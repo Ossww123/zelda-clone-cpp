@@ -27,12 +27,6 @@ void Session::Send(SendBufferRef sendBuffer)
 		registerSend = _sendRegistered.exchange(true) == false;
 	}
 
-	/*if (_sendRegistered == false)
-	{
-		_sendRegistered = true;
-		RegisterSend();
-	}*/
-
 	if (registerSend)
 		RegisterSend();
 }
@@ -47,10 +41,9 @@ void Session::Disconnect(const WCHAR* cause)
 	if (_connected.exchange(false) == false)
 		return;
 
-	// TEMP
 	wcout << L"[ServerCore] Disconnect : " << cause << endl;
 
-	OnDisconnected(); // ������ �ڵ忡�� ������
+	OnDisconnected(); // 상위 코드에서 오버라이드
 	GetService()->ReleaseSession(GetSessionRef());
 
 	RegisterDisconnect();
@@ -93,7 +86,7 @@ bool Session::RegisterConnect()
 	if (SocketUtils::SetReuseAddress(_socket, true) == false)
 		return false;
 
-	if (SocketUtils::BindAnyAddress(_socket, 0/*���°�*/) == false)
+	if (SocketUtils::BindAnyAddress(_socket, 0/*임시값*/) == false)
 		return false;
 
 	_connectEvent.Init();
@@ -165,7 +158,7 @@ void Session::RegisterSend()
 	_sendEvent.Init();
 	_sendEvent.owner = shared_from_this(); // ADD_REF
 
-	// ���� �����͸� sendEvent�� ���
+	// 보낼 데이터를 sendEvent에 복사
 	{
 		WRITE_LOCK;
 
@@ -175,14 +168,15 @@ void Session::RegisterSend()
 			SendBufferRef sendBuffer = _sendQueue.front();
 
 			writeSize += sendBuffer->WriteSize();
-			// TODO : ���� üũ
+			// 개선 : 크기 체크
+			// writeSize가 일정 임계값을 넘으면 break, 나머지는 다음 RegisterSend()에서 처리
 
 			_sendQueue.pop();
 			_sendEvent.sendBuffers.push_back(sendBuffer);
 		}
 	}
 
-	// Scatter-Gather (����� �ִ� �����͵��� ��Ƽ� �� �濡 ������)
+	// Scatter-Gather (보낼 수 있는 데이터들을 묶어서 한 번에 보냄)
 	vector<WSABUF> wsaBufs;
 	wsaBufs.reserve(_sendEvent.sendBuffers.size());
 	for (SendBufferRef sendBuffer : _sendEvent.sendBuffers)
@@ -207,7 +201,6 @@ void Session::RegisterSend()
 	}
 }
 
-
 void Session::ProcessConnect()
 {
 	_connectEvent.owner = nullptr; // RELEASE_REF
@@ -223,13 +216,13 @@ void Session::ProcessConnect()
 
 	_connected.store(true);
 
-	// ���� ���
+	// 서비스 등록
 	GetService()->AddSession(GetSessionRef());
 
-	// ������ �ڵ忡�� ������
+	// 상위 코드에서 오버라이드
 	OnConnected();
 
-	// ���� ���
+	// 수신 등록
 	RegisterRecv();
 }
 
@@ -255,17 +248,17 @@ void Session::ProcessRecv(int32 numOfBytes)
 	}
 
 	int32 dataSize = _recvBuffer.DataSize();
-	int32 processLen = OnRecv(_recvBuffer.ReadPos(), dataSize); // ������ �ڵ忡�� ������
+	int32 processLen = OnRecv(_recvBuffer.ReadPos(), dataSize); // 상위 코드에서 오버라이드
 	if (processLen < 0 || dataSize < processLen || _recvBuffer.OnRead(processLen) == false)
 	{
 		Disconnect(L"OnRead Overflow");
 		return;
 	}
 
-	// Ŀ�� ����
+	// 커서 정리
 	_recvBuffer.Clean();
 
-	// ���� ���
+	// 수신 등록
 	RegisterRecv();
 }
 
@@ -280,14 +273,8 @@ void Session::ProcessSend(int32 numOfBytes)
 		return;
 	}
 
-	// ������ �ڵ忡�� ������
+	// 상위 코드에서 오버라이드
 	OnSend(numOfBytes);
-
-	/*WRITE_LOCK;
-	if (_sendQueue.empty())
-		_sendRegistered.store(false);
-	else
-		RegisterSend();*/
 
 	bool registerSend = false;
 
@@ -313,7 +300,6 @@ void Session::HandleError(int32 errorCode)
 		Disconnect(L"HandleError");
 		break;
 	default:
-		// TODO : Log
 		cout << "[ServerCore] Handle Error : " << errorCode << endl;
 		break;
 	}
@@ -340,16 +326,16 @@ int32 PacketSession::OnRecv(BYTE* buffer, int32 len)
 	while (true)
 	{
 		int32 dataSize = len - processLen;
-		// �ּ��� ����� �Ľ��� �� �־�� �Ѵ�
+		// 최소한 헤더를 파싱할 수 있어야 한다
 		if (dataSize < sizeof(PacketHeader))
 			break;
 
 		PacketHeader header = *(reinterpret_cast<PacketHeader*>(&buffer[processLen]));
-		// ����� ��ϵ� ��Ŷ ũ�⸦ �Ľ��� �� �־�� �Ѵ�
+		// 헤더에 담긴 패킷 크기를 파싱할 수 있어야 한다
 		if (dataSize < header.size)
 			break;
 
-		// ��Ŷ ���� ����
+		// 패킷 처리 위임
 		OnRecvPacket(&buffer[processLen], header.size);
 
 		processLen += header.size;

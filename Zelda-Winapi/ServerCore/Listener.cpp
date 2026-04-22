@@ -15,7 +15,7 @@ Listener::~Listener()
 
 	for (IocpEvent* acceptEvent : _acceptEvents)
 	{
-		// TODO
+		// 개선 : owner 참조 해제 후 delete (acceptEvent->owner = nullptr)
 		delete acceptEvent;
 	}
 }
@@ -86,7 +86,7 @@ void Listener::RegisterAccept(IocpEvent* acceptEvent)
 		const int32 errorCode = ::WSAGetLastError();
 		if (errorCode != WSA_IO_PENDING)
 		{
-			// �ϴ� �ٽ� Accept �ɾ��ش�
+			// 일단 다시 Accept 걸어준다
 			RegisterAccept(acceptEvent);
 		}
 	}
@@ -114,7 +114,7 @@ void Listener::ProcessAccept(IocpEvent* acceptEvent)
 
 	cout << "[ServerCore] Client Connected!" << endl;
 
-	// TODO
+	// TODO : ProcessConnect()를 friend 없이 호출할 수 있는 공개 인터페이스로 개선
 	session->ProcessConnect();
 
 	RegisterAccept(acceptEvent);

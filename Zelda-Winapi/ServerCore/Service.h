@@ -50,7 +50,6 @@ protected:
 	int32				_sessionCount = 0;
 	int32				_maxSessionCount = 0;
 	SessionFactory		_sessionFactory;
-
 };
 
 

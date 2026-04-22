@@ -17,7 +17,7 @@ enum class EventType : uint8
 
 struct IocpEvent : public OVERLAPPED
 {
-	// virtual ��� X
+	// virtual 금지 : 시작 주소에 vptr이 끼어들기 때문
 
 	IocpEvent(EventType type);
 
@@ -27,8 +27,5 @@ struct IocpEvent : public OVERLAPPED
 	IocpObjectRef	owner = nullptr;
 	SessionRef		session = nullptr; // Accept Only
 
-
-	// TEMP
-	vector<BYTE> buffer;
-	vector<SendBufferRef> sendBuffers;
+	vector<SendBufferRef> sendBuffers; // shared_ptr 참조 카운트 유지
 };

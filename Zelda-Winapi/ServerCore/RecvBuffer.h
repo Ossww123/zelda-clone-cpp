@@ -1,6 +1,5 @@
 #pragma once
 
-
 class RecvBuffer
 {
 	enum { BUFFER_COUNT = 10 };

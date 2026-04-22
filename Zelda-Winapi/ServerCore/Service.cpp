@@ -10,7 +10,6 @@
 Service::Service(ServiceType type, NetAddress address, IocpCoreRef core, SessionFactory factory, int32 maxSessionCount)
 	: _type(type), _netAddress(address), _iocpCore(core), _sessionFactory(factory), _maxSessionCount(maxSessionCount)
 {
-
 }
 
 Service::~Service()
@@ -19,7 +18,7 @@ Service::~Service()
 
 void Service::CloseService()
 {
-	// TODO
+	// 개선 : _sessions 순회하며 전체 Disconnect() 호출 후 컨테이너 비우기
 }
 
 SessionRef Service::CreateSession()
@@ -72,6 +71,10 @@ bool ClientService::Start()
 	return true;
 }
 
+/*-----------------
+	ServerService
+------------------*/
+
 ServerService::ServerService(NetAddress address, IocpCoreRef core, SessionFactory factory, int32 maxSessionCount)
 	: Service(ServiceType::Server, address, core, factory, maxSessionCount)
 {
@@ -83,8 +86,6 @@ bool ServerService::Start()
 		return false;
 
 	_listener = make_shared<Listener>();
-	if (_listener == nullptr)
-		return false;
 
 	ServerServiceRef service = static_pointer_cast<ServerService>(shared_from_this());
 	if (_listener->StartAccept(service) == false)
@@ -95,7 +96,7 @@ bool ServerService::Start()
 
 void ServerService::CloseService()
 {
-	// TODO
+	// 개선 : _listener 닫아서 신규 Accept 차단 후 Service::CloseService() 호출
 
 	Service::CloseService();
 }

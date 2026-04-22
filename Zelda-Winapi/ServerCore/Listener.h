@@ -2,8 +2,6 @@
 #include "IocpCore.h"
 #include "NetAddress.h"
 
-class AcceptEvent;
-
 /*--------------
 	Listener
 ---------------*/
@@ -15,17 +13,17 @@ public:
 	~Listener();
 
 public:
-	/* ¿ÜºÎ¿¡¼­ »ç¿ë */
+	/* ì™¸ë¶€ì—ì„œ ì‚¬ìš© */
 	bool StartAccept(ServerServiceRef service);
 	void CloseSocket();
 
 public:
-	/* ÀÎÅÍÆäÀÌ½º ±¸Çö */
+	/* ì¸í„°í˜ì´ìŠ¤ êµ¬í˜„ */
 	virtual HANDLE GetHandle() override;
 	virtual void Dispatch(struct IocpEvent* iocpEvent, int32 numOfBytes = 0) override;
 
 private:
-	/* ¼ö½Å °ü·Ã */
+	/* ë‚´ë¶€ í•¨ìˆ˜ */
 	void RegisterAccept(IocpEvent* acceptEvent);
 	void ProcessAccept(IocpEvent* acceptEvent);
 
