@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-using ServerSessionRef = shared_ptr<class ServerSession>;
-
 class NetworkManager
 {
 	DECLARE_SINGLE(NetworkManager )

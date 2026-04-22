@@ -145,6 +145,9 @@
     <ClCompile Include="RankingPanel.cpp">
       <Filter>Source Files\06. UI\Panel</Filter>
     </ClCompile>
+    <ClCompile Include="UIManager.cpp">
+      <Filter>Source Files\01. Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -311,6 +314,9 @@
     </ClInclude>
     <ClInclude Include="RankingPanel.h">
       <Filter>Source Files\06. UI\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="UIManager.h">
+      <Filter>Source Files\01. Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

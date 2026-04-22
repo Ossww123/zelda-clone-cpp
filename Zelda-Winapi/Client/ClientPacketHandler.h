@@ -40,8 +40,6 @@ enum
 	S_Ranking = 222 ,
 	// [AUTO-GEN ENUM BEGIN]
 
-
-
 	// [AUTO-GEN ENUM END]
 };
 
@@ -51,7 +49,6 @@ public:
 	static void HandlePacket(ServerSessionRef session, BYTE* buffer, int32 len);
 
 	// 받기
-	static void Handle_S_TEST( ServerSessionRef session , BYTE* buffer, int32 len);
 	static void Handle_S_EnterGame ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_MyPlayer ( ServerSessionRef session , BYTE* buffer , int32 len );
 	static void Handle_S_AddObject ( ServerSessionRef session , BYTE* buffer , int32 len );
@@ -90,8 +87,6 @@ public:
 	static SendBufferRef Make_C_GetRanking ( );
 
 	// [AUTO-GEN DECLS BEGIN]
-
-
 
 	// [AUTO-GEN DECLS END]
 

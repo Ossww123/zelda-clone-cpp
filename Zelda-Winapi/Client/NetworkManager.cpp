@@ -11,12 +11,13 @@ void NetworkManager::Init ( uint16 port )
 	_service = make_shared<ClientService> (
 		NetAddress ( L"127.0.0.1" , port ) ,
 		make_shared<IocpCore> ( ) ,
-		[=] ( ) { return CreateSession ( ); } , // TODO : SessionManager 등
+		[=] ( ) { return CreateSession ( ); } , // 클라이언트가 GameServer 외 다른 서버(ChatServer 등)에도 직접 접속하는 구조로 바뀌면 SessionManager로 다중 세션 관리 필요
 		1 );
 
 	assert ( _service->Start ( ) );
 
-	/*for ( int32 i = 0; i < 5; i++ )
+	/*
+	for ( int32 i = 0; i < 5; i++ )
 	{
 		GThreadManager->Launch ( [ = ] ( )
 			{
@@ -25,7 +26,8 @@ void NetworkManager::Init ( uint16 port )
 					service->GetIocpCore ( )->Dispatch ( );
 				}
 			} );
-	}*/
+	}
+	*/
 }
 
 void NetworkManager::Update ( )

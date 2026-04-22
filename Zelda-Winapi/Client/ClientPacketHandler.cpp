@@ -18,9 +18,6 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 
 	switch (header.id)
 	{
-	case S_TEST:
-		Handle_S_TEST( session, buffer, len);
-		break;
 	case S_EnterGame:
 		Handle_S_EnterGame ( session, buffer , len );
 		break;
@@ -92,31 +89,19 @@ void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer,
 	}
 }
 
-// **** HANDLE ****
-
-void ClientPacketHandler::Handle_S_TEST( ServerSessionRef session, BYTE* buffer, int32 len)
+static wstring ToWstring ( const string& utf8 )
 {
-	PacketHeader* header = (PacketHeader*)buffer;
-	//uint16 id = header->id;
-	uint16 size = header->size;
-
-	Protocol::S_TEST pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	uint64 id = pkt.id();
-	uint32 hp = pkt.hp();
-	uint16 attack = pkt.attack();
-
-	for (int32 i = 0; i < pkt.buffs_size(); i++)
-	{
-		const Protocol::BuffData& data = pkt.buffs(i);
-	}
+	int32 size = ::MultiByteToWideChar ( CP_UTF8 , 0 , utf8.c_str ( ) , -1 , nullptr , 0 );
+	wstring result ( size - 1 , 0 );
+	::MultiByteToWideChar ( CP_UTF8 , 0 , utf8.c_str ( ) , -1 , &result[ 0 ] , size );
+	return result;
 }
+
+// **** HANDLE ****
 
 void ClientPacketHandler::Handle_S_EnterGame ( ServerSessionRef session, BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_EnterGame pkt;
@@ -134,13 +119,11 @@ void ClientPacketHandler::Handle_S_EnterGame ( ServerSessionRef session, BYTE* b
 void ClientPacketHandler::Handle_S_MyPlayer ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_MyPlayer pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
 
-	///
 	const Protocol::ObjectInfo& info = pkt.info ( );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
@@ -155,7 +138,6 @@ void ClientPacketHandler::Handle_S_MyPlayer ( ServerSessionRef session , BYTE* b
 void ClientPacketHandler::Handle_S_AddObject ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_AddObject pkt;
@@ -169,7 +151,6 @@ void ClientPacketHandler::Handle_S_AddObject ( ServerSessionRef session , BYTE* 
 void ClientPacketHandler::Handle_S_RemoveObject ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_RemoveObject pkt;
@@ -183,13 +164,10 @@ void ClientPacketHandler::Handle_S_RemoveObject ( ServerSessionRef session , BYT
 void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_Move pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
-
-	//
 
 	const Protocol::ObjectInfo& info = pkt.info ( );
 
@@ -219,7 +197,6 @@ void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffe
 void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_Attack pkt;
@@ -297,19 +274,15 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_Damaged pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
 
-	//
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene )
 	{
-		// GameObject* attackerGameObject = scene->GetObjectW ( pkt.attackerid ( ) );
 		GameObject* targetGameObject = scene->GetObjectW ( pkt.targetid ( ) );
-		// int32 damage = pkt.damage ( );
 		if ( targetGameObject )
 		{
 			if ( Creature* creature = dynamic_cast< Creature* >( targetGameObject ) )
@@ -338,7 +311,6 @@ void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* bu
 void ClientPacketHandler::Handle_S_ChangeMap ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_ChangeMap pkt;
@@ -363,13 +335,10 @@ void ClientPacketHandler::Handle_S_ChangeMap ( ServerSessionRef session , BYTE* 
 void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_GainExp pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
-
-	//
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -387,13 +356,10 @@ void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* bu
 void ClientPacketHandler::Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
-	//uint16 id = header->id;
 	uint16 size = header->size;
 
 	Protocol::S_LevelUp pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
-
-	//
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene == nullptr )
@@ -448,30 +414,6 @@ void ClientPacketHandler::Handle_S_Turn ( ServerSessionRef session , BYTE* buffe
 
 	gameObject->SetDir ( info.dir ( ) );
 	gameObject->SetState ( info.state ( ) );
-}
-
-
-
-// **** MAKE ****
-
-SendBufferRef ClientPacketHandler::Make_C_Move ( const Protocol::C_Move& pkt )
-{
-	return MakeSendBuffer ( pkt , C_Move );
-}
-
-SendBufferRef ClientPacketHandler::Make_C_Attack ( const Protocol::C_Attack& pkt )
-{
-	return MakeSendBuffer ( pkt , C_Attack );
-}
-
-SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::C_ChangeMap& pkt )
-{
-	return MakeSendBuffer ( pkt , C_ChangeMap );
-}
-
-SendBufferRef ClientPacketHandler::Make_C_Turn ( const Protocol::C_Turn& pkt )
-{
-	return MakeSendBuffer ( pkt , C_Turn );
 }
 
 void ClientPacketHandler::Handle_S_InventoryData ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -634,23 +576,6 @@ void ClientPacketHandler::Handle_S_UseItem ( ServerSessionRef session , BYTE* bu
 	myPlayer->info.set_hp ( pkt.newhp ( ) );
 }
 
-SendBufferRef ClientPacketHandler::Make_C_EquipItem ( const Protocol::C_EquipItem& pkt )
-{
-	return MakeSendBuffer ( pkt , C_EquipItem );
-}
-
-SendBufferRef ClientPacketHandler::Make_C_UnequipItem ( const Protocol::C_UnequipItem& pkt )
-{
-	return MakeSendBuffer ( pkt , C_UnequipItem );
-}
-
-SendBufferRef ClientPacketHandler::Make_C_UseItem ( const Protocol::C_UseItem& pkt )
-{
-	return MakeSendBuffer ( pkt , C_UseItem );
-}
-
-// ---- Party ----
-
 void ClientPacketHandler::Handle_S_PartyInvite ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
 	PacketHeader* header = ( PacketHeader* ) buffer;
@@ -666,9 +591,7 @@ void ClientPacketHandler::Handle_S_PartyInvite ( ServerSessionRef session , BYTE
 	myPlayer->_pendingInviteFrom = pkt.inviterid ( );
 	GET_SINGLE ( SoundManager )->Play ( L"UISound" );
 
-	// string → wstring 변환
-	string name = pkt.invitername ( );
-	myPlayer->_pendingInviterName = wstring ( name.begin ( ) , name.end ( ) );
+	myPlayer->_pendingInviterName = ToWstring ( pkt.invitername ( ) );
 }
 
 void ClientPacketHandler::Handle_S_PartyUpdate ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -690,8 +613,7 @@ void ClientPacketHandler::Handle_S_PartyUpdate ( ServerSessionRef session , BYTE
 		const auto& m = pkt.members ( i );
 		PartyMemberData data;
 		data.playerId = m.playerid ( );
-		string name = m.name ( );
-		data.name = wstring ( name.begin ( ) , name.end ( ) );
+		data.name = ToWstring ( m.name ( ) );
 		data.level = m.level ( );
 		data.hp = m.hp ( );
 		data.maxHp = m.maxhp ( );
@@ -704,8 +626,7 @@ void ClientPacketHandler::Handle_S_PartyUpdate ( ServerSessionRef session , BYTE
 			GameObject* obj = scene->GetObjectW ( data.playerId );
 			if ( obj )
 			{
-				string objName = obj->info.name ( );
-				data.name = wstring ( objName.begin ( ) , objName.end ( ) );
+				data.name = ToWstring ( obj->info.name ( ) );
 				data.hp = obj->info.hp ( );
 				data.maxHp = obj->info.maxhp ( );
 				data.level = obj->info.player ( ).level ( );
@@ -741,16 +662,8 @@ void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffe
 	if ( scene == nullptr )
 		return;
 
-	// UTF-8 → UTF-16 변환
-	auto toWstring = [ ] ( const string& utf8 ) -> wstring {
-		int32 size = ::MultiByteToWideChar ( CP_UTF8 , 0 , utf8.c_str ( ) , -1 , nullptr , 0 );
-		wstring result ( size - 1 , 0 );
-		::MultiByteToWideChar ( CP_UTF8 , 0 , utf8.c_str ( ) , -1 , &result[ 0 ] , size );
-		return result;
-		};
-
-	wstring sender = toWstring ( pkt.sender ( ) );
-	wstring msg = toWstring ( pkt.msg ( ) );
+	wstring sender = ToWstring ( pkt.sender ( ) );
+	wstring msg = ToWstring ( pkt.msg ( ) );
 
 	wstring prefix;
 	switch ( pkt.type ( ) )
@@ -762,6 +675,61 @@ void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffe
 	}
 
 	scene->AddChatMessage ( prefix + sender , msg );
+}
+
+void ClientPacketHandler::Handle_S_Ranking ( ServerSessionRef session , BYTE* buffer , int32 len )
+{
+	PacketHeader* header = ( PacketHeader* ) buffer;
+	Protocol::S_Ranking pkt;
+	pkt.ParseFromArray ( &header[ 1 ] , len - sizeof ( PacketHeader ) );
+
+	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
+	if ( scene == nullptr )
+		return;
+
+	vector<pair<wstring, int32>> entries;
+	for ( const auto& e : pkt.entries ( ) )
+		entries.push_back ( { ToWstring ( e.playername ( ) ), e.level ( ) } );
+
+	scene->SetRankingData ( entries );
+}
+
+
+// **** MAKE ****
+
+SendBufferRef ClientPacketHandler::Make_C_Move ( const Protocol::C_Move& pkt )
+{
+	return MakeSendBuffer ( pkt , C_Move );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Attack ( const Protocol::C_Attack& pkt )
+{
+	return MakeSendBuffer ( pkt , C_Attack );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_ChangeMap ( const Protocol::C_ChangeMap& pkt )
+{
+	return MakeSendBuffer ( pkt , C_ChangeMap );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_Turn ( const Protocol::C_Turn& pkt )
+{
+	return MakeSendBuffer ( pkt , C_Turn );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_EquipItem ( const Protocol::C_EquipItem& pkt )
+{
+	return MakeSendBuffer ( pkt , C_EquipItem );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_UnequipItem ( const Protocol::C_UnequipItem& pkt )
+{
+	return MakeSendBuffer ( pkt , C_UnequipItem );
+}
+
+SendBufferRef ClientPacketHandler::Make_C_UseItem ( const Protocol::C_UseItem& pkt )
+{
+	return MakeSendBuffer ( pkt , C_UseItem );
 }
 
 SendBufferRef ClientPacketHandler::Make_C_PartyInvite ( const Protocol::C_PartyInvite& pkt )
@@ -788,28 +756,6 @@ SendBufferRef ClientPacketHandler::Make_C_Login ( const Protocol::C_Login& pkt )
 SendBufferRef ClientPacketHandler::Make_C_Chat ( const Protocol::C_Chat& pkt )
 {
 	return MakeSendBuffer ( pkt , C_Chat );
-}
-
-void ClientPacketHandler::Handle_S_Ranking ( ServerSessionRef session , BYTE* buffer , int32 len )
-{
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	Protocol::S_Ranking pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , len - sizeof ( PacketHeader ) );
-
-	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
-	if ( scene == nullptr )
-		return;
-
-	vector<pair<wstring, int32>> entries;
-	for ( const auto& e : pkt.entries ( ) )
-	{
-		int32 size = ::MultiByteToWideChar ( CP_UTF8 , 0 , e.playername ( ).c_str ( ) , -1 , nullptr , 0 );
-		wstring name ( size - 1 , 0 );
-		::MultiByteToWideChar ( CP_UTF8 , 0 , e.playername ( ).c_str ( ) , -1 , &name[ 0 ] , size );
-		entries.push_back ( { name, e.level ( ) } );
-	}
-
-	scene->SetRankingData ( entries );
 }
 
 SendBufferRef ClientPacketHandler::Make_C_GetRanking ( )

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Scene.h"
+#include "UIManager.h"
 
 class Actor;
 class Player;
@@ -7,11 +8,6 @@ class GameObject;
 class UI;
 class SpriteActor;
 class Sprite;
-class InventoryPanel;
-class PartyPanel;
-class PartyInvitePanel;
-class ChatPanel;
-class RankingPanel;
 
 class DevScene : public Scene
 {
@@ -30,14 +26,12 @@ public:
 	template<typename T>
 	T* SpawnObject ( Vec2Int pos )
 	{
-		// Type-Trait
 		auto isGameObject = std::is_convertible_v<T* , GameObject*>;
 		assert ( isGameObject );
 
 		T* ret = new T ( );
 		ret->SetCellPos ( pos , true );
 		AddActor ( ret );
-
 		ret->BeginPlay ( );
 
 		return ret;
@@ -53,9 +47,8 @@ public:
 
 public:
 	GameObject* GetObject ( uint64 id );
-
 	Player* FindClosestPlayer ( Vec2Int cellPos );
-	
+
 	bool CanGo ( Vec2Int cellPos );
 	Vec2 ConvertPos ( Vec2Int cellPos );
 
@@ -66,8 +59,8 @@ public:
 
 	void SetLoggedIn ( bool value ) { _loggedIn = value; }
 
-	void AddChatMessage ( const wstring& sender , const wstring& msg );
-	void SetRankingData ( const vector<pair<wstring, int32>>& entries );
+	void AddChatMessage ( const wstring& sender , const wstring& msg ) { _uiManager.AddChatMessage ( sender , msg ); }
+	void SetRankingData ( const vector<pair<wstring, int32>>& entries ) { _uiManager.SetRankingData ( entries ); }
 
 private:
 	void LoadMap ( );
@@ -82,13 +75,9 @@ private:
 	void LoadSceneSounds ( );
 
 private:
-	// 로그인
 	void UpdateLogin ( );
 	void RenderLogin ( HDC hdc );
-
-	// 게임 플레이
-	void RenderHUD ( HDC hdc );
-	void HandlePartyInput ( );
+	void HandlePartyInviteClick ( );
 
 private:
 	void CreateMapButtons ( );
@@ -101,15 +90,10 @@ private:
 	wstring _loginText;
 	static const int32 MAX_USERNAME_LEN = 12;
 
-	InventoryPanel* _inventoryPanel = nullptr;
-	PartyPanel* _partyPanel = nullptr;
-	PartyInvitePanel* _partyInvitePanel = nullptr;
-	ChatPanel* _chatPanel = nullptr;
-	RankingPanel* _rankingPanel = nullptr;
+	UIManager _uiManager;
 
 	class TilemapActor* _tilemapActor = nullptr;
 	SpriteActor* _background = nullptr;
 	Protocol::MAP_ID _currentMapId = Protocol::MAP_ID_NONE;
 	bool _hasMapId = false;
 };
-
