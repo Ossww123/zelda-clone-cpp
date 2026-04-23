@@ -11,5 +11,4 @@ Projectile::~Projectile()
 
 void Projectile::Update()
 {
-	// Super::Update();
 }

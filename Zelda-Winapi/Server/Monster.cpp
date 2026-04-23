@@ -19,8 +19,6 @@ Monster::~Monster()
 
 void Monster::Update()
 {
-	//Super::Update();
-
 	switch (info.state())
 	{
 	case IDLE:
@@ -71,7 +69,6 @@ void Monster::UpdateIdle()
 		}
 	}
 
-	// Find/Refresh target
 	PlayerRef target = _target.lock();
 	PlayerRef nearest = room->FindClosestPlayer(myPos);
 
@@ -89,7 +86,6 @@ void Monster::UpdateIdle()
 			int32 distCur = abs(dtCur.x) + abs(dtCur.y);
 			int32 distNew = abs(dtNew.x) + abs(dtNew.y);
 
-			// retarget
 			if (distNew + 1 < distCur)
 			{
 				target = nearest;
@@ -154,7 +150,6 @@ void Monster::UpdateIdle()
 		SetState(SKILL, true);
 		_waitUntil = GetTickCount64() + 1000;
 
-		// 데미지 처리
 		int32 damage = max(1, info.attack() - target->info.defence());
 		target->OnDamaged(damage);
 

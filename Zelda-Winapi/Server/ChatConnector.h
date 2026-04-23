@@ -7,7 +7,6 @@ enum
     SS_BroadcastChat = 302,
 };
 
-// GameServer ������ ChatServer�� �����ϴ� ����
 class ChatRelaySession : public PacketSession
 {
 public:
@@ -17,7 +16,6 @@ public:
     virtual void OnSend(int32 len) override {}
 };
 
-// ChatServer ���� ���� �̱���
 class ChatConnector
 {
 public:

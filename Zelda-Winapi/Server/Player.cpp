@@ -28,7 +28,6 @@ Player::Player()
 		info.set_defence(5);
 	}
 
-	// PlayerExtra 세팅
 	Protocol::PlayerExtra* extra = info.mutable_player();
 	extra->set_level(_level);
 	extra->set_exp(_exp);
@@ -74,7 +73,6 @@ void Player::GainExp(int32 amount)
 		ProcessLevelUp();
 	}
 
-	// S_GainExp 전송 (본인에게만, 레벨업 후 최종 exp)
 	{
 		Protocol::S_GainExp pkt;
 		pkt.set_playerid(info.objectid());
@@ -87,7 +85,6 @@ void Player::GainExp(int32 amount)
 			session->Send(sendBuffer);
 	}
 
-	// PlayerExtra 갱신
 	Protocol::PlayerExtra* extra = info.mutable_player();
 	extra->set_exp(_exp);
 	extra->set_maxexp(GetMaxExp());
@@ -101,10 +98,8 @@ void Player::ProcessLevelUp()
 	if (data)
 		ApplyLevelStats(*data);
 
-	// HP 전체 회복
 	info.set_hp(info.maxhp());
 
-	// PlayerExtra 갱신
 	Protocol::PlayerExtra* extra = info.mutable_player();
 	extra->set_level(_level);
 	extra->set_exp(_exp);
@@ -115,7 +110,6 @@ void Player::ProcessLevelUp()
 	LOG_INFO("Player", "Level Up! %s -> Lv.%d (HP:%d ATK:%d DEF:%d)",
 		info.name().c_str(), _level, info.maxhp(), info.attack(), info.defence());
 
-	// S_LevelUp 브로드캐스트
 	{
 		Protocol::S_LevelUp pkt;
 		pkt.set_playerid(info.objectid());
@@ -179,7 +173,6 @@ bool Player::AddItem(int32 itemId, int32 count)
 	if (!tmpl)
 		return false;
 
-	// 스택 가능한 아이템이면 기존 슬롯에 합산 시도
 	if (tmpl->maxStack > 1)
 	{
 		for (int32 i = 0; i < INVENTORY_SIZE; i++)
@@ -202,7 +195,6 @@ bool Player::AddItem(int32 itemId, int32 count)
 		}
 	}
 
-	// 빈 슬롯 찾아서 추가
 	int32 slot = FindEmptySlot();
 	if (slot < 0)
 		return false;
@@ -253,14 +245,12 @@ void Player::EquipItem(int32 slot)
 	else
 		return;
 
-	// swap: 기존 장비와 교환
 	InventorySlot old = *equipSlot;
 	*equipSlot = _storage[slot];
 	_storage[slot] = old;
 
 	RecalcStats();
 
-	// S_EquipItem 전송
 	if (session)
 	{
 		Protocol::S_EquipItem equipPkt;
@@ -339,7 +329,6 @@ void Player::UseItem(int32 slot)
 	if (!tmpl || tmpl->type != "consumable")
 		return;
 
-	// HP 회복
 	int32 newHp = min(info.hp() + tmpl->value, info.maxhp());
 	info.set_hp(newHp);
 
@@ -402,7 +391,6 @@ void Player::ApplyFromSaveData(const PlayerSaveData& data)
 	_level = data.level;
 	_exp = data.exp;
 
-	// 레벨 기반 스탯 적용
 	const LevelData* levelData = GRoomDataManager.GetLevelData(_level);
 	if (levelData)
 	{
@@ -414,7 +402,6 @@ void Player::ApplyFromSaveData(const PlayerSaveData& data)
 	// HP 복원 (maxHp 초과 방지)
 	info.set_hp(min(data.hp, info.maxhp()));
 
-	// 인벤토리 복원
 	for (int32 i = 0; i < INVENTORY_SIZE; i++)
 		_storage[i] = data.storage[i];
 
@@ -422,10 +409,8 @@ void Player::ApplyFromSaveData(const PlayerSaveData& data)
 	_equipArmor = data.equipArmor;
 	_equipPotion = data.equipPotion;
 
-	// 장비 보정 반영
 	RecalcStats();
 
-	// PlayerExtra 갱신
 	Protocol::PlayerExtra* extra = info.mutable_player();
 	extra->set_level(_level);
 	extra->set_exp(_exp);

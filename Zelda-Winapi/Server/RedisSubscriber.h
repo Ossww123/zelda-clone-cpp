@@ -4,7 +4,7 @@ class RedisSubscriber
 {
 public:
     static RedisSubscriber& GetInstance();
-    void Start();   // ���� ������ ����
+    void Start();
 
 private:
     RedisSubscriber() = default;

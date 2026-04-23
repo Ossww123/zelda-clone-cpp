@@ -59,11 +59,10 @@ void ChatRelaySession::OnRecvPacket(BYTE* buffer, int32 len)
             }
             else
             {
-                // ����� ������ sender���� ���� �޽���
                 Protocol::S_Chat errPkt;
                 errPkt.set_sender("System");
                 errPkt.set_type(Protocol::CHAT_TYPE_WHISPER);
-                errPkt.set_msg("[System] ��� �÷��̾ ã�� �� �����ϴ�.");
+                errPkt.set_msg("[System] 해당 플레이어를 찾을 수 없습니다.");
                 SendBufferRef errBuffer = ServerPacketHandler::Make_S_Chat(errPkt);
                 GameSessionRef senderSession = GSessionManager.FindByPlayerName(pkt.sender());
                 if (senderSession)

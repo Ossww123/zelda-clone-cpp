@@ -15,32 +15,6 @@ Tilemap::~Tilemap()
 
 void Tilemap::LoadFile(const wstring& path)
 {
-	// C ��Ÿ��
-	if (false)
-	{
-		FILE* file = nullptr;
-
-		::_wfopen_s(&file, path.c_str(), L"rb");
-		assert(file);
-
-		::fread(&_mapSize.x, sizeof(_mapSize.x), 1, file);
-		::fread(&_mapSize.y, sizeof(_mapSize.y), 1, file);
-
-		for (int32 y = 0; y < _mapSize.y; y++)
-		{
-			for (int32 x = 0; x < _mapSize.x; x++)
-			{
-				int32 value = -1;
-				::fread(&value, sizeof(value), 1, file);
-				_tiles[y][x].value = value;
-			}
-		}
-
-		::fclose(file);
-		return;
-	}
-
-	// C++ ��Ÿ��
 	{
 		wifstream ifs;
 
