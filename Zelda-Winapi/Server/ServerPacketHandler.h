@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 
 extern std::string GServerAddr;
@@ -44,7 +44,6 @@ enum
 
 	// [AUTO-GEN ENUM BEGIN]
 
-
 	// [AUTO-GEN ENUM END]
 };
 
@@ -67,7 +66,7 @@ public:
 	static void HandlePacket(GameSessionRef session, BYTE* buffer, int32 len);
 	static PacketPerfSnapshot ConsumePerfSnapshot();
 
-	// 받기
+	// recv
 	static void Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_ChangeMap(GameSessionRef session, BYTE* buffer, int32 len);
@@ -82,7 +81,7 @@ public:
 	static void Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len);
 	static void Handle_C_GetRanking(GameSessionRef session, BYTE* buffer, int32 len);
 
-	// 보내기
+	// send
 	static SendBufferRef Make_S_EnterGame();
 	static SendBufferRef Make_S_MyPlayer(const Protocol::S_MyPlayer& pkt);
 	static SendBufferRef Make_S_AddObject(const Protocol::S_AddObject& pkt);
@@ -104,13 +103,19 @@ public:
 	static SendBufferRef Make_S_PartyLeave();
 	static SendBufferRef Make_S_Chat(const Protocol::S_Chat& pkt);
 	static SendBufferRef Make_S_Ranking(const Protocol::S_Ranking& pkt);
+
 	// [AUTO-GEN DECLS BEGIN]
 
-
-	
-	
-
 	// [AUTO-GEN DECLS END]
+
+	template<typename T>
+	static T ParsePacket(BYTE* buffer)
+	{
+		PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
+		T pkt;
+		pkt.ParseFromArray(&header[1], header->size - sizeof(PacketHeader));
+		return pkt;
+	}
 
 	template<typename T>
 	static SendBufferRef MakeSendBuffer(const T& pkt, uint16 pktId)
@@ -128,4 +133,3 @@ public:
 		return sendBuffer;
 	}
 };
-

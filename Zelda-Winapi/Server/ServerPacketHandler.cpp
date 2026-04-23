@@ -81,341 +81,6 @@ void ServerPacketHandler::HandlePacket(GameSessionRef session, BYTE* buffer, int
 	}
 }
 
-void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len)
-{
-	GRecvMovePerSec.fetch_add(1);
-
-	PacketHeader* header = (PacketHeader*)buffer;
-	//uint16 id = header->id;
-	uint16 size = header->size;
-
-	Protocol::C_Move pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	//
-	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom == nullptr)
-		return;
-
-	gameRoom->PushJob([gameRoom, session, pkt]()
-		{
-			gameRoom->Handle_C_Move(session, pkt);
-		});
-}
-
-void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len)
-{
-	GRecvAttackPerSec.fetch_add(1);
-
-	PacketHeader* header = (PacketHeader*)buffer;
-	//uint16 id = header->id;
-	uint16 size = header->size;
-
-	Protocol::C_Attack pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	//
-	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom == nullptr)
-		return;
-
-	gameRoom->PushJob([gameRoom, session, pkt]()
-		{
-			gameRoom->Handle_C_Attack(session, pkt);
-		});
-}
-
-void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffer, int32 len)
-{
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_ChangeMap pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	GameRoomRef fromRoom = session->gameRoom.lock();
-	if (!fromRoom)
-		return;
-
-	fromRoom->PushJob([session, pkt, fromRoom]()
-		{
-			GameRoomRef from = session->gameRoom.lock();
-			if (!from)
-				return;
-
-			PlayerRef requester = dynamic_pointer_cast<Player>(session->player.lock());
-			if (!requester)
-				return;
-
-			uint64 requesterId = requester->info.objectid();
-
-			GameRoomRef to = nullptr;
-			uint64 instanceId = 0;
-
-			if (pkt.mapid() == Protocol::MAP_ID_TOWN)
-			{
-				to = GRoomManager.GetStaticRoom(FieldId::Town, pkt.channel());
-			}
-			else if (pkt.mapid() == Protocol::MAP_ID_DUNGEON)
-			{
-				// 파티원(비리더)이면 던전 진입 불가
-				if (GPartyManager.IsInParty(requesterId) && !GPartyManager.IsLeader(requesterId))
-				{
-					Protocol::S_ChangeMap sendPkt;
-					sendPkt.set_success(false);
-					sendPkt.set_mapid(pkt.mapid());
-					sendPkt.set_channel(pkt.channel());
-					sendPkt.set_instanceid(0);
-					session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
-					return;
-				}
-
-				instanceId = GRoomManager.CreateDungeonInstance();
-				to = GRoomManager.GetDungeonInstance(instanceId);
-			}
-
-			if (!to)
-			{
-				Protocol::S_ChangeMap sendPkt;
-				sendPkt.set_success(false);
-				sendPkt.set_mapid(pkt.mapid());
-				sendPkt.set_channel(pkt.channel());
-				sendPkt.set_instanceid(0);
-
-				session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
-				return;
-			}
-
-			// 파티장이 던전 진입 시 → 같은 방의 파티원 전원 이동
-			if (pkt.mapid() == Protocol::MAP_ID_DUNGEON && GPartyManager.IsLeader(requesterId))
-			{
-				uint64 partyId = GPartyManager.GetPartyIdByPlayer(requesterId);
-				Party* party = GPartyManager.GetParty(partyId);
-				if (party)
-				{
-					vector<pair<GameSessionRef, PlayerRef>> toMove;
-					for (uint64 memberId : party->memberIds)
-					{
-						GameObjectRef obj = from->FindObject(memberId);
-						if (!obj)
-							continue;
-						PlayerRef p = dynamic_pointer_cast<Player>(obj);
-						if (p && p->session)
-							toMove.push_back({ p->session, p });
-					}
-
-					for (auto& [s, p] : toMove)
-					{
-						Protocol::S_ChangeMap sendPkt;
-						sendPkt.set_success(true);
-						sendPkt.set_mapid(pkt.mapid());
-						sendPkt.set_channel(pkt.channel());
-						sendPkt.set_instanceid(instanceId);
-						s->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
-
-						from->LeaveRoom(s);
-						to->PushJob([to, s, p]()
-							{
-								to->EnterRoom(s, p);
-							});
-					}
-					return;
-				}
-			}
-
-			// 솔로 이동 (기존 로직) — 기존 플레이어 유지
-			{
-				Protocol::S_ChangeMap sendPkt;
-				sendPkt.set_success(true);
-				sendPkt.set_mapid(pkt.mapid());
-				sendPkt.set_channel(pkt.channel());
-				sendPkt.set_instanceid(instanceId);
-
-				session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
-			}
-
-			// LeaveRoom 전에 플레이어 강한 참조 확보
-			PlayerRef movingPlayer = dynamic_pointer_cast<Player>(session->player.lock());
-			from->LeaveRoom(session);
-
-			to->PushJob([to, session, movingPlayer]()
-				{
-					to->EnterRoom(session, movingPlayer);
-				});
-		});
-}
-
-void ServerPacketHandler::Handle_C_Turn(GameSessionRef session, BYTE* buffer, int32 len)
-{
-	GRecvTurnPerSec.fetch_add(1);
-
-	PacketHeader* header = (PacketHeader*)buffer;
-	//uint16 id = header->id;
-	uint16 size = header->size;
-
-	Protocol::C_Turn pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	//
-	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom == nullptr)
-		return;
-
-	gameRoom->PushJob([gameRoom, session, pkt]()
-		{
-			gameRoom->Handle_C_Turn(session, pkt);
-		});
-}
-
-
-
-SendBufferRef ServerPacketHandler::Make_S_EnterGame()
-{
-	Protocol::S_EnterGame pkt;
-
-	pkt.set_success(true);
-	pkt.set_accountid(0); // DB
-
-	return MakeSendBuffer(pkt, S_EnterGame);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_MyPlayer(const Protocol::S_MyPlayer& pkt)
-{
-	return MakeSendBuffer(pkt, S_MyPlayer);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_AddObject(const Protocol::S_AddObject& pkt)
-{
-	return MakeSendBuffer(pkt, S_AddObject);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_RemoveObject(const Protocol::S_RemoveObject& pkt)
-{
-	return MakeSendBuffer(pkt, S_RemoveObject);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_Move(const Protocol::S_Move& pkt)
-{
-	return MakeSendBuffer(pkt, S_Move);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_Attack(const Protocol::S_Attack& pkt)
-{
-	return MakeSendBuffer(pkt, S_Attack);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_Damaged(const Protocol::S_Damaged& pkt)
-{
-	return MakeSendBuffer(pkt, S_Damaged);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_ChangeMap(const Protocol::S_ChangeMap& pkt)
-{
-	return MakeSendBuffer(pkt, S_ChangeMap);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_GainExp(const Protocol::S_GainExp& pkt)
-{
-	return MakeSendBuffer(pkt, S_GainExp);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_LevelUp(const Protocol::S_LevelUp& pkt)
-{
-	return MakeSendBuffer(pkt, S_LevelUp);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_Turn(const Protocol::S_Turn& pkt)
-{
-	return MakeSendBuffer(pkt, S_Turn);
-}
-
-void ServerPacketHandler::Handle_C_EquipItem(GameSessionRef session, BYTE* buffer, int32 len)
-{
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_EquipItem pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom == nullptr)
-		return;
-
-	gameRoom->PushJob([session, pkt]()
-		{
-			PlayerRef player = session->player.lock();
-			if (player)
-				player->EquipItem(pkt.slot());
-		});
-}
-
-void ServerPacketHandler::Handle_C_UnequipItem(GameSessionRef session, BYTE* buffer, int32 len)
-{
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_UnequipItem pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom == nullptr)
-		return;
-
-	gameRoom->PushJob([session, pkt]()
-		{
-			PlayerRef player = session->player.lock();
-			if (player)
-				player->UnequipItem(pkt.equiptype());
-		});
-}
-
-void ServerPacketHandler::Handle_C_UseItem(GameSessionRef session, BYTE* buffer, int32 len)
-{
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_UseItem pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
-
-	GameRoomRef gameRoom = session->gameRoom.lock();
-	if (gameRoom == nullptr)
-		return;
-
-	gameRoom->PushJob([session, pkt]()
-		{
-			PlayerRef player = session->player.lock();
-			if (player)
-				player->UseItem(pkt.slot());
-		});
-}
-
-SendBufferRef ServerPacketHandler::Make_S_InventoryData(const Protocol::S_InventoryData& pkt)
-{
-	return MakeSendBuffer(pkt, S_InventoryData);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_AddItem(const Protocol::S_AddItem& pkt)
-{
-	return MakeSendBuffer(pkt, S_AddItem);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_EquipItem(const Protocol::S_EquipItem& pkt)
-{
-	return MakeSendBuffer(pkt, S_EquipItem);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_UnequipItem(const Protocol::S_UnequipItem& pkt)
-{
-	return MakeSendBuffer(pkt, S_UnequipItem);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_UseItem(const Protocol::S_UseItem& pkt)
-{
-	return MakeSendBuffer(pkt, S_UseItem);
-}
-
-// ---- Party ----
-
 static void SendPartyUpdateFromRoom(GameRoomRef room, uint64 partyId)
 {
 	Party* party = GPartyManager.GetParty(partyId);
@@ -462,13 +127,119 @@ static void SendPartyUpdateFromRoom(GameRoomRef room, uint64 partyId)
 	}
 }
 
+void ServerPacketHandler::Handle_C_Move(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	GRecvMovePerSec.fetch_add(1);
+
+	auto pkt = ParsePacket<Protocol::C_Move>(buffer);
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([gameRoom, session, pkt]()
+		{
+			gameRoom->Handle_C_Move(session, pkt);
+		});
+}
+
+void ServerPacketHandler::Handle_C_Attack(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	GRecvAttackPerSec.fetch_add(1);
+
+	auto pkt = ParsePacket<Protocol::C_Attack>(buffer);
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([gameRoom, session, pkt]()
+		{
+			gameRoom->Handle_C_Attack(session, pkt);
+		});
+}
+
+void ServerPacketHandler::Handle_C_ChangeMap(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	auto pkt = ParsePacket<Protocol::C_ChangeMap>(buffer);
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (!gameRoom)
+		return;
+
+	gameRoom->PushJob([gameRoom, session, pkt]()
+		{
+			gameRoom->Handle_C_ChangeMap(session, pkt);
+		});
+}
+
+void ServerPacketHandler::Handle_C_Turn(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	GRecvTurnPerSec.fetch_add(1);
+
+	auto pkt = ParsePacket<Protocol::C_Turn>(buffer);
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([gameRoom, session, pkt]()
+		{
+			gameRoom->Handle_C_Turn(session, pkt);
+		});
+}
+
+void ServerPacketHandler::Handle_C_EquipItem(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	auto pkt = ParsePacket<Protocol::C_EquipItem>(buffer);
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([session, pkt]()
+		{
+			PlayerRef player = session->player.lock();
+			if (player)
+				player->EquipItem(pkt.slot());
+		});
+}
+
+void ServerPacketHandler::Handle_C_UnequipItem(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	auto pkt = ParsePacket<Protocol::C_UnequipItem>(buffer);
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([session, pkt]()
+		{
+			PlayerRef player = session->player.lock();
+			if (player)
+				player->UnequipItem(pkt.equiptype());
+		});
+}
+
+void ServerPacketHandler::Handle_C_UseItem(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	auto pkt = ParsePacket<Protocol::C_UseItem>(buffer);
+
+	GameRoomRef gameRoom = session->gameRoom.lock();
+	if (gameRoom == nullptr)
+		return;
+
+	gameRoom->PushJob([session, pkt]()
+		{
+			PlayerRef player = session->player.lock();
+			if (player)
+				player->UseItem(pkt.slot());
+		});
+}
+
 void ServerPacketHandler::Handle_C_PartyInvite(GameSessionRef session, BYTE* buffer, int32 len)
 {
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_PartyInvite pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+	auto pkt = ParsePacket<Protocol::C_PartyInvite>(buffer);
 
 	GameRoomRef gameRoom = session->gameRoom.lock();
 	if (!gameRoom)
@@ -524,11 +295,7 @@ void ServerPacketHandler::Handle_C_PartyInvite(GameSessionRef session, BYTE* buf
 
 void ServerPacketHandler::Handle_C_PartyAnswer(GameSessionRef session, BYTE* buffer, int32 len)
 {
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_PartyAnswer pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+	auto pkt = ParsePacket<Protocol::C_PartyAnswer>(buffer);
 
 	GameRoomRef gameRoom = session->gameRoom.lock();
 	if (!gameRoom)
@@ -642,41 +409,9 @@ void ServerPacketHandler::Handle_C_PartyLeave(GameSessionRef session, BYTE* buff
 		});
 }
 
-SendBufferRef ServerPacketHandler::Make_S_PartyInvite(const Protocol::S_PartyInvite& pkt)
-{
-	return MakeSendBuffer(pkt, S_PartyInvite);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_PartyUpdate(const Protocol::S_PartyUpdate& pkt)
-{
-	return MakeSendBuffer(pkt, S_PartyUpdate);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_PartyLeave()
-{
-	Protocol::S_PartyLeave pkt;
-	return MakeSendBuffer(pkt, S_PartyLeave);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_Chat(const Protocol::S_Chat& pkt)
-{
-	return MakeSendBuffer(pkt, S_Chat);
-}
-
-SendBufferRef ServerPacketHandler::Make_S_Ranking(const Protocol::S_Ranking& pkt)
-{
-	return MakeSendBuffer(pkt, S_Ranking);
-}
-
-// ---- Login ----
-
 void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, int32 len)
 {
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_Login pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+	auto pkt = ParsePacket<Protocol::C_Login>(buffer);
 
 	string username = pkt.username();
 	if (username.empty())
@@ -734,12 +469,9 @@ void ServerPacketHandler::Handle_C_Login(GameSessionRef session, BYTE* buffer, i
 	LOG_INFO("Login", "%s logged in (accountId=%d)", username.c_str(), accountId);
 }
 
-void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len) {
-	PacketHeader* header = (PacketHeader*)buffer;
-	uint16 size = header->size;
-
-	Protocol::C_Chat pkt;
-	pkt.ParseFromArray(&header[1], size - sizeof(PacketHeader));
+void ServerPacketHandler::Handle_C_Chat(GameSessionRef session, BYTE* buffer, int32 len)
+{
+	auto pkt = ParsePacket<Protocol::C_Chat>(buffer);
 
 	PlayerRef player = session->player.lock();
 	if (player == nullptr)
@@ -827,4 +559,115 @@ void ServerPacketHandler::Handle_C_GetRanking(GameSessionRef session, BYTE* buff
 	}
 
 	session->Send(Make_S_Ranking(pkt));
+}
+
+SendBufferRef ServerPacketHandler::Make_S_EnterGame()
+{
+	Protocol::S_EnterGame pkt;
+
+	pkt.set_success(true);
+	pkt.set_accountid(0); // DB
+
+	return MakeSendBuffer(pkt, S_EnterGame);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_MyPlayer(const Protocol::S_MyPlayer& pkt)
+{
+	return MakeSendBuffer(pkt, S_MyPlayer);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_AddObject(const Protocol::S_AddObject& pkt)
+{
+	return MakeSendBuffer(pkt, S_AddObject);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_RemoveObject(const Protocol::S_RemoveObject& pkt)
+{
+	return MakeSendBuffer(pkt, S_RemoveObject);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_Move(const Protocol::S_Move& pkt)
+{
+	return MakeSendBuffer(pkt, S_Move);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_Attack(const Protocol::S_Attack& pkt)
+{
+	return MakeSendBuffer(pkt, S_Attack);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_Damaged(const Protocol::S_Damaged& pkt)
+{
+	return MakeSendBuffer(pkt, S_Damaged);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_ChangeMap(const Protocol::S_ChangeMap& pkt)
+{
+	return MakeSendBuffer(pkt, S_ChangeMap);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_GainExp(const Protocol::S_GainExp& pkt)
+{
+	return MakeSendBuffer(pkt, S_GainExp);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_LevelUp(const Protocol::S_LevelUp& pkt)
+{
+	return MakeSendBuffer(pkt, S_LevelUp);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_Turn(const Protocol::S_Turn& pkt)
+{
+	return MakeSendBuffer(pkt, S_Turn);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_InventoryData(const Protocol::S_InventoryData& pkt)
+{
+	return MakeSendBuffer(pkt, S_InventoryData);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_AddItem(const Protocol::S_AddItem& pkt)
+{
+	return MakeSendBuffer(pkt, S_AddItem);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_EquipItem(const Protocol::S_EquipItem& pkt)
+{
+	return MakeSendBuffer(pkt, S_EquipItem);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_UnequipItem(const Protocol::S_UnequipItem& pkt)
+{
+	return MakeSendBuffer(pkt, S_UnequipItem);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_UseItem(const Protocol::S_UseItem& pkt)
+{
+	return MakeSendBuffer(pkt, S_UseItem);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_PartyInvite(const Protocol::S_PartyInvite& pkt)
+{
+	return MakeSendBuffer(pkt, S_PartyInvite);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_PartyUpdate(const Protocol::S_PartyUpdate& pkt)
+{
+	return MakeSendBuffer(pkt, S_PartyUpdate);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_PartyLeave()
+{
+	Protocol::S_PartyLeave pkt;
+	return MakeSendBuffer(pkt, S_PartyLeave);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_Chat(const Protocol::S_Chat& pkt)
+{
+	return MakeSendBuffer(pkt, S_Chat);
+}
+
+SendBufferRef ServerPacketHandler::Make_S_Ranking(const Protocol::S_Ranking& pkt)
+{
+	return MakeSendBuffer(pkt, S_Ranking);
 }

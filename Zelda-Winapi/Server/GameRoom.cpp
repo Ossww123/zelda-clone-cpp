@@ -56,10 +56,8 @@ void GameRoom::InitFromConfig(const string& roomId)
 		return;
 	}
 
-	// 타일맵 로드
 	LoadMap(_config->tilemapPath.c_str());
 
-	// 몬스터 스폰 (설정에 따라)
 	if (_config->monsterSpawnEnabled && _spawnConfig)
 	{
 		SpawnMonstersFromData();
@@ -71,7 +69,6 @@ void GameRoom::InitFromConfig(const string& roomId)
 
 void GameRoom::Init()
 {
-	// 기존 초기화 로직 제거됨
 }
 
 void GameRoom::Update(uint64 now)
@@ -125,7 +122,6 @@ void GameRoom::Step(uint64 now)
 		obj->Update();
 	}
 
-	// 데이터 기반 리스폰 처리
 	if (ShouldSpawnMonsters())
 	{
 		ProcessRespawnFromData();
@@ -144,7 +140,6 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 	session->player = player;
 	player->session = session;
 
-	// 스폰 위치로 리셋
 	player->info.set_posx(5);
 	player->info.set_posy(5);
 	player->info.set_state(IDLE);
@@ -212,7 +207,6 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 				}
 				else
 				{
-					// 이름 + (Away) 상태
 					auto nameIt = party->memberNames.find(memberId);
 					string name = (nameIt != party->memberNames.end()) ? nameIt->second : "Unknown";
 					m->set_name(name + "(Away)");
@@ -220,7 +214,6 @@ void GameRoom::EnterRoom(GameSessionRef session, PlayerRef player)
 			}
 			SendBufferRef sendBuffer = ServerPacketHandler::MakeSendBuffer(partyPkt, S_PartyUpdate);
 
-			// 같은 방에 있는 모든 파티원에게 전송
 			for (uint64 memberId : party->memberIds)
 			{
 				auto it = _players.find(memberId);
@@ -241,7 +234,6 @@ void GameRoom::LeaveRoom(GameSessionRef session)
 	uint64 id = session->player.lock()->info.objectid();
 	RemoveObject(id);
 
-	// 빈 던전 인스턴스 자동 제거
 	if (IsDungeonInstance() && GetPlayerCount() == 0)
 	{
 		uint64 instanceId = GetInstanceId();
@@ -384,6 +376,108 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack&
 	}
 }
 
+void GameRoom::Handle_C_ChangeMap(GameSessionRef session, const Protocol::C_ChangeMap& pkt)
+{
+	PlayerRef requester = dynamic_pointer_cast<Player>(session->player.lock());
+	if (!requester)
+		return;
+
+	uint64 requesterId = requester->info.objectid();
+	GameRoomRef from = shared_from_this();
+
+	GameRoomRef to = nullptr;
+	uint64 instanceId = 0;
+
+	if (pkt.mapid() == Protocol::MAP_ID_TOWN)
+	{
+		to = GRoomManager.GetStaticRoom(FieldId::Town, pkt.channel());
+	}
+	else if (pkt.mapid() == Protocol::MAP_ID_DUNGEON)
+	{
+		// 파티원(비리더)이면 던전 진입 불가
+		if (GPartyManager.IsInParty(requesterId) && !GPartyManager.IsLeader(requesterId))
+		{
+			Protocol::S_ChangeMap sendPkt;
+			sendPkt.set_success(false);
+			sendPkt.set_mapid(pkt.mapid());
+			sendPkt.set_channel(pkt.channel());
+			sendPkt.set_instanceid(0);
+			session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
+			return;
+		}
+
+		instanceId = GRoomManager.CreateDungeonInstance();
+		to = GRoomManager.GetDungeonInstance(instanceId);
+	}
+
+	if (!to)
+	{
+		Protocol::S_ChangeMap sendPkt;
+		sendPkt.set_success(false);
+		sendPkt.set_mapid(pkt.mapid());
+		sendPkt.set_channel(pkt.channel());
+		sendPkt.set_instanceid(0);
+		session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
+		return;
+	}
+
+	// 파티장이 던전 진입 시 → 같은 방의 파티원 전원 이동
+	if (pkt.mapid() == Protocol::MAP_ID_DUNGEON && GPartyManager.IsLeader(requesterId))
+	{
+		uint64 partyId = GPartyManager.GetPartyIdByPlayer(requesterId);
+		Party* party = GPartyManager.GetParty(partyId);
+		if (party)
+		{
+			vector<pair<GameSessionRef, PlayerRef>> toMove;
+			for (uint64 memberId : party->memberIds)
+			{
+				GameObjectRef obj = from->FindObject(memberId);
+				if (!obj)
+					continue;
+				PlayerRef p = dynamic_pointer_cast<Player>(obj);
+				if (p && p->session)
+					toMove.push_back({ p->session, p });
+			}
+
+			for (auto& [s, p] : toMove)
+			{
+				Protocol::S_ChangeMap sendPkt;
+				sendPkt.set_success(true);
+				sendPkt.set_mapid(pkt.mapid());
+				sendPkt.set_channel(pkt.channel());
+				sendPkt.set_instanceid(instanceId);
+				s->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
+
+				from->LeaveRoom(s);
+				to->PushJob([to, s, p]()
+					{
+						to->EnterRoom(s, p);
+					});
+			}
+			return;
+		}
+	}
+
+	// 솔로 이동 — 기존 플레이어 유지
+	{
+		Protocol::S_ChangeMap sendPkt;
+		sendPkt.set_success(true);
+		sendPkt.set_mapid(pkt.mapid());
+		sendPkt.set_channel(pkt.channel());
+		sendPkt.set_instanceid(instanceId);
+		session->Send(ServerPacketHandler::Make_S_ChangeMap(sendPkt));
+	}
+
+	// LeaveRoom 전에 플레이어 강한 참조 확보
+	PlayerRef movingPlayer = dynamic_pointer_cast<Player>(session->player.lock());
+	from->LeaveRoom(session);
+
+	to->PushJob([to, session, movingPlayer]()
+		{
+			to->EnterRoom(session, movingPlayer);
+		});
+}
+
 void GameRoom::PushJob(function<void()> job)
 {
 	LockGuard guard(_jobLock);
@@ -413,7 +507,6 @@ void GameRoom::AddObject(GameObjectRef gameObject)
 
 	gameObject->room = GetRoomRef();
 
-	// 신규 오브젝트 브로드캐스트
 	{
 		Protocol::S_AddObject pkt;
 
@@ -431,7 +524,6 @@ void GameRoom::RemoveObject(uint64 id)
 	if (gameObject == nullptr)
 		return;
 
-	// 데이터 기반 몬스터 리스폰 예약
 	if (gameObject->info.objecttype() == Protocol::OBJECT_TYPE_MONSTER && ShouldSpawnMonsters())
 	{
 		MonsterRef monster = static_pointer_cast<Monster>(gameObject);
@@ -464,7 +556,6 @@ void GameRoom::RemoveObject(uint64 id)
 
 	gameObject->room = nullptr;
 
-	// 오브젝트 제거 브로드캐스트
 	{
 		Protocol::S_RemoveObject pkt;
 		pkt.add_ids(id);
@@ -515,7 +606,6 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 	map<Vec2Int, int32> best;
 	map<Vec2Int, Vec2Int> parent;
 
-	// 초기값
 	{
 		int32 cost = abs(dest.y - src.y) + abs(dest.x - src.x);
 
@@ -536,22 +626,18 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 
 	while (pq.empty() == false)
 	{
-		// 우선순위가 가장 높은 후보를 꺼냄
 		PQNode node = pq.top();
 		pq.pop();
 
-		// 이미 더 짧은 경로를 찾은 경우 스킵
 		if (best[node.pos] < node.cost)
 			continue;
 
-		// 목적지에 도달하면 탐색 종료
 		if (node.pos == dest)
 		{
 			found = true;
 			break;
 		}
 
-		// 인접 셀 검사
 		for (int32 dir = 0; dir < 4; dir++)
 		{
 			Vec2Int nextPos = node.pos + front[dir];
@@ -567,12 +653,10 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 			int32 bestValue = best[nextPos];
 			if (bestValue != 0)
 			{
-				// 기존 경로가 더 좋으면 스킵
 				if (bestValue <= cost)
 					continue;
 			}
 
-			// 최적값 갱신
 			best[nextPos] = cost;
 			pq.push(PQNode(cost, nextPos));
 			parent[nextPos] = node.pos;
@@ -588,7 +672,6 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 			Vec2Int pos = item.first;
 			int32 score = item.second;
 
-			// 점수가 같으면 시작점에서 더 가까운 위치 선택
 			if (bestScore == score)
 			{
 				int32 dist1 = abs(dest.x - src.x) + abs(dest.y - src.y);
@@ -611,7 +694,6 @@ bool GameRoom::FindPath(Vec2Int src, Vec2Int dest, vector<Vec2Int>& path, int32 
 	{
 		path.push_back(pos);
 
-		// 시작점 도달
 		if (pos == parent[pos])
 			break;
 
@@ -640,7 +722,6 @@ Vec2Int GameRoom::GetRandomEmptyCellPos()
 
 	Vec2Int size = _tilemap.GetMapSize();
 
-	// 랜덤 빈 셀 찾기
 	while (true)
 	{
 		int32 x = rand() % size.x;
@@ -805,11 +886,6 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 			hitCount++;
 			totalDamage += damage;
 
-			/*cout << "[CombatAuth][Result] weapon=Staff attacker=" << attacker->info.objectid()
-				<< " target=" << target->info.objectid()
-				<< " damage=" << damage
-				<< " hp=" << beforeHp << "->" << afterHp << endl;*/
-
 			BroadcastDamaged(attacker, target, damage);
 
 			if (target->info.hp() == 0)
@@ -824,17 +900,6 @@ void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& 
 		RemoveObject(id);
 	}
 
-	if (hitCount == 0)
-	{
-		/*cout << "[CombatAuth][Result] weapon=Staff attacker=" << attacker->info.objectid()
-			<< " result=Miss areaCenter=(" << center.x << "," << center.y << ")" << endl;*/
-	}
-	else
-	{
-		/*cout << "[CombatAuth][Result] weapon=Staff attacker=" << attacker->info.objectid()
-			<< " result=Hit targets=" << hitCount
-			<< " totalDamage=" << totalDamage << endl;*/
-	}
 }
 
 
@@ -861,7 +926,6 @@ void GameRoom::BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 da
 	Broadcast(sendBuffer);
 }
 
-// 데이터 기반 룸 설정 조회
 bool GameRoom::CanUseSkill() const
 {
 	if (_config)
@@ -883,7 +947,6 @@ uint32 GameRoom::GetRespawnTime() const
 	return 10000; // 기본값: 10초
 }
 
-// 데이터 기반 몬스터 스폰
 void GameRoom::SpawnMonstersFromData()
 {
 	if (!_spawnConfig)
@@ -908,7 +971,6 @@ void GameRoom::SpawnMonstersFromData()
 		{
 			LOG_INFO("Room", "Monster templateId=%d, count=%d", monsterInfo.templateId, monsterInfo.count);
 
-			// MonsterTemplate에서 스탯 로드
 			const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(monsterInfo.templateId);
 			if (!templateData)
 			{
@@ -937,7 +999,6 @@ void GameRoom::SpawnMonstersFromData()
 				m->SetLeashRange(monsterInfo.leashRange);
 				m->SetTemplateId(monsterInfo.templateId);
 
-				// MonsterTemplate 스탯 적용
 				m->info.set_name(templateData->name);
 				m->info.set_maxhp(templateData->maxHp);
 				m->info.set_hp(templateData->maxHp);
@@ -952,7 +1013,6 @@ void GameRoom::SpawnMonstersFromData()
 	LOG_INFO("Room", "Spawned %zu monsters from data", _monsters.size());
 }
 
-// 데이터 기반 리스폰 처리
 void GameRoom::ReserveMonsterRespawn(const RespawnRequest& req)
 {
 	_respawnQueue.push_back(req);
@@ -975,7 +1035,6 @@ void GameRoom::ProcessRespawnFromData()
 		if (!CanGo(pos))
 			pos = GetRandomEmptyCellPos();
 
-		// MonsterTemplate에서 스탯 로드
 		const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(it->templateId);
 
 		MonsterRef m = GameObject::CreateMonster();
@@ -985,7 +1044,6 @@ void GameRoom::ProcessRespawnFromData()
 		m->SetLeashRange(it->leashRange);
 		m->SetTemplateId(it->templateId);
 
-		// MonsterTemplate 스탯 적용
 		if (templateData)
 		{
 			m->info.set_name(templateData->name);
@@ -1023,7 +1081,6 @@ void GameRoom::DistributeExp(PlayerRef killer, MonsterRef monster)
 		return;
 	}
 
-	// 파티: 같은 방에 있는 파티원에게 균등 분배
 	Party* party = GPartyManager.GetParty(partyId);
 	if (!party)
 	{

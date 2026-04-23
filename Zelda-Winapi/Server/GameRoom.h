@@ -62,6 +62,7 @@ public:
 	void Handle_C_Move(GameSessionRef session, const Protocol::C_Move& pkt);
 	void Handle_C_Turn(GameSessionRef session, const Protocol::C_Turn& pkt);
 	void Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack& pkt);
+	void Handle_C_ChangeMap(GameSessionRef session, const Protocol::C_ChangeMap& pkt);
 
 public:
 	void PushJob(function<void()> job);
