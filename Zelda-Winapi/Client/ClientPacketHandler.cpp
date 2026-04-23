@@ -99,11 +99,7 @@ static wstring ToWstring ( const string& utf8 )
 
 void ClientPacketHandler::Handle_S_EnterGame ( ServerSessionRef session, BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_EnterGame pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_EnterGame> ( buffer );
 
 	bool success = pkt.success ( );
 	if ( success )
@@ -116,11 +112,7 @@ void ClientPacketHandler::Handle_S_EnterGame ( ServerSessionRef session, BYTE* b
 
 void ClientPacketHandler::Handle_S_MyPlayer ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_MyPlayer pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_MyPlayer> ( buffer );
 
 	const Protocol::ObjectInfo& info = pkt.info ( );
 
@@ -135,11 +127,7 @@ void ClientPacketHandler::Handle_S_MyPlayer ( ServerSessionRef session , BYTE* b
 
 void ClientPacketHandler::Handle_S_AddObject ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_AddObject pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_AddObject> ( buffer );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene )
@@ -148,11 +136,7 @@ void ClientPacketHandler::Handle_S_AddObject ( ServerSessionRef session , BYTE* 
 
 void ClientPacketHandler::Handle_S_RemoveObject ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_RemoveObject pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_RemoveObject> ( buffer );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene )
@@ -161,11 +145,7 @@ void ClientPacketHandler::Handle_S_RemoveObject ( ServerSessionRef session , BYT
 
 void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_Move pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_Move> ( buffer );
 
 	const Protocol::ObjectInfo& info = pkt.info ( );
 
@@ -194,11 +174,7 @@ void ClientPacketHandler::Handle_S_Move ( ServerSessionRef session , BYTE* buffe
 
 void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_Attack pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_Attack> ( buffer );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene )
@@ -207,11 +183,7 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 
 void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_Damaged pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_Damaged> ( buffer );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene )
@@ -244,19 +216,10 @@ void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* bu
 
 void ClientPacketHandler::Handle_S_ChangeMap ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_ChangeMap pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
-
-	//
+	auto pkt = ParsePacket<Protocol::S_ChangeMap> ( buffer );
 
 	if ( pkt.success ( ) == false )
-	{
-		// 실패
 		return;
-	}
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene == nullptr )
@@ -268,11 +231,7 @@ void ClientPacketHandler::Handle_S_ChangeMap ( ServerSessionRef session , BYTE* 
 
 void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_GainExp pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_GainExp> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -281,7 +240,6 @@ void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* bu
 	if ( myPlayer->info.objectid ( ) != pkt.playerid ( ) )
 		return;
 
-	// PlayerExtra 갱신
 	Protocol::PlayerExtra* extra = myPlayer->info.mutable_player ( );
 	extra->set_exp ( pkt.currentexp ( ) );
 	extra->set_maxexp ( pkt.maxexp ( ) );
@@ -289,11 +247,7 @@ void ClientPacketHandler::Handle_S_GainExp ( ServerSessionRef session , BYTE* bu
 
 void ClientPacketHandler::Handle_S_LevelUp ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_LevelUp pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_LevelUp> ( buffer );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene == nullptr )
@@ -307,13 +261,11 @@ void ClientPacketHandler::Handle_S_LevelUp ( ServerSessionRef session , BYTE* bu
 	if ( creature == nullptr )
 		return;
 
-	// 스탯 업데이트
 	creature->info.set_maxhp ( pkt.maxhp ( ) );
 	creature->info.set_hp ( pkt.maxhp ( ) );  // 레벨업 시 HP 전체 회복
 	creature->info.set_attack ( pkt.attack ( ) );
 	creature->info.set_defence ( pkt.defence ( ) );
 
-	// PlayerExtra 갱신
 	Protocol::PlayerExtra* extra = creature->info.mutable_player ( );
 	extra->set_level ( pkt.newlevel ( ) );
 	extra->set_maxexp ( pkt.maxexp ( ) );
@@ -321,11 +273,7 @@ void ClientPacketHandler::Handle_S_LevelUp ( ServerSessionRef session , BYTE* bu
 
 void ClientPacketHandler::Handle_S_Turn ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_Turn pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_Turn> ( buffer );
 
 	const Protocol::ObjectInfo& info = pkt.info ( );
 
@@ -352,11 +300,7 @@ void ClientPacketHandler::Handle_S_Turn ( ServerSessionRef session , BYTE* buffe
 
 void ClientPacketHandler::Handle_S_InventoryData ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_InventoryData pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_InventoryData> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -367,11 +311,7 @@ void ClientPacketHandler::Handle_S_InventoryData ( ServerSessionRef session , BY
 
 void ClientPacketHandler::Handle_S_AddItem ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_AddItem pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_AddItem> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -382,11 +322,7 @@ void ClientPacketHandler::Handle_S_AddItem ( ServerSessionRef session , BYTE* bu
 
 void ClientPacketHandler::Handle_S_EquipItem ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_EquipItem pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_EquipItem> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -397,11 +333,7 @@ void ClientPacketHandler::Handle_S_EquipItem ( ServerSessionRef session , BYTE* 
 
 void ClientPacketHandler::Handle_S_UnequipItem ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_UnequipItem pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_UnequipItem> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -412,11 +344,7 @@ void ClientPacketHandler::Handle_S_UnequipItem ( ServerSessionRef session , BYTE
 
 void ClientPacketHandler::Handle_S_UseItem ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_UseItem pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_UseItem> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -427,11 +355,7 @@ void ClientPacketHandler::Handle_S_UseItem ( ServerSessionRef session , BYTE* bu
 
 void ClientPacketHandler::Handle_S_PartyInvite ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_PartyInvite pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_PartyInvite> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -445,11 +369,7 @@ void ClientPacketHandler::Handle_S_PartyInvite ( ServerSessionRef session , BYTE
 
 void ClientPacketHandler::Handle_S_PartyUpdate ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	uint16 size = header->size;
-
-	Protocol::S_PartyUpdate pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_PartyUpdate> ( buffer );
 
 	MyPlayer* myPlayer = GET_SINGLE ( SceneManager )->GetMyPlayer ( );
 	if ( myPlayer == nullptr )
@@ -503,9 +423,7 @@ void ClientPacketHandler::Handle_S_PartyLeave ( ServerSessionRef session , BYTE*
 
 void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	Protocol::S_Chat pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , len - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_Chat> ( buffer );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene == nullptr )
@@ -528,9 +446,7 @@ void ClientPacketHandler::Handle_S_Chat ( ServerSessionRef session , BYTE* buffe
 
 void ClientPacketHandler::Handle_S_Ranking ( ServerSessionRef session , BYTE* buffer , int32 len )
 {
-	PacketHeader* header = ( PacketHeader* ) buffer;
-	Protocol::S_Ranking pkt;
-	pkt.ParseFromArray ( &header[ 1 ] , len - sizeof ( PacketHeader ) );
+	auto pkt = ParsePacket<Protocol::S_Ranking> ( buffer );
 
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene == nullptr )

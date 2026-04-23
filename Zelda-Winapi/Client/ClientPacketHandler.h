@@ -91,6 +91,15 @@ public:
 	// [AUTO-GEN DECLS END]
 
 	template<typename T>
+	static T ParsePacket ( BYTE* buffer )
+	{
+		PacketHeader* header = reinterpret_cast<PacketHeader*>( buffer );
+		T pkt;
+		pkt.ParseFromArray ( &header[ 1 ] , header->size - sizeof ( PacketHeader ) );
+		return pkt;
+	}
+
+	template<typename T>
 	static SendBufferRef MakeSendBuffer(T& pkt, uint16 pktId)
 	{
 		const uint16 dataSize = static_cast<uint16>(pkt.ByteSizeLong());
