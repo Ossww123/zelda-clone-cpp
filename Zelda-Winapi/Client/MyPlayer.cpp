@@ -174,6 +174,102 @@ void MyPlayer::TickSkill ( )
 	Super::TickSkill ( );
 }
 
+InventorySlot* MyPlayer::GetEquipSlot ( int32 equipType )
+{
+	if ( equipType == 0 ) return &_equipWeapon;
+	if ( equipType == 1 ) return &_equipArmor;
+	if ( equipType == 2 ) return &_equipPotion;
+	return nullptr;
+}
+
+void MyPlayer::ApplyInventoryData ( const Protocol::S_InventoryData& pkt )
+{
+	for ( int32 i = 0; i < INVENTORY_SIZE; i++ )
+	{
+		_storage[ i ].itemId = 0;
+		_storage[ i ].count = 0;
+	}
+
+	for ( int32 i = 0; i < pkt.items_size ( ); i++ )
+	{
+		const auto& item = pkt.items ( i );
+		int32 slot = item.slot ( );
+		if ( slot >= 0 && slot < INVENTORY_SIZE )
+		{
+			_storage[ slot ].itemId = item.itemid ( );
+			_storage[ slot ].count = item.count ( );
+		}
+	}
+
+	_equipWeapon.itemId = pkt.equippedweapon ( ).itemid ( );
+	_equipWeapon.count = pkt.equippedweapon ( ).count ( );
+	_equipArmor.itemId = pkt.equippedarmor ( ).itemid ( );
+	_equipArmor.count = pkt.equippedarmor ( ).count ( );
+	_equipPotion.itemId = pkt.equippedpotion ( ).itemid ( );
+	_equipPotion.count = pkt.equippedpotion ( ).count ( );
+}
+
+void MyPlayer::ApplyAddItem ( int32 slot, int32 itemId, int32 count )
+{
+	if ( slot >= 0 && slot < INVENTORY_SIZE )
+	{
+		_storage[ slot ].itemId = itemId;
+		_storage[ slot ].count = count;
+	}
+}
+
+void MyPlayer::ApplyEquipItem ( const Protocol::S_EquipItem& pkt )
+{
+	int32 slot = pkt.storageslot ( );
+	if ( slot >= 0 && slot < INVENTORY_SIZE )
+	{
+		_storage[ slot ].itemId = pkt.storageitemid ( );
+		_storage[ slot ].count = pkt.storageitemcount ( );
+	}
+
+	if ( InventorySlot* equipSlot = GetEquipSlot ( pkt.equiptype ( ) ) )
+	{
+		equipSlot->itemId = pkt.equipitemid ( );
+		equipSlot->count = pkt.equipitemcount ( );
+	}
+
+	info.set_attack ( pkt.attack ( ) );
+	info.set_defence ( pkt.defence ( ) );
+}
+
+void MyPlayer::ApplyUnequipItem ( const Protocol::S_UnequipItem& pkt )
+{
+	if ( InventorySlot* equipSlot = GetEquipSlot ( pkt.equiptype ( ) ) )
+	{
+		int32 slot = pkt.storageslot ( );
+		if ( slot >= 0 && slot < INVENTORY_SIZE )
+		{
+			_storage[ slot ].itemId = equipSlot->itemId;
+			_storage[ slot ].count = equipSlot->count;
+		}
+		equipSlot->itemId = 0;
+		equipSlot->count = 0;
+	}
+
+	info.set_attack ( pkt.attack ( ) );
+	info.set_defence ( pkt.defence ( ) );
+}
+
+void MyPlayer::ApplyUseItem ( const Protocol::S_UseItem& pkt )
+{
+	if ( InventorySlot* slot = GetEquipSlot ( pkt.equiptype ( ) ) )
+	{
+		slot->count = pkt.remaincount ( );
+		if ( slot->count <= 0 )
+		{
+			slot->itemId = 0;
+			slot->count = 0;
+		}
+	}
+
+	info.set_hp ( pkt.newhp ( ) );
+}
+
 void MyPlayer::OnServerMoveResult ( const Protocol::ObjectInfo& serverInfo )
 {
 	_movePending = false;

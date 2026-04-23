@@ -45,6 +45,12 @@ public:
 	void OnServerAttackAck ( ) { _attackPending = false; }
 	void OnServerMoveResult ( const Protocol::ObjectInfo& info );
 
+	void ApplyInventoryData ( const Protocol::S_InventoryData& pkt );
+	void ApplyAddItem ( int32 slot, int32 itemId, int32 count );
+	void ApplyEquipItem ( const Protocol::S_EquipItem& pkt );
+	void ApplyUnequipItem ( const Protocol::S_UnequipItem& pkt );
+	void ApplyUseItem ( const Protocol::S_UseItem& pkt );
+
 public:
 	// 인벤토리
 	static const int32 INVENTORY_SIZE = 27;
@@ -59,6 +65,8 @@ public:
 	wstring _pendingInviterName;
 
 private:
+	InventorySlot* GetEquipSlot ( int32 equipType );
+
 	bool _keyPressed = false;
 	Protocol::DIR_TYPE _wantedDir = DIR_DOWN;
 	bool _movePending = false;

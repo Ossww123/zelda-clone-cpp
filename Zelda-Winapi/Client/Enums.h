@@ -37,3 +37,10 @@ enum class WeaponType
 	Bow,
 	Staff,
 };
+
+enum EquipType
+{
+	EQUIP_TYPE_WEAPON = 0,
+	EQUIP_TYPE_ARMOR  = 1,
+	EQUIP_TYPE_POTION = 2,
+};

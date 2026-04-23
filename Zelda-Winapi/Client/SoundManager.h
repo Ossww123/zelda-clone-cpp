@@ -15,6 +15,6 @@ public:
 	LPDIRECTSOUND GetSoundDevice() { return _soundDevice; }
 
 private:
-	LPDIRECTSOUND _soundDevice = nullptr; // ���� ī��
+	LPDIRECTSOUND _soundDevice = nullptr;
 };
 

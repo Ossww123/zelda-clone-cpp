@@ -3,6 +3,7 @@
 
 #include "ResourceManager.h"
 #include "Texture.h"
+#include "Flipbook.h"
 #include "SoundManager.h"
 
 #include <fstream>
@@ -334,6 +335,61 @@ void DevSceneResourceLoader::CreateSceneSprites ( )
 
 		GET_SINGLE ( ResourceManager )->CreateSprite ( wid , texture , x , y , w , h );
 	}
+}
+
+void DevSceneResourceLoader::LoadFlipbooks ( )
+{
+	// Player - IDLE
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerUp" );    auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_IdleUp" );    fb->SetInfo ( { t, L"FB_IdleUp",    {200, 200}, 0, 9, 0, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerDown" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_IdleDown" );  fb->SetInfo ( { t, L"FB_IdleDown",  {200, 200}, 0, 9, 0, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerLeft" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_IdleLeft" );  fb->SetInfo ( { t, L"FB_IdleLeft",  {200, 200}, 0, 9, 0, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerRight" ); auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_IdleRight" ); fb->SetInfo ( { t, L"FB_IdleRight", {200, 200}, 0, 9, 0, 0.5f } ); }
+
+	// Player - MOVE
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerUp" );    auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_MoveUp" );    fb->SetInfo ( { t, L"FB_MoveUp",    {200, 200}, 0, 9, 1, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerDown" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_MoveDown" );  fb->SetInfo ( { t, L"FB_MoveDown",  {200, 200}, 0, 9, 1, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerLeft" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_MoveLeft" );  fb->SetInfo ( { t, L"FB_MoveLeft",  {200, 200}, 0, 9, 1, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerRight" ); auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_MoveRight" ); fb->SetInfo ( { t, L"FB_MoveRight", {200, 200}, 0, 9, 1, 0.5f } ); }
+
+	// Player - ATTACK (Sword)
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerUp" );    auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_AttackUp" );    fb->SetInfo ( { t, L"FB_AttackUp",    {200, 200}, 0, 7, 3, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerDown" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_AttackDown" );  fb->SetInfo ( { t, L"FB_AttackDown",  {200, 200}, 0, 7, 3, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerLeft" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_AttackLeft" );  fb->SetInfo ( { t, L"FB_AttackLeft",  {200, 200}, 0, 7, 3, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerRight" ); auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_AttackRight" ); fb->SetInfo ( { t, L"FB_AttackRight", {200, 200}, 0, 7, 3, 0.5f, false } ); }
+
+	// Player - BOW
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerUp" );    auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_BowUp" );    fb->SetInfo ( { t, L"FB_BowUp",    {200, 200}, 0, 7, 5, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerDown" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_BowDown" );  fb->SetInfo ( { t, L"FB_BowDown",  {200, 200}, 0, 7, 5, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerLeft" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_BowLeft" );  fb->SetInfo ( { t, L"FB_BowLeft",  {200, 200}, 0, 7, 5, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerRight" ); auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_BowRight" ); fb->SetInfo ( { t, L"FB_BowRight", {200, 200}, 0, 7, 5, 0.5f, false } ); }
+
+	// Player - STAFF
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerUp" );    auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_StaffUp" );    fb->SetInfo ( { t, L"FB_StaffUp",    {200, 200}, 0, 10, 6, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerDown" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_StaffDown" );  fb->SetInfo ( { t, L"FB_StaffDown",  {200, 200}, 0, 10, 6, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerLeft" );  auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_StaffLeft" );  fb->SetInfo ( { t, L"FB_StaffLeft",  {200, 200}, 0, 10, 6, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"PlayerRight" ); auto* fb = GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_StaffRight" ); fb->SetInfo ( { t, L"FB_StaffRight", {200, 200}, 0, 10, 6, 0.5f, false } ); }
+
+	// Snake
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Snake" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_SnakeUp" )   ->SetInfo ( { t, L"FB_SnakeUp",    {100, 100}, 0, 3, 3, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Snake" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_SnakeDown" ) ->SetInfo ( { t, L"FB_SnakeDown",  {100, 100}, 0, 3, 0, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Snake" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_SnakeLeft" ) ->SetInfo ( { t, L"FB_SnakeLeft",  {100, 100}, 0, 3, 2, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Snake" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_SnakeRight" )->SetInfo ( { t, L"FB_SnakeRight", {100, 100}, 0, 3, 1, 0.5f } ); }
+
+	// Octoroc
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocUp" )   ->SetInfo ( { t, L"FB_OctorocUp",    {100, 100}, 0, 3, 3, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocDown" ) ->SetInfo ( { t, L"FB_OctorocDown",  {100, 100}, 0, 3, 0, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocLeft" ) ->SetInfo ( { t, L"FB_OctorocLeft",  {100, 100}, 0, 3, 2, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Octoroc" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_OctorocRight" )->SetInfo ( { t, L"FB_OctorocRight", {100, 100}, 0, 3, 1, 0.5f } ); }
+
+	// Arrow
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Arrow" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_ArrowUp" )   ->SetInfo ( { t, L"FB_ArrowUp",    {100, 100}, 0, 0, 3, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Arrow" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_ArrowDown" ) ->SetInfo ( { t, L"FB_ArrowDown",  {100, 100}, 0, 0, 0, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Arrow" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_ArrowLeft" ) ->SetInfo ( { t, L"FB_ArrowLeft",  {100, 100}, 0, 0, 1, 0.5f } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Arrow" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_ArrowRight" )->SetInfo ( { t, L"FB_ArrowRight", {100, 100}, 0, 0, 2, 0.5f } ); }
+
+	// Effects
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Hit" );     GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_Hit" )    ->SetInfo ( { t, L"FB_Hit",     {50,  47},  0, 5,  0, 0.5f, false } ); }
+	{ Texture* t = GET_SINGLE ( ResourceManager )->GetTexture ( L"Explode" ); GET_SINGLE ( ResourceManager )->CreateFlipbook ( L"FB_Explode" )->SetInfo ( { t, L"FB_Explode", {144, 144}, 0, 11, 0, 0.5f, false } ); }
 }
 
 void DevSceneResourceLoader::LoadSceneSounds ( )

@@ -22,9 +22,5 @@ private:
 	virtual void TickSkill ( ) override;
 	virtual void UpdateAnimation ( ) override;
 
-protected:
-	// TODO
-	Flipbook* _flipbookMove[ 4 ];
-	float _waitSeconds = 0.f;
 };
 

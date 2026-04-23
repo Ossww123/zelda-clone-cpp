@@ -11,17 +11,15 @@ SoundManager::~SoundManager()
 
 void SoundManager::Init(HWND hwnd)
 {
-	// ���� ����̽� ����
 	if (FAILED(::DirectSoundCreate(NULL, &_soundDevice, NULL)))
 	{
-		::MessageBox(NULL, L"�������̽���������", L"SYSTEM ERROR", MB_OK);
+		::MessageBox(NULL, L"Sound: DirectSoundCreate failed", L"SYSTEM ERROR", MB_OK);
 		return;
 	}
 
-	// ���� ����̽� �������� ����
 	if (FAILED(_soundDevice->SetCooperativeLevel(hwnd, DSSCL_PRIORITY)))
 	{
-		::MessageBox(NULL, L"�������̽� �������� ����", L"SYSTEM ERROR", MB_OK);
+		::MessageBox(NULL, L"Sound: SetCooperativeLevel failed", L"SYSTEM ERROR", MB_OK);
 		return;
 	}
 }

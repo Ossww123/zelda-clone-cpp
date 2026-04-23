@@ -9,11 +9,18 @@
 #include "ClientPacketHandler.h"
 #include "MyPlayer.h"
 #include "Sprite.h"
+#include "Button.h"
 #include "InventoryPanel.h"
 #include "PartyPanel.h"
 #include "PartyInvitePanel.h"
 #include "ChatPanel.h"
 #include "RankingPanel.h"
+
+UIManager::~UIManager ( )
+{
+	for ( Button* b : _mapButtons )
+		delete b;
+}
 
 void UIManager::Init ( HWND hWnd )
 {
@@ -23,6 +30,7 @@ void UIManager::Init ( HWND hWnd )
 	_chatPanel = new ChatPanel ( );
 	_rankingPanel = new RankingPanel ( );
 	_chatPanel->Init ( hWnd );
+	CreateMapButtons ( );
 }
 
 void UIManager::Tick ( )
@@ -123,6 +131,9 @@ void UIManager::TickUIInput ( )
 
 void UIManager::TickPanels ( )
 {
+	for ( Button* b : _mapButtons )
+		b->Tick ( );
+
 	if ( _inventoryPanel )
 		_inventoryPanel->Tick ( );
 	if ( _rankingPanel )
@@ -149,6 +160,9 @@ void UIManager::Render ( HDC hdc )
 		_partyInvitePanel->Render ( hdc );
 	if ( _chatPanel )
 		_chatPanel->Render ( hdc );
+
+	for ( Button* b : _mapButtons )
+		b->Render ( hdc );
 }
 
 void UIManager::RenderHUD ( HDC hdc )
@@ -249,4 +263,73 @@ void UIManager::SetRankingData ( const vector<pair<wstring, int32>>& entries )
 {
 	if ( _rankingPanel )
 		_rankingPanel->SetData ( entries );
+}
+
+void UIManager::CreateMapButtons ( )
+{
+	const int32 btnW = 64;
+	const int32 btnH = 40;
+	const int32 gap = 7;
+	const int32 totalW = btnW * 3 + gap * 2;
+	const int32 marginX = 10;
+	const int32 marginY = 10;
+
+	int32 startX = GWinSizeX - marginX - totalW;
+	int32 y = marginY + btnH / 2;
+
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town1" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &UIManager::OnClickTown1 );
+		_mapButtons.push_back ( b );
+		startX += btnW + gap;
+	}
+
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Town2" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &UIManager::OnClickTown2 );
+		_mapButtons.push_back ( b );
+		startX += btnW + gap;
+	}
+
+	{
+		Button* b = new Button ( );
+		b->SetSize ( { btnW, btnH } );
+		b->SetPos ( { ( float ) ( startX + btnW / 2 ), ( float ) y } );
+		b->SetSprite ( GET_SINGLE ( ResourceManager )->GetSprite ( L"Btn_Dungeon" ) , BS_Default );
+		b->SetCurrentSprite ( b->GetSprite ( BS_Default ) );
+		b->AddOnClickDelegate ( this , &UIManager::OnClickDungeon );
+		_mapButtons.push_back ( b );
+	}
+}
+
+void UIManager::OnClickTown1 ( )
+{
+	Protocol::C_ChangeMap pkt;
+	pkt.set_mapid ( Protocol::MAP_ID_TOWN );
+	pkt.set_channel ( 1 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( ClientPacketHandler::Make_C_ChangeMap ( pkt ) );
+}
+
+void UIManager::OnClickTown2 ( )
+{
+	Protocol::C_ChangeMap pkt;
+	pkt.set_mapid ( Protocol::MAP_ID_TOWN );
+	pkt.set_channel ( 2 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( ClientPacketHandler::Make_C_ChangeMap ( pkt ) );
+}
+
+void UIManager::OnClickDungeon ( )
+{
+	Protocol::C_ChangeMap pkt;
+	pkt.set_mapid ( Protocol::MAP_ID_DUNGEON );
+	pkt.set_channel ( 0 );
+	GET_SINGLE ( NetworkManager )->SendPacket ( ClientPacketHandler::Make_C_ChangeMap ( pkt ) );
 }

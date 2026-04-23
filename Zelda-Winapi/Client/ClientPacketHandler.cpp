@@ -5,8 +5,6 @@
 #include "MyPlayer.h"
 #include "SceneManager.h"
 #include "HitEffect.h"
-#include "ExplodeEffect.h"
-#include "Flipbook.h"
 #include "SoundManager.h"
 
 void ClientPacketHandler::HandlePacket( ServerSessionRef session , BYTE* buffer, int32 len)
@@ -202,73 +200,9 @@ void ClientPacketHandler::Handle_S_Attack ( ServerSessionRef session , BYTE* buf
 	Protocol::S_Attack pkt;
 	pkt.ParseFromArray ( &header[ 1 ] , size - sizeof ( PacketHeader ) );
 
-	//
 	DevScene* scene = GET_SINGLE ( SceneManager )->GetDevScene ( );
 	if ( scene )
-	{
-		switch ( pkt.weapontype ( ) )
-		{
-		case Protocol::WEAPON_TYPE_SWORD:
-			GET_SINGLE ( SoundManager )->Play ( L"Sword" );
-			break;
-		case Protocol::WEAPON_TYPE_BOW:
-			GET_SINGLE ( SoundManager )->Play ( L"Arrow" );
-			break;
-		case Protocol::WEAPON_TYPE_STAFF:
-			GET_SINGLE ( SoundManager )->Play ( L"Explode" );
-			break;
-		default:
-			break;
-		}
-
-		GameObject* gameObject = scene->GetObjectW ( pkt.attackerid ( ) );
-		if ( gameObject )
-		{
-			gameObject->SetDir ( pkt.dir ( ) );
-
-			if ( Player* player = dynamic_cast< Player* >( gameObject ) )
-			{
-				auto weapon = Player::FromProtoWeaponType ( pkt.weapontype ( ) );
-				player->SetWeaponType ( weapon );
-
-				float duration = 0.35f; // fallback
-
-				if ( Flipbook* fb = player->GetSkillFlipbook ( weapon , pkt.dir ( ) ) )
-					duration = fb->GetInfo ( ).duration;
-
-				gameObject->StartSkillAnim ( duration );
-			}
-			else
-			{
-				// fallback
-				gameObject->StartSkillAnim ( 0.35f );
-			}
-
-			if ( pkt.weapontype ( ) == Protocol::WEAPON_TYPE_STAFF )
-			{
-				Vec2Int pos = gameObject->GetCellPos ( );
-				Vec2Int forward{ 0,0 };
-
-				switch ( pkt.dir ( ) )
-				{
-				case Protocol::DIR_TYPE_UP:    forward = { 0,-2 }; break;
-				case Protocol::DIR_TYPE_DOWN:  forward = { 0, 2 }; break;
-				case Protocol::DIR_TYPE_LEFT:  forward = { -2,0 }; break;
-				case Protocol::DIR_TYPE_RIGHT: forward = { 2, 0 }; break;
-				}
-
-				Vec2Int center = pos + forward;
-				scene->SpawnObject<ExplodeEffect> ( center );
-			}
-		}
-	}
-
-	uint64 myId = GET_SINGLE ( SceneManager )->GetMyPlayerId ( );
-	if ( pkt.attackerid ( ) == myId )
-	{
-		if ( MyPlayer* mp = GET_SINGLE ( SceneManager )->GetMyPlayer ( ) )
-			mp->OnServerAttackAck ( );
-	}
+		scene->Handle_S_Attack ( pkt );
 }
 
 void ClientPacketHandler::Handle_S_Damaged ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -428,30 +362,7 @@ void ClientPacketHandler::Handle_S_InventoryData ( ServerSessionRef session , BY
 	if ( myPlayer == nullptr )
 		return;
 
-	// 초기화
-	for ( int32 i = 0; i < MyPlayer::INVENTORY_SIZE; i++ )
-	{
-		myPlayer->_storage[ i ].itemId = 0;
-		myPlayer->_storage[ i ].count = 0;
-	}
-
-	for ( int32 i = 0; i < pkt.items_size ( ); i++ )
-	{
-		const auto& item = pkt.items ( i );
-		int32 slot = item.slot ( );
-		if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
-		{
-			myPlayer->_storage[ slot ].itemId = item.itemid ( );
-			myPlayer->_storage[ slot ].count = item.count ( );
-		}
-	}
-
-	myPlayer->_equipWeapon.itemId = pkt.equippedweapon ( ).itemid ( );
-	myPlayer->_equipWeapon.count = pkt.equippedweapon ( ).count ( );
-	myPlayer->_equipArmor.itemId = pkt.equippedarmor ( ).itemid ( );
-	myPlayer->_equipArmor.count = pkt.equippedarmor ( ).count ( );
-	myPlayer->_equipPotion.itemId = pkt.equippedpotion ( ).itemid ( );
-	myPlayer->_equipPotion.count = pkt.equippedpotion ( ).count ( );
+	myPlayer->ApplyInventoryData ( pkt );
 }
 
 void ClientPacketHandler::Handle_S_AddItem ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -466,12 +377,7 @@ void ClientPacketHandler::Handle_S_AddItem ( ServerSessionRef session , BYTE* bu
 	if ( myPlayer == nullptr )
 		return;
 
-	int32 slot = pkt.slot ( );
-	if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
-	{
-		myPlayer->_storage[ slot ].itemId = pkt.itemid ( );
-		myPlayer->_storage[ slot ].count = pkt.count ( );
-	}
+	myPlayer->ApplyAddItem ( pkt.slot ( ) , pkt.itemid ( ) , pkt.count ( ) );
 }
 
 void ClientPacketHandler::Handle_S_EquipItem ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -486,30 +392,7 @@ void ClientPacketHandler::Handle_S_EquipItem ( ServerSessionRef session , BYTE* 
 	if ( myPlayer == nullptr )
 		return;
 
-	int32 slot = pkt.storageslot ( );
-	if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
-	{
-		myPlayer->_storage[ slot ].itemId = pkt.storageitemid ( );
-		myPlayer->_storage[ slot ].count = pkt.storageitemcount ( );
-	}
-
-	int32 equipType = pkt.equiptype ( );
-	InventorySlot* equipSlot = nullptr;
-	if ( equipType == 0 )
-		equipSlot = &myPlayer->_equipWeapon;
-	else if ( equipType == 1 )
-		equipSlot = &myPlayer->_equipArmor;
-	else if ( equipType == 2 )
-		equipSlot = &myPlayer->_equipPotion;
-
-	if ( equipSlot )
-	{
-		equipSlot->itemId = pkt.equipitemid ( );
-		equipSlot->count = pkt.equipitemcount ( );
-	}
-
-	myPlayer->info.set_attack ( pkt.attack ( ) );
-	myPlayer->info.set_defence ( pkt.defence ( ) );
+	myPlayer->ApplyEquipItem ( pkt );
 }
 
 void ClientPacketHandler::Handle_S_UnequipItem ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -524,30 +407,7 @@ void ClientPacketHandler::Handle_S_UnequipItem ( ServerSessionRef session , BYTE
 	if ( myPlayer == nullptr )
 		return;
 
-	int32 equipType = pkt.equiptype ( );
-	InventorySlot* equipSlot = nullptr;
-	if ( equipType == 0 )
-		equipSlot = &myPlayer->_equipWeapon;
-	else if ( equipType == 1 )
-		equipSlot = &myPlayer->_equipArmor;
-	else if ( equipType == 2 )
-		equipSlot = &myPlayer->_equipPotion;
-
-	if ( equipSlot )
-	{
-		// 기존 장비를 storage로 이동
-		int32 slot = pkt.storageslot ( );
-		if ( slot >= 0 && slot < MyPlayer::INVENTORY_SIZE )
-		{
-			myPlayer->_storage[ slot ].itemId = equipSlot->itemId;
-			myPlayer->_storage[ slot ].count = equipSlot->count;
-		}
-		equipSlot->itemId = 0;
-		equipSlot->count = 0;
-	}
-
-	myPlayer->info.set_attack ( pkt.attack ( ) );
-	myPlayer->info.set_defence ( pkt.defence ( ) );
+	myPlayer->ApplyUnequipItem ( pkt );
 }
 
 void ClientPacketHandler::Handle_S_UseItem ( ServerSessionRef session , BYTE* buffer , int32 len )
@@ -562,18 +422,7 @@ void ClientPacketHandler::Handle_S_UseItem ( ServerSessionRef session , BYTE* bu
 	if ( myPlayer == nullptr )
 		return;
 
-	int32 equipType = pkt.equiptype ( );
-	if ( equipType == 2 )
-	{
-		myPlayer->_equipPotion.count = pkt.remaincount ( );
-		if ( myPlayer->_equipPotion.count <= 0 )
-		{
-			myPlayer->_equipPotion.itemId = 0;
-			myPlayer->_equipPotion.count = 0;
-		}
-	}
-
-	myPlayer->info.set_hp ( pkt.newhp ( ) );
+	myPlayer->ApplyUseItem ( pkt );
 }
 
 void ClientPacketHandler::Handle_S_PartyInvite ( ServerSessionRef session , BYTE* buffer , int32 len )

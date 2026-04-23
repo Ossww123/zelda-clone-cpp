@@ -14,7 +14,6 @@
 
 Monster::Monster()
 {
-	for ( int i = 0; i < 4; ++i ) _flipbookMove[ i ] = nullptr;
 }
 
 Monster::~Monster()
@@ -33,7 +32,7 @@ void Monster::Tick()
 {
 	Super::Tick();
 
-	// TODO
+
 }
 
 void Monster::Render(HDC hdc)
@@ -54,8 +53,8 @@ void Monster::Render(HDC hdc)
 	int32 screenY = ( int32 ) _pos.y - cameraOffsetY;
 
 	// Frame 위치: 몬스터 스프라이트(100x100) 위에 배치
-	int32 frameW = hpFrame->GetSize ( ).x;  // 102
-	int32 frameH = hpFrame->GetSize ( ).y;  // 12
+	int32 frameW = hpFrame->GetSize ( ).x;
+	int32 frameH = hpFrame->GetSize ( ).y;
 	int32 frameX = screenX - frameW / 2;
 	int32 frameY = screenY - 50 - frameH - 2;
 
@@ -70,7 +69,7 @@ void Monster::Render(HDC hdc)
 	// HP Bar: Frame 기준 (3, 3) 오프셋
 	int32 hp = info.hp ( );
 	int32 maxHp = info.maxhp ( );
-	int32 fullBarWidth = hpBar->GetSize ( ).x;  // 96
+	int32 fullBarWidth = hpBar->GetSize ( ).x;
 	int32 barWidth = ( maxHp > 0 ) ? ( fullBarWidth * hp / maxHp ) : 0;
 
 	if ( barWidth > 0 )

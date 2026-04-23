@@ -194,7 +194,7 @@ void InventoryPanel::HandleInventoryClick ( )
 		if ( myPlayer->_equipWeapon.itemId > 0 )
 		{
 			Protocol::C_UnequipItem unequipPkt;
-			unequipPkt.set_equiptype ( 0 );
+			unequipPkt.set_equiptype ( EQUIP_TYPE_WEAPON );
 			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( unequipPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 		}
@@ -205,7 +205,7 @@ void InventoryPanel::HandleInventoryClick ( )
 		if ( myPlayer->_equipArmor.itemId > 0 )
 		{
 			Protocol::C_UnequipItem unequipPkt;
-			unequipPkt.set_equiptype ( 1 );
+			unequipPkt.set_equiptype ( EQUIP_TYPE_ARMOR );
 			SendBufferRef sb = ClientPacketHandler::Make_C_UnequipItem ( unequipPkt );
 			GET_SINGLE ( NetworkManager )->SendPacket ( sb );
 		}

@@ -5,7 +5,6 @@
 class Actor;
 class Player;
 class GameObject;
-class UI;
 class SpriteActor;
 class Sprite;
 
@@ -44,6 +43,7 @@ public:
 public:
 	void Handle_S_AddObject ( Protocol::S_AddObject& pkt );
 	void Handle_S_RemoveObject ( Protocol::S_RemoveObject& pkt );
+	void Handle_S_Attack ( Protocol::S_Attack& pkt );
 
 public:
 	GameObject* GetObject ( uint64 id );
@@ -64,26 +64,13 @@ public:
 
 private:
 	void LoadMap ( );
-	void LoadPlayer ( );
-	void LoadMonster ( );
-	void LoadProjectiles ( );
-	void LoadEffect ( );
 	void LoadTilemap ( );
 	void LoadTilemap ( const wchar_t* tilemapFile );
-	void LoadSceneTextures ( );
-	void CreateSceneSprites ( );
-	void LoadSceneSounds ( );
 
 private:
 	void UpdateLogin ( );
 	void RenderLogin ( HDC hdc );
 	void HandlePartyInviteClick ( );
-
-private:
-	void CreateMapButtons ( );
-	void OnClickTown1 ( );
-	void OnClickTown2 ( );
-	void OnClickDungeon ( );
 
 private:
 	bool _loggedIn = false;

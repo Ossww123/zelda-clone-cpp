@@ -21,7 +21,7 @@ bool Sound::LoadWave(fs::path fullPath)
 	HMMIO file = ::mmioOpen((WCHAR*)fullPath.c_str(), NULL, MMIO_READ);
 	if (file == 0)
 	{
-		::MessageBox(NULL, L"���� ���� ����", L"", MB_OK);
+		::MessageBox(NULL, L"Sound: file open failed", L"", MB_OK);
 		return false;
 	}
 
@@ -51,7 +51,7 @@ bool Sound::LoadWave(fs::path fullPath)
 
 	if (FAILED(GET_SINGLE(SoundManager)->GetSoundDevice()->CreateSoundBuffer(&_bufferDesc, &_soundBuffer, NULL)))
 	{
-		::MessageBox(NULL, L"���� ���� ���� ����", L"", MB_OK);
+		::MessageBox(NULL, L"Sound: buffer creation failed", L"", MB_OK);
 		return false;
 	}
 
