@@ -4,39 +4,13 @@
 #include "Player.h"
 #include "Monster.h"
 #include "Projectile.h"
-#include "Arrow.h"
 #include "GameSession.h"
 #include "GameRoomManager.h"
 #include "RoomConfig.h"
 #include "RoomDataManager.h"
 #include "PartyManager.h"
 
-namespace
-{
-	const char* ToWeaponName(Protocol::WEAPON_TYPE type)
-	{
-		switch (type)
-		{
-		case Protocol::WEAPON_TYPE_SWORD: return "Sword";
-		case Protocol::WEAPON_TYPE_BOW: return "Bow";
-		case Protocol::WEAPON_TYPE_STAFF: return "Staff";
-		default: return "Unknown";
-		}
-	}
-
-	const char* ToDirName(Protocol::DIR_TYPE dir)
-	{
-		switch (dir)
-		{
-		case Protocol::DIR_TYPE_UP: return "Up";
-		case Protocol::DIR_TYPE_DOWN: return "Down";
-		case Protocol::DIR_TYPE_LEFT: return "Left";
-		case Protocol::DIR_TYPE_RIGHT: return "Right";
-		default: return "Unknown";
-		}
-	}
-}
-GameRoom::GameRoom()
+GameRoom::GameRoom() : _combat(*this), _spawn(*this)
 {
 }
 
@@ -48,7 +22,7 @@ void GameRoom::InitFromConfig(const string& roomId)
 {
 	_roomIdStr = roomId;
 	_config = GRoomDataManager.GetRoomConfig(roomId);
-	_spawnConfig = GRoomDataManager.GetSpawnConfig(roomId);
+	const RoomSpawnConfig* spawnConfig = GRoomDataManager.GetSpawnConfig(roomId);
 
 	if (!_config)
 	{
@@ -57,11 +31,7 @@ void GameRoom::InitFromConfig(const string& roomId)
 	}
 
 	LoadMap(_config->tilemapPath.c_str());
-
-	if (_config->monsterSpawnEnabled && _spawnConfig)
-	{
-		SpawnMonstersFromData();
-	}
+	_spawn.Init(_config, spawnConfig);
 
 	LOG_INFO("Room", "Initialized room: %s (SkillEnabled=%d, MonsterSpawn=%d)",
 		roomId.c_str(), _config->skillEnabled, _config->monsterSpawnEnabled);
@@ -122,10 +92,7 @@ void GameRoom::Step(uint64 now)
 		obj->Update();
 	}
 
-	if (ShouldSpawnMonsters())
-	{
-		ProcessRespawnFromData();
-	}
+	_spawn.Tick();
 }
 
 void GameRoom::EnterRoom(GameSessionRef session)
@@ -355,25 +322,7 @@ void GameRoom::Handle_C_Attack(GameSessionRef session, const Protocol::C_Attack&
 	if (!attacker)
 		return;
 
-	BroadcastAttack(attacker, pkt);
-
-	switch (pkt.weapontype())
-	{
-	case Protocol::WEAPON_TYPE_SWORD:
-		Handle_SwordAttack(attacker, pkt);
-		break;
-
-	case Protocol::WEAPON_TYPE_BOW:
-		Handle_BowAttack(attacker, pkt);
-		break;
-
-	case Protocol::WEAPON_TYPE_STAFF:
-		Handle_StaffAttack(attacker, pkt);
-		break;
-
-	default:
-		break;
-	}
+	_combat.HandleAttack(attacker, pkt);
 }
 
 void GameRoom::Handle_C_ChangeMap(GameSessionRef session, const Protocol::C_ChangeMap& pkt)
@@ -524,19 +473,10 @@ void GameRoom::RemoveObject(uint64 id)
 	if (gameObject == nullptr)
 		return;
 
-	if (gameObject->info.objecttype() == Protocol::OBJECT_TYPE_MONSTER && ShouldSpawnMonsters())
+	if (gameObject->info.objecttype() == Protocol::OBJECT_TYPE_MONSTER)
 	{
 		MonsterRef monster = static_pointer_cast<Monster>(gameObject);
-
-		RespawnRequest req;
-		req.when = GetTickCount64() + GetRespawnTime();
-		req.homePos = monster->GetHomePos();
-		req.templateId = monster->GetTemplateId();
-		req.level = 1; // TODO: 서버 몬스터 레벨 구현 시 변경
-		req.aggroRange = monster->GetAggroRange();
-		req.leashRange = monster->GetLeashRange();
-
-		ReserveMonsterRespawn(req);
+		_spawn.TryReserve(monster);
 	}
 
 	switch (gameObject->info.objecttype())
@@ -793,332 +733,18 @@ MonsterRef GameRoom::GetMonsterAt(Vec2Int cellPos)
 	return nullptr;
 }
 
-void GameRoom::Handle_SwordAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
-{
-	Vec2Int frontPos = attacker->GetFrontCellPos();
-	GameObjectRef obj = GetGameObjectAt(frontPos);
-	CreatureRef target = std::dynamic_pointer_cast<Creature>(obj);
-
-	if (!target)
-	{
-		return;
-	}
-
-	int32 beforeHp = target->info.hp();
-	int32 damage = max(1, attacker->info.attack() - target->info.defence());
-	target->OnDamaged(damage);
-	int32 afterHp = target->info.hp();
-
-	BroadcastDamaged(attacker, target, damage);
-
-	if (target->info.hp() == 0)
-	{
-		MonsterRef monster = dynamic_pointer_cast<Monster>(target);
-		if (monster)
-		{
-			DistributeExp(attacker, monster);
-			ProcessMonsterDrop(attacker, monster);
-		}
-		RemoveObject(target->info.objectid());
-	}
-}
-
-void GameRoom::Handle_BowAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
-{
-	ArrowRef arrow = GameObject::CreateArrow();
-	arrow->info.set_dir(pkt.dir());
-
-	Vec2Int start = attacker->GetCellPos();
-	arrow->info.set_posx(start.x);
-	arrow->info.set_posy(start.y);
-
-	arrow->SetOwner(attacker->info.objectid());
-
-	AddObject(arrow);
-}
-
-void GameRoom::Handle_StaffAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
-{
-	if (!attacker)
-		return;
-
-	Vec2Int pos = attacker->GetCellPos();
-
-	Vec2Int forward = { 0, 0 };
-	switch (pkt.dir())
-	{
-	case Protocol::DIR_TYPE_UP:
-		forward = { 0, -2 };
-		break;
-	case Protocol::DIR_TYPE_DOWN:
-		forward = { 0,  2 };
-		break;
-	case Protocol::DIR_TYPE_LEFT:
-		forward = { -2, 0 };
-		break;
-	case Protocol::DIR_TYPE_RIGHT:
-		forward = { 2,  0 };
-		break;
-	default:
-		break;
-	}
-
-	Vec2Int center = pos + forward;
-
-	std::vector<std::pair<uint64, MonsterRef>> deadTargets;
-	int32 hitCount = 0;
-	int32 totalDamage = 0;
-
-	for (int32 dy = -1; dy <= 1; dy++)
-	{
-		for (int32 dx = -1; dx <= 1; dx++)
-		{
-			Vec2Int cell = { center.x + dx, center.y + dy };
-
-			MonsterRef target = GetMonsterAt(cell);
-			if (!target)
-				continue;
-
-			int32 beforeHp = target->info.hp();
-			int32 damage = max(1, static_cast<int32>((attacker->info.attack() - target->info.defence()) * 0.5f));
-			target->OnDamaged(damage);
-			int32 afterHp = target->info.hp();
-			hitCount++;
-			totalDamage += damage;
-
-			BroadcastDamaged(attacker, target, damage);
-
-			if (target->info.hp() == 0)
-				deadTargets.push_back({ target->info.objectid(), target });
-		}
-	}
-
-	for (auto& [id, monster] : deadTargets)
-	{
-		DistributeExp(attacker, monster);
-		ProcessMonsterDrop(attacker, monster);
-		RemoveObject(id);
-	}
-
-}
-
-
-void GameRoom::BroadcastAttack(PlayerRef attacker, const Protocol::C_Attack& pkt)
-{
-	Protocol::S_Attack atk;
-	atk.set_attackerid(attacker->info.objectid());
-	atk.set_dir(pkt.dir());
-	atk.set_weapontype(pkt.weapontype());
-
-	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Attack(atk);
-	Broadcast(sendBuffer);
-}
-
-void GameRoom::BroadcastDamaged(PlayerRef attacker, CreatureRef target, int32 damage)
-{
-	Protocol::S_Damaged dmgPkt;
-	dmgPkt.set_attackerid(attacker->info.objectid());
-	dmgPkt.set_targetid(target->info.objectid());
-	dmgPkt.set_damage(damage);
-	dmgPkt.set_newhp(target->info.hp());
-
-	SendBufferRef sendBuffer = ServerPacketHandler::Make_S_Damaged(dmgPkt);
-	Broadcast(sendBuffer);
-}
-
-bool GameRoom::CanUseSkill() const
-{
-	if (_config)
-		return _config->skillEnabled;
-	return true; // 기본값: 허용
-}
-
-bool GameRoom::ShouldSpawnMonsters() const
-{
-	if (_config)
-		return _config->monsterSpawnEnabled;
-	return false; // 기본값: 스폰 안 함
-}
-
-uint32 GameRoom::GetRespawnTime() const
-{
-	if (_config)
-		return _config->respawnTimeMs;
-	return 10000; // 기본값: 10초
-}
-
-void GameRoom::SpawnMonstersFromData()
-{
-	if (!_spawnConfig)
-	{
-		LOG_ERROR("Room", "_spawnConfig is null! Cannot spawn monsters.");
-		return;
-	}
-
-	LOG_INFO("Room", "Starting monster spawn. Spawn groups: %zu", _spawnConfig->spawns.size());
-
-	for (const auto& spawnGroup : _spawnConfig->spawns)
-	{
-		LOG_INFO("Room", "Processing spawn group: %s at (%d, %d)",
-			spawnGroup.groupId.c_str(), spawnGroup.anchor.x, spawnGroup.anchor.y);
-
-		Vec2Int anchor = spawnGroup.anchor;
-		int offsetIndex = 0;
-
-		LOG_INFO("Room", "Monster types in this group: %zu", spawnGroup.monsters.size());
-
-		for (const auto& monsterInfo : spawnGroup.monsters)
-		{
-			LOG_INFO("Room", "Monster templateId=%d, count=%d", monsterInfo.templateId, monsterInfo.count);
-
-			const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(monsterInfo.templateId);
-			if (!templateData)
-			{
-				LOG_ERROR("Room", "MonsterTemplate not found: %d", monsterInfo.templateId);
-				continue;
-			}
-
-			for (int i = 0; i < monsterInfo.count; ++i)
-			{
-				if (offsetIndex >= spawnGroup.offsets.size())
-				{
-					LOG_WARN("Room", "Not enough offsets for monster count in group: %s", spawnGroup.groupId.c_str());
-					break;
-				}
-
-				Vec2Int pos = anchor + spawnGroup.offsets[offsetIndex];
-				offsetIndex++;
-
-				if (!CanGo(pos))
-					pos = GetRandomEmptyCellPos();
-
-				MonsterRef m = GameObject::CreateMonster();
-				m->SetHomePos(pos);
-				m->SetCellPos(pos);
-				m->SetAggroRange(monsterInfo.aggroRange);
-				m->SetLeashRange(monsterInfo.leashRange);
-				m->SetTemplateId(monsterInfo.templateId);
-
-				m->info.set_name(templateData->name);
-				m->info.set_maxhp(templateData->maxHp);
-				m->info.set_hp(templateData->maxHp);
-				m->info.set_attack(templateData->attack);
-				m->info.set_defence(templateData->defence);
-
-				AddObject(m);
-			}
-		}
-	}
-
-	LOG_INFO("Room", "Spawned %zu monsters from data", _monsters.size());
-}
-
-void GameRoom::ReserveMonsterRespawn(const RespawnRequest& req)
-{
-	_respawnQueue.push_back(req);
-}
-
-void GameRoom::ProcessRespawnFromData()
-{
-	uint64 now = GetTickCount64();
-
-	for (auto it = _respawnQueue.begin(); it != _respawnQueue.end(); )
-	{
-		if (now < it->when)
-		{
-			++it;
-			continue;
-		}
-
-		Vec2Int pos = it->homePos;
-
-		if (!CanGo(pos))
-			pos = GetRandomEmptyCellPos();
-
-		const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(it->templateId);
-
-		MonsterRef m = GameObject::CreateMonster();
-		m->SetHomePos(pos);
-		m->SetCellPos(pos);
-		m->SetAggroRange(it->aggroRange);
-		m->SetLeashRange(it->leashRange);
-		m->SetTemplateId(it->templateId);
-
-		if (templateData)
-		{
-			m->info.set_name(templateData->name);
-			m->info.set_maxhp(templateData->maxHp);
-			m->info.set_hp(templateData->maxHp);
-			m->info.set_attack(templateData->attack);
-			m->info.set_defence(templateData->defence);
-		}
-
-		AddObject(m);
-
-		it = _respawnQueue.erase(it);
-	}
-}
-
 void GameRoom::DistributeExp(PlayerRef killer, MonsterRef monster)
 {
-	if (!killer || !monster)
-		return;
-
-	const MonsterTemplateData* templateData = GRoomDataManager.GetMonsterTemplate(monster->GetTemplateId());
-	if (!templateData)
-		return;
-
-	int32 exp = templateData->exp;
-	if (exp <= 0)
-		return;
-
-	uint64 killerId = killer->info.objectid();
-	uint64 partyId = GPartyManager.GetPartyIdByPlayer(killerId);
-
-	if (partyId == 0)
-	{
-		killer->GainExp(exp);
-		return;
-	}
-
-	Party* party = GPartyManager.GetParty(partyId);
-	if (!party)
-	{
-		killer->GainExp(exp);
-		return;
-	}
-
-	vector<PlayerRef> nearbyMembers;
-	for (uint64 memberId : party->memberIds)
-	{
-		auto it = _players.find(memberId);
-		if (it != _players.end())
-			nearbyMembers.push_back(it->second);
-	}
-
-	if (nearbyMembers.empty())
-		return;
-
-	int32 share = max(1, exp / (int32)nearbyMembers.size());
-	for (auto& member : nearbyMembers)
-		member->GainExp(share);
+	_combat.DistributeExp(killer, monster);
 }
 
 void GameRoom::ProcessMonsterDrop(PlayerRef killer, MonsterRef monster)
 {
-	if (!killer || !monster)
-		return;
+	_combat.ProcessMonsterDrop(killer, monster);
+}
 
-	const vector<MonsterDropData>* drops = GRoomDataManager.GetMonsterDrops(monster->GetTemplateId());
-	if (!drops)
-		return;
-
-	for (const auto& drop : *drops)
-	{
-		if (rand() % 100 < drop.dropRate)
-		{
-			killer->AddItem(drop.itemId, 1);
-		}
-	}
+bool GameRoom::CanUseSkill() const
+{
+	return _config && _config->skillEnabled;
 }
 
