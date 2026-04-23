@@ -45,7 +45,6 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
     broadcast.set_partyid(pkt.partyid());
 
     SendBufferRef sendBuffer = Make_SS_BroadcastChat(broadcast);
-    // GChatSessionManager.BroadcastAll(sendBuffer);
 
     std::string payload;
     broadcast.SerializeToString(&payload);
@@ -65,18 +64,16 @@ void ChatPacketHandler::Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer
         auto val = GRedisClient.Get().get("player:loc:" + pkt.target());
         if (val)
         {
-            // ��� ���� ä�η� PUBLISH
             string channel = "chat:whisper:" + *val;
             LOG_CHAT(pkt.sender(), "WHISPER", pkt.target(), pkt.msg());
             GRedisClient.Get().publish(channel, payload);
         }
         else
         {
-            // ��� ���� �� sender ������ ���� �޽��� PUBLISH
             Protocol::SS_BroadcastChat errPkt;
             errPkt.set_sender("System");
             errPkt.set_type(Protocol::CHAT_TYPE_WHISPER);
-            errPkt.set_msg("[System] ��� �÷��̾ ã�� �� �����ϴ�.");
+            errPkt.set_msg("[System] 해당 플레이어를 찾을 수 없습니다.");
             errPkt.set_target(pkt.sender());
 
             string errPayload;

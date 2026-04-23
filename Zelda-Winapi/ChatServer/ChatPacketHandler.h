@@ -4,10 +4,10 @@ class ChatPacketHandler
 public:
     static void HandlePacket(ChatSessionRef session, BYTE* buffer, int32 len);
 
-    // �ޱ�
+    // recv
     static void Handle_SS_RelayChat(ChatSessionRef session, BYTE* buffer, int32 len);
 
-    // ������
+    // send
     static SendBufferRef Make_SS_BroadcastChat(const Protocol::SS_BroadcastChat& pkt);
 
     template<typename T>
