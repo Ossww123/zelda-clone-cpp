@@ -8,7 +8,7 @@
 
 ## 📺 프로젝트 시연 영상
 
-[![GamePlay Video](https://img.youtube.com/vi/wyDDfSWafTo/0.jpg)](https://youtu.be/wyDDfSWafTo)
+[![GamePlay Video](https://img.youtube.com/vi/920p26shYrY/0.jpg)](https://youtu.be/920p26shYrY)
 
 ###### _위 이미지를 클릭하면 유튜브 시연 영상으로 이동합니다._
 
