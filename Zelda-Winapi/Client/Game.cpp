@@ -55,8 +55,8 @@ void Game::Update ( )
 {
 	GET_SINGLE ( TimeManager  )->Update ( );
 	GET_SINGLE ( InputManager )->Update ( );
-	GET_SINGLE ( SceneManager )->Update ( );
 	GET_SINGLE ( NetworkManager )->Update ( );
+	GET_SINGLE ( SceneManager )->Update ( );
 }
 
 void Game::Render ( )
